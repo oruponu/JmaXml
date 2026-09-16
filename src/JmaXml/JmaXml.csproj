@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>JmaXml</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <PackageId>JmaXml</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>oruponu</Authors>
+    <Description>気象庁防災情報XMLの電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリ。
+A .NET library that parses JMA (Japan Meteorological Agency) disaster information XML messages into strongly typed, immutable models generated from the official XML schemas and data dictionary.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/oruponu/JmaXml</RepositoryUrl>
+    <PackageTags>jma;jmaxml;xml;parser;weather;earthquake;tsunami;volcano;disaster;気象庁;気象庁防災情報XML;防災</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="JmaXml.Tests" />
+  </ItemGroup>
+
+</Project>

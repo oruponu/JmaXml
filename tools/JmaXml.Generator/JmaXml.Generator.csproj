@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>JmaXml.Generator</RootNamespace>
+  </PropertyGroup>
+
+</Project>
