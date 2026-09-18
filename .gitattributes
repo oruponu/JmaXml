@@ -1,1 +1,3 @@
 * text=auto eol=lf
+schema/xsd/** -text
+tests/JmaXml.Tests/fixtures/samples/** -text
