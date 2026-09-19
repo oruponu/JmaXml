@@ -216,6 +216,21 @@ public class JmaXmlReaderValueTests
     }
 
     [Fact]
+    public void RequiredAttributeList_splits_on_xml_whitespace()
+    {
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><m l=\" x  y\nz \"/></a>");
+        Assert.Equal(["x", "y", "z"], AtFirstChild(reader).RequiredAttributeList("l"));
+    }
+
+    [Fact]
+    public void RequiredAttributeList_reports_the_attribute_path_when_missing()
+    {
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><m>4.2</m></a>");
+        var ex = Assert.Throws<JmaXmlException>(() => AtFirstChild(reader).RequiredAttributeList("l"));
+        Assert.Equal("a/m/@l", ex.Path);
+    }
+
+    [Fact]
     public void RequiredAttributeFloat_reports_the_attribute_path_when_missing()
     {
         using var presentReader = Xml.Reader("<a xmlns=\"urn:x\"><m per=\"1.5\"/></a>");

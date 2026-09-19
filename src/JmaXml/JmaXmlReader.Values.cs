@@ -12,7 +12,7 @@ internal sealed partial class JmaXmlReader
 
     public string ReadToken() => Collapse(ReadContent());
 
-    public ImmutableArray<string> ReadList() => [.. ReadContent().Split(XmlWhitespace, StringSplitOptions.RemoveEmptyEntries)];
+    public ImmutableArray<string> ReadList() => SplitList(ReadContent());
 
     public float ReadFloat() => ConvertContent(XmlConvert.ToSingle);
 
@@ -47,6 +47,8 @@ internal sealed partial class JmaXmlReader
     public string? AttributeToken(string name) => _reader.GetAttribute(name) is { } s ? Collapse(s) : null;
 
     public string RequiredAttributeToken(string name) => Collapse(RequiredAttributeString(name));
+
+    public ImmutableArray<string> RequiredAttributeList(string name) => SplitList(RequiredAttributeString(name));
 
     public float? AttributeFloat(string name) => ConvertAttribute(name, XmlConvert.ToSingle);
 
@@ -137,4 +139,6 @@ internal sealed partial class JmaXmlReader
         s.EndsWith('Z') || (s.Length >= 6 && (s[^6] == '+' || s[^6] == '-') && s[^3] == ':');
 
     private static string Collapse(string s) => string.Join(' ', s.Split(XmlWhitespace, StringSplitOptions.RemoveEmptyEntries));
+
+    private static ImmutableArray<string> SplitList(string s) => [.. s.Split(XmlWhitespace, StringSplitOptions.RemoveEmptyEntries)];
 }
