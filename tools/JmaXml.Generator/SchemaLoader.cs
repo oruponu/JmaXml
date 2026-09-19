@@ -184,9 +184,9 @@ public static partial class SchemaLoader
         type.Content is XmlSchemaSimpleTypeRestriction restriction
         && restriction.Facets.OfType<XmlSchemaEnumerationFacet>().Select(f => f.Value ?? "").ToArray() is [""];
 
-    private static ImmutableArray<SchemaVersion> ReadVersions(XmlSchemaSet set)
+    private static ImmutableArray<XsdVersion> ReadVersions(XmlSchemaSet set)
     {
-        var versions = new List<SchemaVersion>();
+        var versions = new List<XsdVersion>();
         foreach (var schema in set.Schemas().Cast<XmlSchema>().OrderBy(s => s.SourceUri, StringComparer.Ordinal))
         {
             var text = string.Concat(schema.Items.OfType<XmlSchemaAnnotation>()
@@ -201,7 +201,7 @@ public static partial class SchemaLoader
                 .LastOrDefault();
             if (latest.Date is null) continue;
             var file = Path.GetFileName(new Uri(schema.SourceUri!).LocalPath);
-            versions.Add(new SchemaVersion(file, schema.TargetNamespace ?? "", latest.Version, latest.Date));
+            versions.Add(new XsdVersion(file, schema.TargetNamespace ?? "", latest.Version, latest.Date));
         }
         return [.. versions];
     }

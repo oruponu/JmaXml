@@ -37,9 +37,9 @@ public sealed record TypeModel(string XsdName, string Namespace, Primitive? Cont
 
 public sealed record NamespaceModel(string Prefix, string Uri, string? ClassName, ImmutableArray<TypeModel> Types);
 
-public sealed record SchemaVersion(string File, string Namespace, string Version, string Date);
+public sealed record XsdVersion(string File, string Namespace, string Version, string Date);
 
-public sealed record SchemaModel(ImmutableArray<NamespaceModel> Namespaces, ImmutableArray<SchemaVersion> Versions)
+public sealed record SchemaModel(ImmutableArray<NamespaceModel> Namespaces, ImmutableArray<XsdVersion> Versions)
 {
     public NamespaceModel? Namespace(string prefix) => Namespaces.FirstOrDefault(n => n.Prefix == prefix);
 

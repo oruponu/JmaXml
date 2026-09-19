@@ -6,3 +6,6 @@ end_of_line = lf
 
 [*.cs]
 csharp_style_deconstructed_variable_declaration = false
+
+[src/JmaXml/Generated/**.cs]
+generated_code = true

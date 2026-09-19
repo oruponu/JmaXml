@@ -173,7 +173,7 @@ public class CSharpEmitterTests
     [Fact]
     public void SchemaInfo_carries_dates_and_versions()
     {
-        var schema = new SchemaModel([], [new SchemaVersion("sample.xsd", "urn:sample", "9.9", "2020-01-02")]);
+        var schema = new SchemaModel([], [new XsdVersion("sample.xsd", "urn:sample", "9.9", "2020-01-02")]);
         var dictionary = new DictionaryModel("2020-12-31", []);
         var files = CSharpEmitter.Emit(schema, dictionary);
         var info = files["SchemaInfo.g.cs"];

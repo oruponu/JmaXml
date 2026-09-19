@@ -4,7 +4,7 @@ namespace JmaXml;
 /// 電文の内容部を表します。
 /// </summary>
 /// <remarks>
-/// 実際の型は、気象・地震・火山のいずれかの <c>Body</c> です。
+/// 実際の型は、<see cref="Meteorology.Body"/>、<see cref="Seismology.Body"/>、<see cref="Volcanology.Body"/> のいずれかです。
 /// </remarks>
 public abstract record ReportBody
 {
