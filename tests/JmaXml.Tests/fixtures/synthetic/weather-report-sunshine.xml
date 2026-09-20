@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx_add="http://xml.kishou.go.jp/jmaxml1/addition1/">
+<Control>
+<Title>地方天候情報</Title>
+<DateTime>2066-09-03T05:10:00Z</DateTime>
+<Status>通常</Status>
+<EditorialOffice>仙台管区気象台</EditorialOffice>
+<PublishingOffice>仙台管区気象台</PublishingOffice>
+</Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+<Title>日照不足に関する東北地方気象情報</Title>
+<ReportDateTime>2066-09-03T14:15:00+09:00</ReportDateTime>
+<TargetDateTime>2066-09-03T14:15:00+09:00</TargetDateTime>
+<ValidDateTime>2066-09-10T14:15:00+09:00</ValidDateTime>
+<EventID>206608251605地方天候情報仙台管区気象台</EventID>
+<InfoType>発表</InfoType>
+<Serial>2</Serial>
+<InfoKind>天候情報</InfoKind>
+<InfoKindVersion>1.0_0</InfoKindVersion>
+<Headline>
+<Text>岩手県では、８月中頃から日照時間の少ない状態が続いています。このような状態は今後５日程度続く見込みです。農作物の管理等に十分注意して下さい。</Text>
+</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/meteorology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+<TargetArea codeType="全国・地方予報区等">
+<Name>東北地方</Name>
+<Code>010200</Code>
+</TargetArea>
+<MeteorologicalInfos type="天候情報">
+<MeteorologicalInfo>
+<DateTime significant="yyyy-mm-dd">2066-08-14T00:00:00+09:00</DateTime>
+<Duration>P26D</Duration>
+<Item>
+<Kind>
+<Property>
+<Type>本文</Type>
+<Text type="概況">岩手県では、８月中頃から日照時間の少ない状態が続いています。</Text>
+<Text type="今後の見通し">今後も５日程度は気圧の谷の影響で曇りや雨の日が多く、日照時間が少ない見込みです。</Text>
+<Text type="防災事項">農作物の管理等に十分注意して下さい。</Text>
+</Property>
+</Kind>
+<Areas codeType="全国・地方予報区等">
+<Area>
+<Name>東北地方</Name>
+<Code>010200</Code>
+</Area>
+</Areas>
+</Item>
+</MeteorologicalInfo>
+<MeteorologicalInfo type="気象官署及び特別地域気象観測所">
+<DateTime significant="yyyy-mm-dd">2066-08-14T00:00:00+09:00</DateTime>
+<Duration>P20D</Duration>
+<Name>８月１４日から９月２日まで</Name>
+<Item>
+<Kind>
+<Property>
+<Type>天候の状況（速報値）</Type>
+<Text type="表題">日照時間（８月１４日から９月２日まで）（速報値）</Text>
+</Property>
+</Kind>
+</Item>
+<Item>
+<Kind>
+<Property>
+<Type>天候の状況（速報値）</Type>
+<ClimateValuesPart type="日照時間の合計と平年比">
+<jmx_eb:Sunshine type="日照時間" unit="h">45.2</jmx_eb:Sunshine>
+<jmx_eb:Comparison type="日照時間合計平年比" unit="％">47</jmx_eb:Comparison>
+</ClimateValuesPart>
+</Property>
+</Kind>
+<Station>
+<Name>盛岡</Name>
+<Code type="国際地点番号">47584</Code>
+</Station>
+</Item>
+<Item>
+<Kind>
+<Property>
+<Type>天候の状況（速報値）</Type>
+<ClimateValuesPart type="日照時間の合計と平年比">
+<jmx_eb:Sunshine type="日照時間" unit="h">47.0</jmx_eb:Sunshine>
+<jmx_eb:Comparison type="日照時間合計平年比" unit="％">47</jmx_eb:Comparison>
+</ClimateValuesPart>
+</Property>
+</Kind>
+<Station>
+<Name>宮古</Name>
+<Code type="国際地点番号">47585</Code>
+</Station>
+</Item>
+<Item>
+<Kind>
+<Property>
+<Type>天候の状況（速報値）</Type>
+<ClimateValuesPart type="日照時間の合計と平年比">
+<jmx_eb:Sunshine type="日照時間" unit="h">37.2</jmx_eb:Sunshine>
+<jmx_eb:Comparison type="日照時間合計平年比" unit="％">39</jmx_eb:Comparison>
+</ClimateValuesPart>
+</Property>
+</Kind>
+<Station>
+<Name>大船渡</Name>
+<Code type="国際地点番号">47512</Code>
+</Station>
+</Item>
+</MeteorologicalInfo>
+</MeteorologicalInfos>
+<Comment>
+<Text type="末文">今後、気象台から発表される気象情報に留意して下さい。</Text>
+</Comment>
+</Body>
+</Report>

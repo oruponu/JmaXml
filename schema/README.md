@@ -11,6 +11,6 @@
 上記の資料は、本リポジトリの [MITライセンス](../LICENSE) の対象外です。
 公共データ利用規約（第1.0版）に準拠した[気象庁ホームページの利用規約](https://www.jma.go.jp/jma/kishou/info/coment.html)に従います。
 
-取得したファイルの内容は変更していません。
+`../tests/JmaXml.Tests/fixtures/synthetic/*.xml` は、上記のサンプルデータを一部変更して作成したテスト用のデータです。
 
 出典：[気象庁ホームページ](https://xml.kishou.go.jp/tec_material.html)

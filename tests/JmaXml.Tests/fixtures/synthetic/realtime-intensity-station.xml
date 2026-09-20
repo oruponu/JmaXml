@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+<Title>リアルタイム震度</Title>
+<DateTime>2008-06-13T23:43:56Z</DateTime>
+<Status>通常</Status>
+<EditorialOffice>気象庁本庁</EditorialOffice>
+<PublishingOffice>気象庁</PublishingOffice>
+</Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+<Title>リアルタイム震度</Title>
+<ReportDateTime>2008-06-14T08:43:56+09:00</ReportDateTime>
+<TargetDateTime>2008-06-14T08:43:56+09:00</TargetDateTime>
+<EventID>20080614084350</EventID>
+<InfoType>発表</InfoType>
+<Serial>1</Serial>
+<InfoKind>緊急地震速報</InfoKind>
+<InfoKindVersion>1.0_0</InfoKindVersion>
+<Headline>
+<Text></Text>
+</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/" xmlns:jmx_eb="http://xml.kishou.go.jp/jmaxml1/elementBasis1/">
+<NextAdvisory>この情報をもって、緊急地震速報：最終報とします。</NextAdvisory>
+<Earthquake>
+<OriginTime>2008-06-14T08:43:46+09:00</OriginTime>
+<ArrivalTime>2008-06-14T08:43:50+09:00</ArrivalTime>
+<Hypocenter>
+<Area>
+<Name>岩手県内陸南部</Name>
+<Code type="震央地名">213</Code>
+<jmx_eb:Coordinate description="北緯３９．０度　東経１４０．９度　深さ　１０ｋｍ">+39.0+140.9-10000/</jmx_eb:Coordinate>
+<ReduceName>岩手県</ReduceName>
+<ReduceCode type="短縮用震央地名">9030</ReduceCode>
+<LandOrSea>内陸</LandOrSea>
+</Area>
+<Accuracy>
+<Epicenter rank="2" rank2="2">NaN</Epicenter>
+<Depth rank="2">NaN</Depth>
+<MagnitudeCalculation rank="5">NaN</MagnitudeCalculation>
+<NumberOfMagnitudeCalculation>1</NumberOfMagnitudeCalculation>
+</Accuracy>
+</Hypocenter>
+<jmx_eb:Magnitude type="Mj" description="Ｍ６．１">6.1</jmx_eb:Magnitude>
+</Earthquake>
+<Intensity>
+<Observation>
+<CodeDefine>
+<Type xpath="Pref/Code">地震情報／都道府県等</Type>
+<Type xpath="Pref/Area/Code">地震情報／細分区域</Type>
+<Type xpath="Pref/Area/City/Code">気象・地震・火山情報／市町村等</Type>
+<Type xpath="Pref/Area/City/IntensityStation/Code">リアルタイム震度観測点</Type>
+</CodeDefine>
+<Pref>
+<Name>青森県</Name>
+<Code>02</Code>
+<Area>
+<Name>青森県下北</Name>
+<Code>203</Code>
+<City>
+<Name>むつ市</Name>
+<Code>0220800</Code>
+<IntensityStation>
+<Name>むつ市大畑町奥薬研</Name>
+<Code>0220801</Code>
+<Int>5+</Int>
+<K>5.3</K>
+</IntensityStation>
+<IntensityStation>
+<Name>むつ市金曲</Name>
+<Code>0220800</Code>
+<Int>5+</Int>
+<K>5.3</K>
+</IntensityStation>
+</City>
+</Area>
+</Pref>
+<Pref>
+<Name>北海道</Name>
+<Code>01</Code>
+<Area>
+<Name>渡島地方東部</Name>
+<Code>106</Code>
+<City>
+<Name>函館市</Name>
+<Code>0120200</Code>
+<IntensityStation>
+<Name>函館市大森町</Name>
+<Code>0120200</Code>
+<Int>2</Int>
+<K>2.4</K>
+</IntensityStation>
+</City>
+</Area>
+</Pref>
+</Observation>
+</Intensity>
+</Body>
+</Report>

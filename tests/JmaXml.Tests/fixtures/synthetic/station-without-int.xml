@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://xml.kishou.go.jp/jmaxml1/" xmlns:jmx="http://xml.kishou.go.jp/jmaxml1/">
+<Control>
+<Title>長周期地震動に関する観測情報</Title>
+<DateTime>2020-11-20T17:33:30Z</DateTime>
+<Status>通常</Status>
+<EditorialOffice>気象庁本庁</EditorialOffice>
+<PublishingOffice>気象庁</PublishingOffice>
+</Control>
+<Head xmlns="http://xml.kishou.go.jp/jmaxml1/informationBasis1/">
+<Title>長周期地震動に関する観測情報</Title>
+<ReportDateTime>2020-11-21T02:33:10+09:00</ReportDateTime>
+<TargetDateTime>2020-11-21T02:33:10+09:00</TargetDateTime>
+<EventID>20201121023300</EventID>
+<InfoType>発表</InfoType>
+<Serial>1</Serial>
+<InfoKind>長周期地震動に関する観測情報</InfoKind>
+<InfoKindVersion>1.3_0</InfoKindVersion>
+<Headline>
+<Text>２１日０２時２３分ころの地震により、長周期地震動階級３を観測した地域があります。以下の地域では、最大震度は４以下でしたが、大きな長周期地震動階級（階級３以上）を観測しています。高層ビル高層階では非常に大きな揺れとなっていた可能性があります。宮城県北部</Text>
+<Information type="長周期地震動に関する観測情報（細分区域）">
+<Item>
+<Kind><Name>長周期地震動階級３</Name></Kind>
+<Areas codeType="地震情報／細分区域">
+<Area><Name>宮城県北部</Name><Code>220</Code></Area>
+</Areas>
+</Item>
+<Item>
+<Kind><Name>長周期地震動階級１</Name></Kind>
+<Areas codeType="地震情報／細分区域">
+<Area><Name>青森県津軽北部</Name><Code>200</Code></Area>
+<Area><Name>青森県三八上北</Name><Code>202</Code></Area>
+<Area><Name>岩手県内陸北部</Name><Code>212</Code></Area>
+<Area><Name>岩手県内陸南部</Name><Code>213</Code></Area>
+</Areas>
+</Item>
+</Information>
+</Headline>
+</Head>
+<Body xmlns="http://xml.kishou.go.jp/jmaxml1/body/seismology1/">
+<Intensity>
+<Observation>
+<Pref><Name>宮城県</Name><Code>04</Code>
+<Area><Name>宮城県北部</Name><Code>220</Code>
+<IntensityStation><Name>登米市中田町</Name><Code>0421200</Code>
+<LgInt>3</LgInt>
+</IntensityStation>
+</Area>
+</Pref>
+</Observation>
+</Intensity>
+</Body>
+</Report>
