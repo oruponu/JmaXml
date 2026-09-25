@@ -27,6 +27,31 @@ public class JmaXmlReaderTraversalTests
     }
 
     [Fact]
+    public void Path_numbers_siblings_within_each_parent()
+    {
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><p><q/><r/><q/></p><r/><p/><p><q/></p></a>");
+        var r = new JmaXmlReader(reader);
+        r.MoveToElement("a", "urn:x");
+        var paths = new List<string>();
+        using (r.Enter())
+        {
+            while (r.NextChild())
+            {
+                paths.Add(r.Path);
+                using (r.Enter())
+                {
+                    while (r.NextChild())
+                    {
+                        paths.Add(r.Path);
+                        r.Skip();
+                    }
+                }
+            }
+        }
+        Assert.Equal(["a/p", "a/p/q", "a/p/r", "a/p/q[2]", "a/r", "a/p[2]", "a/p[3]", "a/p[3]/q"], paths);
+    }
+
+    [Fact]
     public void MoveToElement_accepts_a_reader_already_on_the_element()
     {
         using var reader = Xml.Reader("<a xmlns=\"urn:x\"/>");

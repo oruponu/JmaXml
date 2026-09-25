@@ -8,6 +8,7 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     private readonly IXmlLineInfo? _lineInfo = reader as IXmlLineInfo;
     private readonly List<Segment> _path = [];
     private readonly Stack<ScopeState> _scopes = new();
+    private readonly List<(string Name, int Count)> _siblings = [];
 
     public string LocalName => _reader.LocalName;
 
@@ -34,7 +35,7 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     public Scope Enter()
     {
         var (line, position) = Position();
-        _scopes.Push(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position));
+        _scopes.Push(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position, _siblings.Count));
         return new Scope(this);
     }
 
@@ -105,27 +106,40 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     {
         var depth = _reader.Depth;
         var name = _reader.LocalName;
-        scope.Siblings ??= new Dictionary<string, int>(StringComparer.Ordinal);
-        var ordinal = scope.Siblings.GetValueOrDefault(name) + 1;
-        scope.Siblings[name] = ordinal;
+        var ordinal = 1;
+        var i = scope.SiblingStart;
+        for (; i < _siblings.Count; i++)
+        {
+            if (_siblings[i].Name == name)
+            {
+                ordinal = _siblings[i].Count + 1;
+                _siblings[i] = (name, ordinal);
+                break;
+            }
+        }
+        if (i == _siblings.Count) _siblings.Add((name, 1));
         while (_path.Count > 0 && _path[^1].Depth >= depth) _path.RemoveAt(_path.Count - 1);
         _path.Add(new Segment(name, ordinal, depth));
     }
 
     private readonly record struct Segment(string Name, int Ordinal, int Depth);
 
-    private sealed class ScopeState(int depth, bool empty, int line, int position)
+    private sealed class ScopeState(int depth, bool empty, int line, int position, int siblingStart)
     {
         public int Depth { get; } = depth;
         public bool Empty { get; } = empty;
         public int Line { get; } = line;
         public int Position { get; } = position;
         public bool Entered { get; set; }
-        public Dictionary<string, int>? Siblings { get; set; }
+        public int SiblingStart { get; } = siblingStart;
     }
 
     public readonly struct Scope(JmaXmlReader owner) : IDisposable
     {
-        public void Dispose() => owner._scopes.Pop();
+        public void Dispose()
+        {
+            var scope = owner._scopes.Pop();
+            owner._siblings.RemoveRange(scope.SiblingStart, owner._siblings.Count - scope.SiblingStart);
+        }
     }
 }
