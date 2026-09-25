@@ -197,6 +197,29 @@ public class JmaXmlReaderValueTests
     }
 
     [Fact]
+    public void Conversion_failure_in_a_repeated_sibling_reports_its_ordinal()
+    {
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><v>1</v><v>x</v></a>");
+        var r = AtFirstChild(reader);
+        Assert.Equal(1f, r.ReadFloat());
+        Assert.True(r.NextChild());
+        var ex = Assert.Throws<JmaXmlException>(() => r.ReadFloat());
+        Assert.Equal("a/v[2]", ex.Path);
+    }
+
+    [Fact]
+    public void Attribute_conversion_failure_in_a_repeated_sibling_reports_its_ordinal()
+    {
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><v t=\"1\"/><v t=\"x\"/></a>");
+        var r = AtFirstChild(reader);
+        Assert.Equal(1f, r.AttributeFloat("t"));
+        r.Skip();
+        Assert.True(r.NextChild());
+        var ex = Assert.Throws<JmaXmlException>(() => r.AttributeFloat("t"));
+        Assert.Equal("a/v[2]/@t", ex.Path);
+    }
+
+    [Fact]
     public void AttributeToken_collapses_whitespace()
     {
         using var reader = Xml.Reader("<a xmlns=\"urn:x\"><m t=\" a \t\n b　c \"/></a>");

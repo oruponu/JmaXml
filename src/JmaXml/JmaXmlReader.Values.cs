@@ -83,14 +83,14 @@ internal sealed partial class JmaXmlReader
     {
         var (line, position) = Position();
         var text = ReadContent();
-        return ConvertValue(text, convert, Path, line, position);
+        return ConvertValue(text, convert, null, line, position);
     }
 
     private T? ConvertNullableContent<T>(Func<string, T> convert) where T : struct
     {
         var (line, position) = Position();
         var text = ReadContent();
-        return text.Length == 0 ? null : ConvertValue(text, convert, Path, line, position);
+        return text.Length == 0 ? null : ConvertValue(text, convert, null, line, position);
     }
 
     private T? ConvertAttribute<T>(string name, Func<string, T> convert) where T : struct
@@ -98,17 +98,17 @@ internal sealed partial class JmaXmlReader
         var text = _reader.GetAttribute(name);
         if (text is null) return null;
         var (line, position) = Position();
-        return ConvertValue(text, convert, Path + "/@" + name, line, position);
+        return ConvertValue(text, convert, name, line, position);
     }
 
     private T ConvertRequiredAttribute<T>(string name, Func<string, T> convert)
     {
         var text = _reader.GetAttribute(name) ?? throw MissingAttribute(name);
         var (line, position) = Position();
-        return ConvertValue(text, convert, Path + "/@" + name, line, position);
+        return ConvertValue(text, convert, name, line, position);
     }
 
-    private static T ConvertValue<T>(string text, Func<string, T> convert, string path, int line, int position)
+    private T ConvertValue<T>(string text, Func<string, T> convert, string? attribute, int line, int position)
     {
         try
         {
@@ -116,7 +116,7 @@ internal sealed partial class JmaXmlReader
         }
         catch (Exception e) when (e is FormatException or OverflowException or ArgumentException)
         {
-            throw new JmaXmlException($"Value '{text}' could not be converted", path, line, position, e);
+            throw new JmaXmlException($"Value '{text}' could not be converted", attribute is null ? Path : Path + "/@" + attribute, line, position, e);
         }
     }
 
@@ -125,7 +125,7 @@ internal sealed partial class JmaXmlReader
         var text = _reader.GetAttribute("nil", XmlSchema.InstanceNamespace);
         if (text is null) return false;
         var (line, position) = Position();
-        return ConvertValue(text, XmlConvert.ToBoolean, Path + "/@nil", line, position);
+        return ConvertValue(text, XmlConvert.ToBoolean, "nil", line, position);
     }
 
     private static DateTimeOffset ToDateTimeOffset(string text)
