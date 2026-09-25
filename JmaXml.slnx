@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/bench/">
+    <Project Path="bench/JmaXml.Benchmarks/JmaXml.Benchmarks.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/JmaXml/JmaXml.csproj" />
   </Folder>
