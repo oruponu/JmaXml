@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace JmaXml;
@@ -7,7 +8,7 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     private readonly XmlReader _reader = reader;
     private readonly IXmlLineInfo? _lineInfo = reader as IXmlLineInfo;
     private readonly List<Segment> _path = [];
-    private readonly Stack<ScopeState> _scopes = new();
+    private readonly List<ScopeState> _scopes = [];
     private readonly List<(string Name, int Count)> _siblings = [];
 
     public string LocalName => _reader.LocalName;
@@ -35,13 +36,13 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     public Scope Enter()
     {
         var (line, position) = Position();
-        _scopes.Push(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position, _siblings.Count));
+        _scopes.Add(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position, _siblings.Count));
         return new Scope(this);
     }
 
     public bool NextChild()
     {
-        var scope = _scopes.Peek();
+        ref var scope = ref CollectionsMarshal.AsSpan(_scopes)[^1];
         if (!scope.Entered)
         {
             scope.Entered = true;
@@ -53,7 +54,7 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
             switch (_reader.NodeType)
             {
                 case XmlNodeType.Element:
-                    PushSegment(scope);
+                    PushSegment(in scope);
                     return true;
                 case XmlNodeType.EndElement when _reader.Depth == scope.Depth:
                     _reader.Read();
@@ -77,7 +78,7 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
 
     public JmaXmlException Missing(string name)
     {
-        var (line, position) = _scopes.TryPeek(out var scope) ? (scope.Line, scope.Position) : Position();
+        var (line, position) = _scopes.Count > 0 ? (_scopes[^1].Line, _scopes[^1].Position) : Position();
         return new JmaXmlException($"Required element '{name}' is missing", ScopePath() + "/" + name, line, position);
     }
 
@@ -98,11 +99,11 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
 
     private string ScopePath()
     {
-        var depth = _scopes.Count > 0 ? _scopes.Peek().Depth : int.MaxValue;
+        var depth = _scopes.Count > 0 ? _scopes[^1].Depth : int.MaxValue;
         return string.Join("/", _path.Where(s => s.Depth <= depth).Select(s => s.Ordinal >= 2 ? $"{s.Name}[{s.Ordinal}]" : s.Name));
     }
 
-    private void PushSegment(ScopeState scope)
+    private void PushSegment(in ScopeState scope)
     {
         var depth = _reader.Depth;
         var name = _reader.LocalName;
@@ -124,7 +125,7 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
 
     private readonly record struct Segment(string Name, int Ordinal, int Depth);
 
-    private sealed class ScopeState(int depth, bool empty, int line, int position, int siblingStart)
+    private struct ScopeState(int depth, bool empty, int line, int position, int siblingStart)
     {
         public int Depth { get; } = depth;
         public bool Empty { get; } = empty;
@@ -138,7 +139,8 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     {
         public void Dispose()
         {
-            var scope = owner._scopes.Pop();
+            var scope = owner._scopes[^1];
+            owner._scopes.RemoveAt(owner._scopes.Count - 1);
             owner._siblings.RemoveRange(scope.SiblingStart, owner._siblings.Count - scope.SiblingStart);
         }
     }
