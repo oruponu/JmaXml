@@ -11,9 +11,19 @@
     <Description>気象庁防災情報XMLの電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリ。
 A .NET library that parses JMA (Japan Meteorological Agency) disaster information XML messages into strongly typed, immutable models generated from the official XML schemas and data dictionary.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/oruponu/JmaXml</PackageProjectUrl>
     <RepositoryUrl>https://github.com/oruponu/JmaXml</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>jma;jmaxml;xml;parser;weather;earthquake;tsunami;volcano;disaster;気象庁;気象庁防災情報XML;防災</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="JmaXml.Tests" />
