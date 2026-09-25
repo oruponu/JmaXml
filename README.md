@@ -194,7 +194,20 @@ dotnet run --project tools/JmaXml.Generator
 dotnet run --project tools/JmaXml.Generator -- --check
 ```
 
-気象庁が辞書や XSD を改版したときは、`schema/` のファイルを差し替えて再生成し、差分を確認してください。
+公開 API は `src/JmaXml/PublicAPI.Shipped.txt`（公開済み）と `src/JmaXml/PublicAPI.Unshipped.txt`（未公開）に記録しています。一覧に無い公開 API があるとビルドが失敗します。生成したコードは `dotnet format` で一覧に追加できないため、次のスクリプトで追加します。ビルドが失敗した場合や、警告の文面を解釈できなかった場合は、一覧を変更せずに終了します。
+
+```bash
+bash tools/update-public-api.sh
+```
+
+公開 API を削除または変更すると、変更前の API について RS0017 でビルドが失敗します。対処は、変更前の API が公開済みかどうかで異なります。
+
+- `PublicAPI.Unshipped.txt` にある未公開の API：その行を削除します。
+- `PublicAPI.Shipped.txt` にある公開済みの API：互換性のない変更なので、メジャーバージョンを上げます。`PublicAPI.Shipped.txt` は変更せず、先頭に `*REMOVED*` を付けた行を `PublicAPI.Unshipped.txt` に追加します。
+
+API を変更した場合は、変更後の API について RS0016 も出るので、上のスクリプトで一覧に追加します。
+
+気象庁が辞書や XSD を改版したときは、`schema/` のファイルを差し替えて再生成し、スクリプトで公開 API の一覧を更新してから、生成したコードと一覧の差分を確認してください。
 
 ## 出典とライセンス
 
