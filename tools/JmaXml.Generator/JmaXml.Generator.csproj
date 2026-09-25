@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>JmaXml.Generator</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
 </Project>

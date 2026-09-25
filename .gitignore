@@ -2,5 +2,11 @@ bin/
 obj/
 .vs/
 .idea/
+.vscode/
 *.user
 TestResults/
+artifacts/
+BenchmarkDotNet.Artifacts/
+*.nupkg
+*.snupkg
+*.binlog
