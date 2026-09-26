@@ -83,6 +83,20 @@ public class JmaXmlReaderTraversalTests
     }
 
     [Fact]
+    public void Path_is_tracked_in_deeply_nested_elements()
+    {
+        var names = Enumerable.Range(0, 40).Select(i => $"e{i}").ToList();
+        var xml = "<a xmlns=\"urn:x\">" + string.Concat(names.Select(n => $"<{n}>")) + "<x/><x/>" + string.Concat(names.AsEnumerable().Reverse().Select(n => $"</{n}>")) + "</a>";
+        using var reader = Xml.Reader(xml);
+        var r = new JmaXmlReader(reader);
+        r.MoveToElement("a", "urn:x");
+        var paths = new List<string>();
+        CollectLeafPaths(r, paths);
+        var parent = "a/" + string.Join("/", names);
+        Assert.Equal([$"{parent}/x", $"{parent}/x[2]"], paths);
+    }
+
+    [Fact]
     public void Many_distinct_sibling_names_are_numbered_in_linear_time()
     {
         var xml = new StringBuilder("<a xmlns=\"urn:x\">");
@@ -235,6 +249,25 @@ public class JmaXmlReaderTraversalTests
             }
             Assert.True(r.NextChild());
             Assert.Equal("q", r.LocalName);
+        }
+    }
+
+    private static void CollectLeafPaths(JmaXmlReader r, List<string> paths)
+    {
+        using (r.Enter())
+        {
+            while (r.NextChild())
+            {
+                if (r.LocalName == "x")
+                {
+                    paths.Add(r.Path);
+                    r.Skip();
+                }
+                else
+                {
+                    CollectLeafPaths(r, paths);
+                }
+            }
         }
     }
 

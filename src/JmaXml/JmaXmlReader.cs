@@ -10,9 +10,11 @@ internal sealed partial class JmaXmlReader
 
     private readonly XmlReader _reader;
     private readonly IXmlLineInfo? _lineInfo;
-    private readonly List<Segment> _path = [];
     private readonly List<ScopeState> _scopes = [];
-    private readonly List<(string Name, int Count)> _siblings = [];
+    private Segment[] _path = new Segment[16];
+    private int _pathCount;
+    private Sibling[] _siblings = new Sibling[32];
+    private int _siblingCount;
     private readonly List<object?[]> _buffers = [];
 
     public JmaXmlReader(XmlReader reader)
@@ -34,7 +36,7 @@ internal sealed partial class JmaXmlReader
 
     public bool InNamespace(string ns) => _reader.NamespaceURI == ns;
 
-    public string Path => string.Join("/", _path.Select(s => s.Ordinal >= 2 ? $"{s.Name}[{s.Ordinal}]" : s.Name));
+    public string Path => string.Join("/", _path.Take(_pathCount).Select(s => s.Ordinal >= 2 ? $"{s.Name}[{s.Ordinal}]" : s.Name));
 
     public void MoveToElement(string name, string ns)
     {
@@ -46,14 +48,14 @@ internal sealed partial class JmaXmlReader
         {
             throw Error($"Expected element '{name}' in namespace '{ns}' but found '{_reader.LocalName}' in namespace '{_reader.NamespaceURI}'");
         }
-        _path.Clear();
-        _path.Add(new Segment(name, 1, _reader.Depth));
+        _path[0] = new Segment(name, 1, _reader.Depth);
+        _pathCount = 1;
     }
 
     public Scope Enter()
     {
         var (line, position) = Position();
-        _scopes.Add(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position, _siblings.Count));
+        _scopes.Add(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position, _siblingCount));
         return new Scope(this);
     }
 
@@ -133,7 +135,7 @@ internal sealed partial class JmaXmlReader
     private string ScopePath()
     {
         var depth = _scopes.Count > 0 ? _scopes[^1].Depth : int.MaxValue;
-        return string.Join("/", _path.Where(s => s.Depth <= depth).Select(s => s.Ordinal >= 2 ? $"{s.Name}[{s.Ordinal}]" : s.Name));
+        return string.Join("/", _path.Take(_pathCount).Where(s => s.Depth <= depth).Select(s => s.Ordinal >= 2 ? $"{s.Name}[{s.Ordinal}]" : s.Name));
     }
 
     private void PushSegment(ref ScopeState scope)
@@ -141,38 +143,54 @@ internal sealed partial class JmaXmlReader
         var depth = _reader.Depth;
         var name = _reader.LocalName;
         var ordinal = scope.Siblings is { } siblings ? CountInDictionary(siblings, name) : CountInList(ref scope, name);
-        while (_path.Count > 0 && _path[^1].Depth >= depth) _path.RemoveAt(_path.Count - 1);
-        _path.Add(new Segment(name, ordinal, depth));
+        var count = _pathCount;
+        var path = _path;
+        while (count > 0 && path[count - 1].Depth >= depth) count--;
+        if (count == path.Length)
+        {
+            Array.Resize(ref _path, count * 2);
+            path = _path;
+        }
+        path[count] = new Segment(name, ordinal, depth);
+        _pathCount = count + 1;
     }
 
     private int CountInList(ref ScopeState scope, string name)
     {
-        for (var i = scope.SiblingStart; i < _siblings.Count; i++)
+        var siblings = _siblings;
+        var end = _siblingCount;
+        for (var i = scope.SiblingStart; i < end; i++)
         {
-            if (_siblings[i].Name == name)
-            {
-                var ordinal = _siblings[i].Count + 1;
-                _siblings[i] = (name, ordinal);
-                return ordinal;
-            }
+            ref var sibling = ref siblings[i];
+            if (SameName(sibling.Name, name)) return ++sibling.Count;
         }
-        if (_siblings.Count - scope.SiblingStart < LinearSiblingLimit)
+        if (end - scope.SiblingStart < LinearSiblingLimit)
         {
-            _siblings.Add((name, 1));
+            if (end == siblings.Length) Array.Resize(ref _siblings, end * 2);
+            _siblings[end] = new Sibling(name, 1);
+            _siblingCount = end + 1;
             return 1;
         }
-        var siblings = new Dictionary<string, int>(StringComparer.Ordinal);
-        for (var i = scope.SiblingStart; i < _siblings.Count; i++) siblings[_siblings[i].Name] = _siblings[i].Count;
-        _siblings.RemoveRange(scope.SiblingStart, _siblings.Count - scope.SiblingStart);
-        scope.Siblings = siblings;
-        return CountInDictionary(siblings, name);
+        var dictionary = new Dictionary<string, int>(StringComparer.Ordinal);
+        for (var i = scope.SiblingStart; i < end; i++) dictionary[siblings[i].Name] = siblings[i].Count;
+        _siblingCount = scope.SiblingStart;
+        scope.Siblings = dictionary;
+        return CountInDictionary(dictionary, name);
     }
+
+    private static bool SameName(string a, string b) => (object)a == b || (a.Length == b.Length && a[0] == b[0] && a == b);
 
     private static int CountInDictionary(Dictionary<string, int> siblings, string name)
     {
         var ordinal = siblings.GetValueOrDefault(name) + 1;
         siblings[name] = ordinal;
         return ordinal;
+    }
+
+    private struct Sibling(string name, int count)
+    {
+        public readonly string Name = name;
+        public int Count = count;
     }
 
     private readonly record struct Segment(string Name, int Ordinal, int Depth);
@@ -194,7 +212,7 @@ internal sealed partial class JmaXmlReader
         {
             var scope = owner._scopes[^1];
             owner._scopes.RemoveAt(owner._scopes.Count - 1);
-            owner._siblings.RemoveRange(scope.SiblingStart, owner._siblings.Count - scope.SiblingStart);
+            owner._siblingCount = scope.SiblingStart;
         }
     }
 }
