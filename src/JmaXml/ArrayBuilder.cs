@@ -13,25 +13,32 @@ internal struct ArrayBuilder<T> where T : class
 
     public void Add(JmaXmlReader r, T item)
     {
+        if (_items is null || _count == _items.Length) Grow(r);
+        Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_items!), _count++) = item;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ImmutableArray<T> ToImmutable(JmaXmlReader r) => _items is null ? [] : Build(r);
+
+    private void Grow(JmaXmlReader r)
+    {
         if (_items is null)
         {
             _items = r.RentBuffer(0);
+            return;
         }
-        else if (_count == _items.Length)
-        {
-            var grown = r.RentBuffer(_count * 2);
-            Array.Copy(_items, grown, _count);
-            Release(r);
-            _items = grown;
-        }
-        _items[_count++] = item;
+        var grown = r.RentBuffer(_count * 2);
+        Array.Copy(_items, grown, _count);
+        Release(r);
+        _items = grown;
     }
 
-    public ImmutableArray<T> ToImmutable(JmaXmlReader r)
+    private ImmutableArray<T> Build(JmaXmlReader r)
     {
-        if (_items is null) return [];
         var result = new T[_count];
-        for (var i = 0; i < result.Length; i++) result[i] = Unsafe.As<T>(_items[i]!);
+        var source = new ReadOnlySpan<object?>(_items, 0, _count);
+        var destination = MemoryMarshal.CreateSpan(ref Unsafe.As<T, object?>(ref MemoryMarshal.GetArrayDataReference(result)), result.Length);
+        source.CopyTo(destination);
         Release(r);
         _items = null;
         _count = 0;
