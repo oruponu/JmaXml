@@ -122,8 +122,8 @@ public sealed record Report
         var headSeen = false;
         ReportBody? body = null;
         var bodySeen = false;
-        using var scope = r.Enter();
-        while (r.NextChild())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
             switch (r.LocalName)
             {
@@ -154,11 +154,12 @@ public sealed record Report
                     break;
             }
         }
+        r.Exit(in scope);
         return new Report
         {
-            Control = control ?? throw r.Missing("Control"),
-            Head = head ?? throw r.Missing("Head"),
-            Body = body ?? throw r.Missing("Body"),
+            Control = control ?? throw r.Missing(in scope, "Control"),
+            Head = head ?? throw r.Missing(in scope, "Head"),
+            Body = body ?? throw r.Missing(in scope, "Body"),
         };
     }
 }

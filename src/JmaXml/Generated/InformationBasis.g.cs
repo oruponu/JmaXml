@@ -199,8 +199,8 @@ public static partial class InformationBasis
             var infoKindVersionSeen = false;
             Headline? headline = null;
             var headlineSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -219,20 +219,21 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Head
             {
-                Title = title ?? throw r.Missing("Title"),
-                ReportDateTime = reportDateTime ?? throw r.Missing("ReportDateTime"),
-                TargetDateTime = targetDateTimeSeen ? targetDateTime : throw r.Missing("TargetDateTime"),
+                Title = title ?? throw r.Missing(in scope, "Title"),
+                ReportDateTime = reportDateTime ?? throw r.Missing(in scope, "ReportDateTime"),
+                TargetDateTime = targetDateTimeSeen ? targetDateTime : throw r.Missing(in scope, "TargetDateTime"),
                 TargetDTDubious = targetDTDubious,
                 TargetDuration = targetDuration,
                 ValidDateTime = validDateTime,
-                EventId = eventID ?? throw r.Missing("EventID"),
-                InfoType = infoType ?? throw r.Missing("InfoType"),
-                Serial = serial ?? throw r.Missing("Serial"),
-                InfoKind = infoKind ?? throw r.Missing("InfoKind"),
-                InfoKindVersion = infoKindVersion ?? throw r.Missing("InfoKindVersion"),
-                Headline = headline ?? throw r.Missing("Headline"),
+                EventId = eventID ?? throw r.Missing(in scope, "EventID"),
+                InfoType = infoType ?? throw r.Missing(in scope, "InfoType"),
+                Serial = serial ?? throw r.Missing(in scope, "Serial"),
+                InfoKind = infoKind ?? throw r.Missing(in scope, "InfoKind"),
+                InfoKindVersion = infoKindVersion ?? throw r.Missing(in scope, "InfoKindVersion"),
+                Headline = headline ?? throw r.Missing(in scope, "Headline"),
             };
         }
     }
@@ -257,8 +258,8 @@ public static partial class InformationBasis
             string? text = null;
             var textSeen = false;
             ArrayBuilder<Information> information = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -267,9 +268,10 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Headline
             {
-                Text = text ?? throw r.Missing("Text"),
+                Text = text ?? throw r.Missing(in scope, "Text"),
                 Information = information.ToImmutable(r),
             };
         }
@@ -345,8 +347,8 @@ public static partial class InformationBasis
         {
             var type = r.RequiredAttributeString("type");
             ArrayBuilder<Item> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -354,10 +356,11 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Information
             {
                 Type = type,
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -386,8 +389,8 @@ public static partial class InformationBasis
             ArrayBuilder<Kind> lastKind = default;
             Areas? areas = null;
             var areasSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -397,11 +400,12 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Item
             {
-                Kind = kind.IsEmpty ? throw r.Missing("Kind") : kind.ToImmutable(r),
+                Kind = kind.IsEmpty ? throw r.Missing(in scope, "Kind") : kind.ToImmutable(r),
                 LastKind = lastKind.ToImmutable(r),
-                Areas = areas ?? throw r.Missing("Areas"),
+                Areas = areas ?? throw r.Missing(in scope, "Areas"),
             };
         }
     }
@@ -429,8 +433,8 @@ public static partial class InformationBasis
             var codeSeen = false;
             string? condition = null;
             var conditionSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -440,9 +444,10 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Kind
             {
-                Name = name ?? throw r.Missing("Name"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
                 Code = code,
                 Condition = condition,
             };
@@ -485,8 +490,8 @@ public static partial class InformationBasis
         {
             var codeType = r.RequiredAttributeString("codeType");
             ArrayBuilder<Area> area = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -494,10 +499,11 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Areas
             {
                 CodeType = codeType,
-                Area = area.IsEmpty ? throw r.Missing("Area") : area.ToImmutable(r),
+                Area = area.IsEmpty ? throw r.Missing(in scope, "Area") : area.ToImmutable(r),
             };
         }
     }
@@ -562,8 +568,8 @@ public static partial class InformationBasis
             ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
             ArrayBuilder<ElementBasis.Coordinate> line = default;
             ArrayBuilder<ElementBasis.Coordinate> polygon = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -576,9 +582,10 @@ public static partial class InformationBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Area
             {
-                Name = name ?? throw r.Missing("Name"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
                 Code = code,
                 Circle = circle.ToImmutable(r),
                 Coordinate = coordinate.ToImmutable(r),

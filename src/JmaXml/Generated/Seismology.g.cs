@@ -121,8 +121,8 @@ public static partial class Seismology
             var nextAdvisorySeen = false;
             Comment? comments = null;
             var commentsSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -140,6 +140,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Body
             {
                 Naming = naming,
@@ -192,8 +193,8 @@ public static partial class Seismology
             Hypocenter? hypocenter = null;
             var hypocenterSeen = false;
             ArrayBuilder<ElementBasis.Magnitude> magnitude = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -205,13 +206,14 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Earthquake
             {
                 OriginTime = originTime,
-                ArrivalTime = arrivalTime ?? throw r.Missing("ArrivalTime"),
+                ArrivalTime = arrivalTime ?? throw r.Missing(in scope, "ArrivalTime"),
                 Condition = condition,
                 Hypocenter = hypocenter,
-                Magnitude = magnitude.IsEmpty ? throw r.Missing("Magnitude") : magnitude.ToImmutable(r),
+                Magnitude = magnitude.IsEmpty ? throw r.Missing(in scope, "Magnitude") : magnitude.ToImmutable(r),
             };
         }
     }
@@ -245,8 +247,8 @@ public static partial class Seismology
             var sourceSeen = false;
             Accuracy? accuracy = null;
             var accuracySeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -256,9 +258,10 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Hypocenter
             {
-                Area = area ?? throw r.Missing("Area"),
+                Area = area ?? throw r.Missing(in scope, "Area"),
                 Source = source,
                 Accuracy = accuracy,
             };
@@ -366,8 +369,8 @@ public static partial class Seismology
             var distanceSeen = false;
             string? landOrSea = null;
             var landOrSeaSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -386,11 +389,12 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new HypoArea
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
-                Coordinate = coordinate.IsEmpty ? throw r.Missing("Coordinate") : coordinate.ToImmutable(r),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
+                Coordinate = coordinate.IsEmpty ? throw r.Missing(in scope, "Coordinate") : coordinate.ToImmutable(r),
                 ReduceName = reduceName,
                 ReduceCode = reduceCode,
                 DetailedName = detailedName,
@@ -534,8 +538,8 @@ public static partial class Seismology
             var magnitudeCalculationSeen = false;
             int? numberOfMagnitudeCalculation = null;
             var numberOfMagnitudeCalculationSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -546,12 +550,13 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Accuracy
             {
-                Epicenter = epicenter ?? throw r.Missing("Epicenter"),
-                Depth = depth ?? throw r.Missing("Depth"),
-                MagnitudeCalculation = magnitudeCalculation ?? throw r.Missing("MagnitudeCalculation"),
-                NumberOfMagnitudeCalculation = numberOfMagnitudeCalculation ?? throw r.Missing("NumberOfMagnitudeCalculation"),
+                Epicenter = epicenter ?? throw r.Missing(in scope, "Epicenter"),
+                Depth = depth ?? throw r.Missing(in scope, "Depth"),
+                MagnitudeCalculation = magnitudeCalculation ?? throw r.Missing(in scope, "MagnitudeCalculation"),
+                NumberOfMagnitudeCalculation = numberOfMagnitudeCalculation ?? throw r.Missing(in scope, "NumberOfMagnitudeCalculation"),
             };
         }
     }
@@ -661,8 +666,8 @@ public static partial class Seismology
             var estimationSeen = false;
             TsunamiDetail? forecast = null;
             var forecastSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -673,6 +678,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Tsunami
             {
                 Release = release,
@@ -703,8 +709,8 @@ public static partial class Seismology
             CodeDefine? codeDefine = null;
             var codeDefineSeen = false;
             ArrayBuilder<TsunamiItem> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -713,10 +719,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TsunamiDetail
             {
                 CodeDefine = codeDefine,
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -773,8 +780,8 @@ public static partial class Seismology
             TimeSpan? duration = null;
             var durationSeen = false;
             ArrayBuilder<TsunamiStation> station = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -787,9 +794,10 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TsunamiItem
             {
-                Area = area ?? throw r.Missing("Area"),
+                Area = area ?? throw r.Missing(in scope, "Area"),
                 Category = category,
                 FirstHeight = firstHeight,
                 MaxHeight = maxHeight,
@@ -827,8 +835,8 @@ public static partial class Seismology
             string? code = null;
             var codeSeen = false;
             ArrayBuilder<ForecastCity> city = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -838,10 +846,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ForecastArea
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 City = city.ToImmutable(r),
             };
         }
@@ -868,8 +877,8 @@ public static partial class Seismology
             var nameSeen = false;
             string? code = null;
             var codeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -878,10 +887,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ForecastCity
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
             };
         }
     }
@@ -907,8 +917,8 @@ public static partial class Seismology
             var kindSeen = false;
             Kind? lastKind = null;
             var lastKindSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -917,9 +927,10 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Category
             {
-                Kind = kind ?? throw r.Missing("Kind"),
+                Kind = kind ?? throw r.Missing(in scope, "Kind"),
                 LastKind = lastKind,
             };
         }
@@ -946,8 +957,8 @@ public static partial class Seismology
             var nameSeen = false;
             string? code = null;
             var codeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -956,10 +967,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Kind
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
             };
         }
     }
@@ -1030,8 +1042,8 @@ public static partial class Seismology
             var reviseSeen = false;
             float? period = null;
             var periodSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1046,6 +1058,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new FirstHeight
             {
                 ArrivalTimeFrom = arrivalTimeFrom,
@@ -1115,8 +1128,8 @@ public static partial class Seismology
             var reviseSeen = false;
             float? period = null;
             var periodSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1130,6 +1143,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new MaxHeight
             {
                 DateTime = dateTime,
@@ -1180,8 +1194,8 @@ public static partial class Seismology
             var conditionSeen = false;
             ElementBasis.TsunamiHeight? tsunamiHeight = null;
             var tsunamiHeightSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1192,6 +1206,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CurrentHeight
             {
                 StartTime = startTime,
@@ -1260,8 +1275,8 @@ public static partial class Seismology
             var maxHeightSeen = false;
             CurrentHeight? currentHeight = null;
             var currentHeightSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1275,13 +1290,14 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TsunamiStation
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Sensor = sensor,
                 HighTideDateTime = highTideDateTime,
-                FirstHeight = firstHeight ?? throw r.Missing("FirstHeight"),
+                FirstHeight = firstHeight ?? throw r.Missing(in scope, "FirstHeight"),
                 MaxHeight = maxHeight,
                 CurrentHeight = currentHeight,
             };
@@ -1309,8 +1325,8 @@ public static partial class Seismology
             var forecastSeen = false;
             IntensityDetail? observation = null;
             var observationSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1319,6 +1335,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Intensity
             {
                 Forecast = forecast,
@@ -1383,8 +1400,8 @@ public static partial class Seismology
             IntensityAppendix? appendix = null;
             var appendixSeen = false;
             ArrayBuilder<IntensityPref> pref = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1399,6 +1416,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IntensityDetail
             {
                 CodeDefine = codeDefine,
@@ -1438,8 +1456,8 @@ public static partial class Seismology
             var fromSeen = false;
             string? to = null;
             var toSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1448,6 +1466,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ForecastInt
             {
                 Bound = bound,
@@ -1482,8 +1501,8 @@ public static partial class Seismology
             var fromSeen = false;
             string? to = null;
             var toSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1492,6 +1511,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ForecastLgInt
             {
                 Bound = bound,
@@ -1529,8 +1549,8 @@ public static partial class Seismology
             var maxIntChangeReasonSeen = false;
             int? maxLgIntChangeReason = null;
             var maxLgIntChangeReasonSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1541,11 +1561,12 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IntensityAppendix
             {
-                MaxIntChange = maxIntChange ?? throw r.Missing("MaxIntChange"),
+                MaxIntChange = maxIntChange ?? throw r.Missing(in scope, "MaxIntChange"),
                 MaxLgIntChange = maxLgIntChange,
-                MaxIntChangeReason = maxIntChangeReason ?? throw r.Missing("MaxIntChangeReason"),
+                MaxIntChangeReason = maxIntChangeReason ?? throw r.Missing(in scope, "MaxIntChangeReason"),
                 MaxLgIntChangeReason = maxLgIntChangeReason,
             };
         }
@@ -1625,8 +1646,8 @@ public static partial class Seismology
             string? revise = null;
             var reviseSeen = false;
             ArrayBuilder<IntensityArea> area = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1644,10 +1665,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IntensityPref
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Category = category,
                 MaxInt = maxInt,
                 MaxLgInt = maxLgInt,
@@ -1742,8 +1764,8 @@ public static partial class Seismology
             var reviseSeen = false;
             ArrayBuilder<IntensityCity> city = default;
             ArrayBuilder<IntensityStation> intensityStation = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1762,10 +1784,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IntensityArea
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Category = category,
                 MaxInt = maxInt,
                 MaxLgInt = maxLgInt,
@@ -1857,8 +1880,8 @@ public static partial class Seismology
             string? revise = null;
             var reviseSeen = false;
             ArrayBuilder<IntensityStation> intensityStation = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1876,10 +1899,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IntensityCity
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Category = category,
                 MaxInt = maxInt,
                 MaxLgInt = maxLgInt,
@@ -1953,8 +1977,8 @@ public static partial class Seismology
             ArrayBuilder<SvaPerPeriod> svaPerPeriod = default;
             string? revise = null;
             var reviseSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1970,10 +1994,11 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IntensityStation
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Int = @int,
                 K = k,
                 LgInt = lgInt,
@@ -2088,8 +2113,8 @@ public static partial class Seismology
         internal static EarthquakeCount Read(JmaXmlReader r)
         {
             ArrayBuilder<CountData> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2097,9 +2122,10 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new EarthquakeCount
             {
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -2141,8 +2167,8 @@ public static partial class Seismology
             var feltNumberSeen = false;
             string? condition = null;
             var conditionSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2154,13 +2180,14 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CountData
             {
                 Type = type,
-                StartTime = startTime ?? throw r.Missing("StartTime"),
-                EndTime = endTime ?? throw r.Missing("EndTime"),
-                Number = number ?? throw r.Missing("Number"),
-                FeltNumber = feltNumber ?? throw r.Missing("FeltNumber"),
+                StartTime = startTime ?? throw r.Missing(in scope, "StartTime"),
+                EndTime = endTime ?? throw r.Missing(in scope, "EndTime"),
+                Number = number ?? throw r.Missing(in scope, "Number"),
+                FeltNumber = feltNumber ?? throw r.Missing(in scope, "FeltNumber"),
                 Condition = condition,
             };
         }
@@ -2192,8 +2219,8 @@ public static partial class Seismology
             var infoSerialSeen = false;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2203,11 +2230,12 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Tokai
             {
-                InfoKind = infoKind ?? throw r.Missing("InfoKind"),
+                InfoKind = infoKind ?? throw r.Missing(in scope, "InfoKind"),
                 InfoSerial = infoSerial,
-                Text = text ?? throw r.Missing("Text"),
+                Text = text ?? throw r.Missing(in scope, "Text"),
             };
         }
     }
@@ -2237,8 +2265,8 @@ public static partial class Seismology
             var nameSeen = false;
             string? code = null;
             var codeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2247,11 +2275,12 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new InfoSerial
             {
                 CodeType = codeType,
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
             };
         }
     }
@@ -2294,8 +2323,8 @@ public static partial class Seismology
             var textSeen = false;
             string? appendix = null;
             var appendixSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2306,12 +2335,13 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new EarthquakeInfo
             {
                 Type = type,
-                InfoKind = infoKind ?? throw r.Missing("InfoKind"),
+                InfoKind = infoKind ?? throw r.Missing(in scope, "InfoKind"),
                 InfoSerial = infoSerial,
-                Text = text ?? throw r.Missing("Text"),
+                Text = text ?? throw r.Missing(in scope, "Text"),
                 Appendix = appendix,
             };
         }
@@ -2358,8 +2388,8 @@ public static partial class Seismology
             ArrayBuilder<AftershockItem> item = default;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2368,9 +2398,10 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Aftershocks
             {
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
                 Text = text,
             };
         }
@@ -2418,8 +2449,8 @@ public static partial class Seismology
             var targetMagnitudeSeen = false;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2431,12 +2462,13 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new AftershockItem
             {
-                StartTime = startTime ?? throw r.Missing("StartTime"),
-                EndTime = endTime ?? throw r.Missing("EndTime"),
-                ProbabilityOfAftershock = probabilityOfAftershock ?? throw r.Missing("ProbabilityOfAftershock"),
-                TargetMagnitude = targetMagnitude ?? throw r.Missing("TargetMagnitude"),
+                StartTime = startTime ?? throw r.Missing(in scope, "StartTime"),
+                EndTime = endTime ?? throw r.Missing(in scope, "EndTime"),
+                ProbabilityOfAftershock = probabilityOfAftershock ?? throw r.Missing(in scope, "ProbabilityOfAftershock"),
+                TargetMagnitude = targetMagnitude ?? throw r.Missing(in scope, "TargetMagnitude"),
                 Text = text,
             };
         }
@@ -2492,8 +2524,8 @@ public static partial class Seismology
             var freeFormCommentSeen = false;
             string? uRI = null;
             var uRISeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2506,6 +2538,7 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Comment
             {
                 WarningComment = warningComment,
@@ -2543,8 +2576,8 @@ public static partial class Seismology
             var textSeen = false;
             ImmutableArray<string>? code = null;
             var codeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2553,11 +2586,12 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CommentForm
             {
                 CodeType = codeType,
-                Text = text ?? throw r.Missing("Text"),
-                Code = code ?? throw r.Missing("Code"),
+                Text = text ?? throw r.Missing(in scope, "Text"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
             };
         }
     }
@@ -2571,8 +2605,8 @@ public static partial class Seismology
         internal static CodeDefine Read(JmaXmlReader r)
         {
             ArrayBuilder<CodeDefineType> type = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2580,9 +2614,10 @@ public static partial class Seismology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CodeDefine
             {
-                Type = type.IsEmpty ? throw r.Missing("Type") : type.ToImmutable(r),
+                Type = type.IsEmpty ? throw r.Missing(in scope, "Type") : type.ToImmutable(r),
             };
         }
     }

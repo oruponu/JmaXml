@@ -13,20 +13,18 @@ public class JmaXmlReaderTraversalTests
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var paths = new List<string>();
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
+            var inner = r.Enter();
+            while (r.NextChild(ref inner))
             {
-                using (r.Enter())
-                {
-                    while (r.NextChild())
-                    {
-                        paths.Add(r.Path);
-                        r.Skip();
-                    }
-                }
+                paths.Add(r.Path);
+                r.Skip();
             }
+            r.Exit(in inner);
         }
+        r.Exit(in scope);
         Assert.Equal(["a/p/q", "a/p/q[2]", "a/p[2]/q"], paths);
     }
 
@@ -37,21 +35,19 @@ public class JmaXmlReaderTraversalTests
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var paths = new List<string>();
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
+            paths.Add(r.Path);
+            var inner = r.Enter();
+            while (r.NextChild(ref inner))
             {
                 paths.Add(r.Path);
-                using (r.Enter())
-                {
-                    while (r.NextChild())
-                    {
-                        paths.Add(r.Path);
-                        r.Skip();
-                    }
-                }
+                r.Skip();
             }
+            r.Exit(in inner);
         }
+        r.Exit(in scope);
         Assert.Equal(["a/q", "a/p", "a/p/q", "a/p/r", "a/p/q[2]", "a/r", "a/p[2]", "a/p[3]", "a/p[3]/q"], paths);
     }
 
@@ -64,21 +60,19 @@ public class JmaXmlReaderTraversalTests
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var paths = new List<string>();
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
+            paths.Add(r.Path);
+            var inner = r.Enter();
+            while (r.NextChild(ref inner))
             {
                 paths.Add(r.Path);
-                using (r.Enter())
-                {
-                    while (r.NextChild())
-                    {
-                        paths.Add(r.Path);
-                        r.Skip();
-                    }
-                }
+                r.Skip();
             }
+            r.Exit(in inner);
         }
+        r.Exit(in scope);
         Assert.Equal([.. names.Select(n => $"a/{n}"), "a/n0[2]", "a/n19[2]", "a/n3[2]", "a/n3[2]/q", "a/n3[2]/q[2]"], paths);
     }
 
@@ -107,14 +101,13 @@ public class JmaXmlReaderTraversalTests
         r.MoveToElement("a", "urn:x");
         var count = 0;
         var stopwatch = Stopwatch.StartNew();
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
-            {
-                count++;
-                r.Skip();
-            }
+            count++;
+            r.Skip();
         }
+        r.Exit(in scope);
         stopwatch.Stop();
         Assert.Equal(80_000, count);
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2), $"took {stopwatch.Elapsed.TotalMilliseconds:N0} ms");
@@ -163,14 +156,13 @@ public class JmaXmlReaderTraversalTests
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var names = new List<string>();
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
-            {
-                names.Add(r.LocalName);
-                r.Skip();
-            }
+            names.Add(r.LocalName);
+            r.Skip();
         }
+        r.Exit(in scope);
         Assert.Equal(["b", "c"], names);
         Assert.True(reader.EOF);
     }
@@ -182,17 +174,15 @@ public class JmaXmlReaderTraversalTests
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var names = new List<string>();
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
-            {
-                names.Add(r.LocalName);
-                using (r.Enter())
-                {
-                    Assert.False(r.NextChild());
-                }
-            }
+            names.Add(r.LocalName);
+            var inner = r.Enter();
+            Assert.False(r.NextChild(ref inner));
+            r.Exit(in inner);
         }
+        r.Exit(in scope);
         Assert.Equal(["b", "c"], names);
     }
 
@@ -203,17 +193,16 @@ public class JmaXmlReaderTraversalTests
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var seen = false;
-        using (r.Enter())
-        {
-            Assert.True(r.NextChild());
-            r.Once(ref seen, "p");
-            r.Skip();
-            Assert.True(r.NextChild());
-            var ex = Assert.Throws<JmaXmlException>(() => r.Once(ref seen, "p"));
-            Assert.Equal("a/p[2]", ex.Path);
-            Assert.Equal(1, ex.LineNumber);
-            Assert.True(ex.LinePosition > 1);
-        }
+        var scope = r.Enter();
+        Assert.True(r.NextChild(ref scope));
+        r.Once(ref seen, "p");
+        r.Skip();
+        Assert.True(r.NextChild(ref scope));
+        var ex = Assert.Throws<JmaXmlException>(() => r.Once(ref seen, "p"));
+        Assert.Equal("a/p[2]", ex.Path);
+        Assert.Equal(1, ex.LineNumber);
+        Assert.True(ex.LinePosition > 1);
+        r.Exit(in scope);
     }
 
     [Fact]
@@ -222,13 +211,12 @@ public class JmaXmlReaderTraversalTests
         using var reader = Xml.Reader("<a xmlns=\"urn:x\"><p/><p/></a>");
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
-        using (r.Enter())
-        {
-            while (r.NextChild()) r.Skip();
-            var ex = r.Missing("z");
-            Assert.Equal("a/z", ex.Path);
-            Assert.Equal("Required element 'z' is missing (path: a/z, line: 1, position: 2)", ex.Message);
-        }
+        var scope = r.Enter();
+        while (r.NextChild(ref scope)) r.Skip();
+        var ex = r.Missing(in scope, "z");
+        Assert.Equal("a/z", ex.Path);
+        Assert.Equal("Required element 'z' is missing (path: a/z, line: 1, position: 2)", ex.Message);
+        r.Exit(in scope);
     }
 
     [Fact]
@@ -237,38 +225,35 @@ public class JmaXmlReaderTraversalTests
         using var reader = Xml.Reader("<a xmlns=\"urn:x\">\n  <p>\n  </p>\n  <q/>\n</a>");
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
-        using (r.Enter())
-        {
-            Assert.True(r.NextChild());
-            using (r.Enter())
-            {
-                Assert.False(r.NextChild());
-                var ex = r.Missing("z");
-                Assert.Equal("a/p/z", ex.Path);
-                Assert.Equal((2, 4), (ex.LineNumber, ex.LinePosition));
-            }
-            Assert.True(r.NextChild());
-            Assert.Equal("q", r.LocalName);
-        }
+        var scope = r.Enter();
+        Assert.True(r.NextChild(ref scope));
+        var inner = r.Enter();
+        Assert.False(r.NextChild(ref inner));
+        var ex = r.Missing(in inner, "z");
+        Assert.Equal("a/p/z", ex.Path);
+        Assert.Equal((2, 4), (ex.LineNumber, ex.LinePosition));
+        r.Exit(in inner);
+        Assert.True(r.NextChild(ref scope));
+        Assert.Equal("q", r.LocalName);
+        r.Exit(in scope);
     }
 
     private static void CollectLeafPaths(JmaXmlReader r, List<string> paths)
     {
-        using (r.Enter())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
-            while (r.NextChild())
+            if (r.LocalName == "x")
             {
-                if (r.LocalName == "x")
-                {
-                    paths.Add(r.Path);
-                    r.Skip();
-                }
-                else
-                {
-                    CollectLeafPaths(r, paths);
-                }
+                paths.Add(r.Path);
+                r.Skip();
+            }
+            else
+            {
+                CollectLeafPaths(r, paths);
             }
         }
+        r.Exit(in scope);
     }
 
     private sealed class NoNameTableReader(string xml) : XmlTextReader(new StringReader(xml))

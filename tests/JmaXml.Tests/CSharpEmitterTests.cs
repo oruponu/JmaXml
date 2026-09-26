@@ -49,7 +49,7 @@ public class CSharpEmitterTests
         Assert.Contains("internal static Occurrences Read(JmaXmlReader r)", seis, StringComparison.Ordinal);
         Assert.Contains("public required string Name { get; init; }", seis, StringComparison.Ordinal);
         Assert.Contains("case \"Name\" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref nameSeen, \"Name\"); name = r.ReadString(); break;", seis, StringComparison.Ordinal);
-        Assert.Contains("Name = name ?? throw r.Missing(\"Name\"),", seis, StringComparison.Ordinal);
+        Assert.Contains("Name = name ?? throw r.Missing(in scope, \"Name\"),", seis, StringComparison.Ordinal);
         Assert.Contains("public string? Note { get; init; }", seis, StringComparison.Ordinal);
         Assert.Contains("case \"Note\" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref noteSeen, \"Note\"); note = r.ReadString(); break;", seis, StringComparison.Ordinal);
         Assert.Contains("Note = note,", seis, StringComparison.Ordinal);
@@ -58,7 +58,7 @@ public class CSharpEmitterTests
         Assert.Contains("Tags = tags.ToImmutable(r),", seis, StringComparison.Ordinal);
         Assert.Contains("public required ImmutableArray<string> Entries { get; init; }", seis, StringComparison.Ordinal);
         Assert.Contains("case \"Entries\" when r.InNamespace(XmlNamespaces.Seismology): entries.Add(r, r.ReadString()); break;", seis, StringComparison.Ordinal);
-        Assert.Contains("Entries = entries.IsEmpty ? throw r.Missing(\"Entries\") : entries.ToImmutable(r),", seis, StringComparison.Ordinal);
+        Assert.Contains("Entries = entries.IsEmpty ? throw r.Missing(in scope, \"Entries\") : entries.ToImmutable(r),", seis, StringComparison.Ordinal);
         Assert.Contains("default: r.Skip(); break;", seis, StringComparison.Ordinal);
     }
 
@@ -101,7 +101,7 @@ public class CSharpEmitterTests
         var ib = files["InformationBasis.g.cs"];
         Assert.Contains("public DateTimeOffset? NoticedAt { get; init; }", ib, StringComparison.Ordinal);
         Assert.Contains("case \"NoticedAt\" when r.InNamespace(XmlNamespaces.InformationBasis): r.Once(ref noticedAtSeen, \"NoticedAt\"); noticedAt = r.ReadNullableDateTimeOffset(); break;", ib, StringComparison.Ordinal);
-        Assert.Contains("NoticedAt = noticedAtSeen ? noticedAt : throw r.Missing(\"NoticedAt\"),", ib, StringComparison.Ordinal);
+        Assert.Contains("NoticedAt = noticedAtSeen ? noticedAt : throw r.Missing(in scope, \"NoticedAt\"),", ib, StringComparison.Ordinal);
     }
 
     [Fact]

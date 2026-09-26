@@ -78,8 +78,8 @@ public static partial class Volcanology
             var volcanoObservationSeen = false;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -92,6 +92,7 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Body
             {
                 Notice = notice,
@@ -136,8 +137,8 @@ public static partial class Volcanology
         {
             var type = r.RequiredAttributeString("type");
             ArrayBuilder<Item> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -145,10 +146,11 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new VolcanoInfo
             {
                 Type = type,
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -184,8 +186,8 @@ public static partial class Volcanology
             var lastKindSeen = false;
             Areas? areas = null;
             var areasSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -196,12 +198,13 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Item
             {
                 EventTime = eventTime,
-                Kind = kind ?? throw r.Missing("Kind"),
+                Kind = kind ?? throw r.Missing(in scope, "Kind"),
                 LastKind = lastKind,
-                Areas = areas ?? throw r.Missing("Areas"),
+                Areas = areas ?? throw r.Missing(in scope, "Areas"),
             };
         }
     }
@@ -226,8 +229,8 @@ public static partial class Volcanology
             var eventDateTimeUTCSeen = false;
             string? eventDateTimeComment = null;
             var eventDateTimeCommentSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -237,6 +240,7 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new EventTime
             {
                 EventDateTime = eventDateTime,
@@ -288,8 +292,8 @@ public static partial class Volcanology
             var conditionSeen = false;
             Property? property = null;
             var propertySeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -301,9 +305,10 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Kind
             {
-                Name = name ?? throw r.Missing("Name"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
                 FormalName = formalName,
                 Code = code,
                 Condition = condition,
@@ -336,8 +341,8 @@ public static partial class Volcanology
         {
             var codeType = r.RequiredAttributeString("codeType");
             ArrayBuilder<Area> area = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -345,10 +350,11 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Areas
             {
                 CodeType = codeType,
-                Area = area.IsEmpty ? throw r.Missing("Area") : area.ToImmutable(r),
+                Area = area.IsEmpty ? throw r.Missing(in scope, "Area") : area.ToImmutable(r),
             };
         }
     }
@@ -408,8 +414,8 @@ public static partial class Volcanology
             var craterNameSeen = false;
             ElementBasis.Coordinate? craterCoordinate = null;
             var craterCoordinateSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -422,10 +428,11 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Area
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Coordinate = coordinate,
                 AreaFromMark = areaFromMark,
                 CraterName = craterName,
@@ -458,8 +465,8 @@ public static partial class Volcanology
         {
             var type = r.RequiredAttributeString("type");
             ArrayBuilder<AshInfo> ashInfo = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -467,10 +474,11 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new AshInfos
             {
                 Type = type,
-                AshInfo = ashInfo.IsEmpty ? throw r.Missing("AshInfo") : ashInfo.ToImmutable(r),
+                AshInfo = ashInfo.IsEmpty ? throw r.Missing(in scope, "AshInfo") : ashInfo.ToImmutable(r),
             };
         }
     }
@@ -515,8 +523,8 @@ public static partial class Volcanology
             DateTimeOffset? endTime = null;
             var endTimeSeen = false;
             ArrayBuilder<Item> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -526,12 +534,13 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new AshInfo
             {
                 Type = type,
-                StartTime = startTime ?? throw r.Missing("StartTime"),
-                EndTime = endTime ?? throw r.Missing("EndTime"),
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                StartTime = startTime ?? throw r.Missing(in scope, "StartTime"),
+                EndTime = endTime ?? throw r.Missing(in scope, "EndTime"),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -574,8 +583,8 @@ public static partial class Volcanology
             var distanceSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -587,12 +596,13 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Property
             {
                 Size = size,
-                Polygon = polygon.IsEmpty ? throw r.Missing("Polygon") : polygon.ToImmutable(r),
-                PlumeDirection = plumeDirection ?? throw r.Missing("PlumeDirection"),
-                Distance = distance ?? throw r.Missing("Distance"),
+                Polygon = polygon.IsEmpty ? throw r.Missing(in scope, "Polygon") : polygon.ToImmutable(r),
+                PlumeDirection = plumeDirection ?? throw r.Missing(in scope, "PlumeDirection"),
+                Distance = distance ?? throw r.Missing(in scope, "Distance"),
                 Remark = remark,
             };
         }
@@ -744,8 +754,8 @@ public static partial class Volcanology
             var appendixSeen = false;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -759,6 +769,7 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new VolcanoInfoContent
             {
                 VolcanoHeadline = volcanoHeadline,
@@ -810,8 +821,8 @@ public static partial class Volcanology
             var otherObservationSeen = false;
             string? appendix = null;
             var appendixSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -824,6 +835,7 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new VolcanoObservation
             {
                 EventTime = eventTime,
@@ -861,8 +873,8 @@ public static partial class Volcanology
             var plumeDirectionSeen = false;
             string? plumeComment = null;
             var plumeCommentSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -873,11 +885,12 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Plume
             {
-                PlumeHeightAboveCrater = plumeHeightAboveCrater ?? throw r.Missing("PlumeHeightAboveCrater"),
+                PlumeHeightAboveCrater = plumeHeightAboveCrater ?? throw r.Missing(in scope, "PlumeHeightAboveCrater"),
                 PlumeHeightAboveSeaLevel = plumeHeightAboveSeaLevel,
-                PlumeDirection = plumeDirection ?? throw r.Missing("PlumeDirection"),
+                PlumeDirection = plumeDirection ?? throw r.Missing(in scope, "PlumeDirection"),
                 PlumeComment = plumeComment,
             };
         }
@@ -897,8 +910,8 @@ public static partial class Volcanology
             ElementBasis.DateTime? dateTime = null;
             var dateTimeSeen = false;
             ArrayBuilder<WindAboveCraterElements> windAboveCraterElements = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -907,9 +920,10 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WindAboveCrater
             {
-                DateTime = dateTime ?? throw r.Missing("DateTime"),
+                DateTime = dateTime ?? throw r.Missing(in scope, "DateTime"),
                 WindAboveCraterElements = windAboveCraterElements.ToImmutable(r),
             };
         }
@@ -946,8 +960,8 @@ public static partial class Volcanology
             var windDegreeSeen = false;
             ElementBasis.WindSpeed? windSpeed = null;
             var windSpeedSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -957,13 +971,14 @@ public static partial class Volcanology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WindAboveCraterElements
             {
                 HeightProperty = heightProperty,
                 Description = description,
-                WindHeightAboveSeaLevel = windHeightAboveSeaLevel ?? throw r.Missing("WindHeightAboveSeaLevel"),
-                WindDegree = windDegree ?? throw r.Missing("WindDegree"),
-                WindSpeed = windSpeed ?? throw r.Missing("WindSpeed"),
+                WindHeightAboveSeaLevel = windHeightAboveSeaLevel ?? throw r.Missing(in scope, "WindHeightAboveSeaLevel"),
+                WindDegree = windDegree ?? throw r.Missing(in scope, "WindDegree"),
+                WindSpeed = windSpeed ?? throw r.Missing(in scope, "WindSpeed"),
             };
         }
     }

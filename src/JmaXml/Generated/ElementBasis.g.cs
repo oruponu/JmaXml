@@ -206,8 +206,8 @@ public static partial class ElementBasis
             ArrayBuilder<Coordinate> basePoint = default;
             Axes? axes = null;
             var axesSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -216,6 +216,7 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Circle
             {
                 Type = type,
@@ -242,8 +243,8 @@ public static partial class ElementBasis
             ArrayBuilder<Axis> axis = default;
             ArrayBuilder<Axis> longAxis = default;
             ArrayBuilder<Axis> shortAxis = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -253,6 +254,7 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Axes
             {
                 Axis = axis.ToImmutable(r),
@@ -288,8 +290,8 @@ public static partial class ElementBasis
             ArrayBuilder<Direction> direction = default;
             ArrayBuilder<Bearings> bearings = default;
             ArrayBuilder<Radius> radius = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -299,11 +301,12 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Axis
             {
                 Direction = direction.ToImmutable(r),
                 Bearings = bearings.ToImmutable(r),
-                Radius = radius.IsEmpty ? throw r.Missing("Radius") : radius.ToImmutable(r),
+                Radius = radius.IsEmpty ? throw r.Missing(in scope, "Radius") : radius.ToImmutable(r),
             };
         }
     }
@@ -2089,8 +2092,8 @@ public static partial class ElementBasis
         {
             ArrayBuilder<ReferableString> generalSituationText = default;
             ArrayBuilder<SignificantClimateElement> significantClimateElement = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2099,6 +2102,7 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClimateFeature
             {
                 GeneralSituationText = generalSituationText.ToImmutable(r),
@@ -2287,8 +2291,8 @@ public static partial class ElementBasis
             var thresholdOfSignificantlyBelowNormalSeen = false;
             Threshold? thresholdOfSignificantlyAboveNormal = null;
             var thresholdOfSignificantlyAboveNormalSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2305,10 +2309,11 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SignificantClimateElement
             {
                 Kind = kind,
-                Text = text.IsEmpty ? throw r.Missing("Text") : text.ToImmutable(r),
+                Text = text.IsEmpty ? throw r.Missing(in scope, "Text") : text.ToImmutable(r),
                 ProbabilityOfBelowNormal = probabilityOfBelowNormal,
                 ProbabilityOfNormal = probabilityOfNormal,
                 ProbabilityOfAboveNormal = probabilityOfAboveNormal,
@@ -2357,8 +2362,8 @@ public static partial class ElementBasis
             var thresholdOfSignificantlyAboveNormalSeen = false;
             Threshold? thresholdOfMaximum = null;
             var thresholdOfMaximumSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2371,6 +2376,7 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClassThresholdOfAverage
             {
                 ThresholdOfMinimum = thresholdOfMinimum,
@@ -2501,8 +2507,8 @@ public static partial class ElementBasis
             var probabilityOfNormalSeen = false;
             Probability? probabilityOfAboveNormal = null;
             var probabilityOfAboveNormalSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2512,13 +2518,14 @@ public static partial class ElementBasis
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClimateProbabilityValues
             {
                 Kind = kind,
                 RefId = refID,
-                ProbabilityOfBelowNormal = probabilityOfBelowNormal ?? throw r.Missing("ProbabilityOfBelowNormal"),
-                ProbabilityOfNormal = probabilityOfNormal ?? throw r.Missing("ProbabilityOfNormal"),
-                ProbabilityOfAboveNormal = probabilityOfAboveNormal ?? throw r.Missing("ProbabilityOfAboveNormal"),
+                ProbabilityOfBelowNormal = probabilityOfBelowNormal ?? throw r.Missing(in scope, "ProbabilityOfBelowNormal"),
+                ProbabilityOfNormal = probabilityOfNormal ?? throw r.Missing(in scope, "ProbabilityOfNormal"),
+                ProbabilityOfAboveNormal = probabilityOfAboveNormal ?? throw r.Missing(in scope, "ProbabilityOfAboveNormal"),
             };
         }
     }

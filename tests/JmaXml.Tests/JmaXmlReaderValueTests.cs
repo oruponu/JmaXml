@@ -4,12 +4,14 @@ namespace JmaXml.Tests;
 
 public class JmaXmlReaderValueTests
 {
-    private static JmaXmlReader AtFirstChild(XmlReader reader)
+    private static JmaXmlReader AtFirstChild(XmlReader reader) => AtFirstChild(reader, out _);
+
+    private static JmaXmlReader AtFirstChild(XmlReader reader, out JmaXmlReader.Scope scope)
     {
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
-        r.Enter();
-        Assert.True(r.NextChild());
+        scope = r.Enter();
+        Assert.True(r.NextChild(ref scope));
         return r;
     }
 
@@ -132,9 +134,9 @@ public class JmaXmlReaderValueTests
     public void ReadNullableDateTimeOffset_returns_null_for_nil(string nil)
     {
         using var reader = Xml.Reader($"<a xmlns=\"urn:x\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><d xsi:nil=\"{nil}\"/><e/></a>");
-        var r = AtFirstChild(reader);
+        var r = AtFirstChild(reader, out var scope);
         Assert.Null(r.ReadNullableDateTimeOffset());
-        Assert.True(r.NextChild());
+        Assert.True(r.NextChild(ref scope));
         Assert.Equal("e", r.LocalName);
     }
 
@@ -200,9 +202,9 @@ public class JmaXmlReaderValueTests
     public void Conversion_failure_in_a_repeated_sibling_reports_its_ordinal()
     {
         using var reader = Xml.Reader("<a xmlns=\"urn:x\"><v>1</v><v>x</v></a>");
-        var r = AtFirstChild(reader);
+        var r = AtFirstChild(reader, out var scope);
         Assert.Equal(1f, r.ReadFloat());
-        Assert.True(r.NextChild());
+        Assert.True(r.NextChild(ref scope));
         var ex = Assert.Throws<JmaXmlException>(() => r.ReadFloat());
         Assert.Equal("a/v[2]", ex.Path);
     }
@@ -211,10 +213,10 @@ public class JmaXmlReaderValueTests
     public void Attribute_conversion_failure_in_a_repeated_sibling_reports_its_ordinal()
     {
         using var reader = Xml.Reader("<a xmlns=\"urn:x\"><v t=\"1\"/><v t=\"x\"/></a>");
-        var r = AtFirstChild(reader);
+        var r = AtFirstChild(reader, out var scope);
         Assert.Equal(1f, r.AttributeFloat("t"));
         r.Skip();
-        Assert.True(r.NextChild());
+        Assert.True(r.NextChild(ref scope));
         var ex = Assert.Throws<JmaXmlException>(() => r.AttributeFloat("t"));
         Assert.Equal("a/v[2]/@t", ex.Path);
     }

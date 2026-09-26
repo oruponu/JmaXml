@@ -81,8 +81,8 @@ public static partial class Meteorology
             var officeInfoSeen = false;
             AdditionalInfo? additionalInfo = null;
             var additionalInfoSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -96,6 +96,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Body
             {
                 TargetArea = targetArea,
@@ -128,8 +129,8 @@ public static partial class Meteorology
         {
             var type = r.RequiredAttributeString("type");
             ArrayBuilder<Item> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -137,10 +138,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Warning
             {
                 Type = type,
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -209,8 +211,8 @@ public static partial class Meteorology
             var type = r.RequiredAttributeString("type");
             ArrayBuilder<MeteorologicalInfo> meteorologicalInfo = default;
             ArrayBuilder<TimeSeriesInfo> timeSeriesInfo = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -219,6 +221,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new MeteorologicalInfos
             {
                 Type = type,
@@ -265,8 +268,8 @@ public static partial class Meteorology
             string? name = null;
             var nameSeen = false;
             ArrayBuilder<Item> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -277,13 +280,14 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new MeteorologicalInfo
             {
                 Type = type,
-                DateTime = dateTime ?? throw r.Missing("DateTime"),
+                DateTime = dateTime ?? throw r.Missing(in scope, "DateTime"),
                 Duration = duration,
                 Name = name,
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -308,8 +312,8 @@ public static partial class Meteorology
             TimeDefines? timeDefines = null;
             var timeDefinesSeen = false;
             ArrayBuilder<Item> item = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -318,10 +322,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TimeSeriesInfo
             {
-                TimeDefines = timeDefines ?? throw r.Missing("TimeDefines"),
-                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
+                TimeDefines = timeDefines ?? throw r.Missing(in scope, "TimeDefines"),
+                Item = item.IsEmpty ? throw r.Missing(in scope, "Item") : item.ToImmutable(r),
             };
         }
     }
@@ -338,8 +343,8 @@ public static partial class Meteorology
         internal static TimeDefines Read(JmaXmlReader r)
         {
             ArrayBuilder<TimeDefine> timeDefine = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -347,9 +352,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TimeDefines
             {
-                TimeDefine = timeDefine.IsEmpty ? throw r.Missing("TimeDefine") : timeDefine.ToImmutable(r),
+                TimeDefine = timeDefine.IsEmpty ? throw r.Missing(in scope, "TimeDefine") : timeDefine.ToImmutable(r),
             };
         }
     }
@@ -387,8 +393,8 @@ public static partial class Meteorology
             var durationSeen = false;
             string? name = null;
             var nameSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -398,10 +404,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TimeDefine
             {
                 TimeId = timeId,
-                DateTime = dateTime ?? throw r.Missing("DateTime"),
+                DateTime = dateTime ?? throw r.Missing(in scope, "DateTime"),
                 Duration = duration,
                 Name = name,
             };
@@ -444,8 +451,8 @@ public static partial class Meteorology
             FloodForecastAddition? floodForecastAddition = null;
             var floodForecastAdditionSeen = false;
             ArrayBuilder<TidalWarningAddition> tidalWarningAddition = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -456,6 +463,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new AdditionalInfo
             {
                 ObservationAddition = observationAddition,
@@ -496,8 +504,8 @@ public static partial class Meteorology
             var noticeOfScheduleSeen = false;
             string? additionalNotice = null;
             var additionalNoticeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -508,6 +516,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClimateForecastAddition
             {
                 TargetDateTimeNotice = targetDateTimeNotice,
@@ -548,8 +557,8 @@ public static partial class Meteorology
             var textSeen = false;
             DateTimeOffset? dateTime = null;
             var dateTimeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -558,6 +567,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ForecastSchedule
             {
                 Target = target,
@@ -584,8 +594,8 @@ public static partial class Meteorology
             ArrayBuilder<Text> text = default;
             ImmutableArray<string>? code = null;
             var codeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -594,9 +604,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Comment
             {
-                Text = text.IsEmpty ? throw r.Missing("Text") : text.ToImmutable(r),
+                Text = text.IsEmpty ? throw r.Missing(in scope, "Text") : text.ToImmutable(r),
                 Code = code,
             };
         }
@@ -711,8 +722,8 @@ public static partial class Meteorology
             string? editingMark = null;
             var editingMarkSeen = false;
             ArrayBuilder<string> otherReport = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -728,9 +739,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Item
             {
-                Kind = kind.IsEmpty ? throw r.Missing("Kind") : kind.ToImmutable(r),
+                Kind = kind.IsEmpty ? throw r.Missing(in scope, "Kind") : kind.ToImmutable(r),
                 Areas = areas,
                 Stations = stations,
                 Area = area,
@@ -981,8 +993,8 @@ public static partial class Meteorology
             ElementBasis.DateTime? dateTime = null;
             var dateTimeSeen = false;
             ArrayBuilder<Property> property = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1001,6 +1013,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Kind
             {
                 Name = name,
@@ -1028,8 +1041,8 @@ public static partial class Meteorology
         internal static NextKinds Read(JmaXmlReader r)
         {
             ArrayBuilder<NextKind> nextKind = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1037,9 +1050,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new NextKinds
             {
-                NextKind = nextKind.IsEmpty ? throw r.Missing("NextKind") : nextKind.ToImmutable(r),
+                NextKind = nextKind.IsEmpty ? throw r.Missing(in scope, "NextKind") : nextKind.ToImmutable(r),
             };
         }
     }
@@ -1089,8 +1103,8 @@ public static partial class Meteorology
             var dateTimeSeen = false;
             string? sentence = null;
             var sentenceSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1102,10 +1116,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new NextKind
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Condition = condition,
                 DateTime = dateTime,
                 Sentence = sentence,
@@ -1132,8 +1147,8 @@ public static partial class Meteorology
         internal static Attention Read(JmaXmlReader r)
         {
             ArrayBuilder<string> note = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1141,9 +1156,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Attention
             {
-                Note = note.IsEmpty ? throw r.Missing("Note") : note.ToImmutable(r),
+                Note = note.IsEmpty ? throw r.Missing(in scope, "Note") : note.ToImmutable(r),
             };
         }
     }
@@ -1169,8 +1185,8 @@ public static partial class Meteorology
             var startTimeSeen = false;
             string? note = null;
             var noteSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1179,10 +1195,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WarningNotice
             {
-                StartTime = startTime ?? throw r.Missing("StartTime"),
-                Note = note ?? throw r.Missing("Note"),
+                StartTime = startTime ?? throw r.Missing(in scope, "StartTime"),
+                Note = note ?? throw r.Missing(in scope, "Note"),
             };
         }
     }
@@ -1244,8 +1261,8 @@ public static partial class Meteorology
             var dateSeen = false;
             string? term = null;
             var termSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1254,6 +1271,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ForecastTerm
             {
                 Date = date,
@@ -1294,8 +1312,8 @@ public static partial class Meteorology
         internal static Addition Read(JmaXmlReader r)
         {
             ArrayBuilder<string> note = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1303,9 +1321,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Addition
             {
-                Note = note.IsEmpty ? throw r.Missing("Note") : note.ToImmutable(r),
+                Note = note.IsEmpty ? throw r.Missing(in scope, "Note") : note.ToImmutable(r),
             };
         }
     }
@@ -1849,8 +1868,8 @@ public static partial class Meteorology
             ArrayBuilder<FiftyKtWindProbabilityPart> fiftyKtWindProbabilityPart = default;
             ArrayBuilder<EventPart> eventPart = default;
             ArrayBuilder<ElementBasis.ReferableString> text = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -1907,9 +1926,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Property
             {
-                Type = type ?? throw r.Missing("Type"),
+                Type = type ?? throw r.Missing(in scope, "Type"),
                 SignificancyPart = significancyPart.ToImmutable(r),
                 SubsequentSignificancyPart = subsequentSignificancyPart.ToImmutable(r),
                 WarningPeriod = warningPeriod,
@@ -2004,8 +2024,8 @@ public static partial class Meteorology
             ArrayBuilder<ElementBasis.Comparison> comparison = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2019,6 +2039,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClimateValuesPart
             {
                 Type = type,
@@ -2061,8 +2082,8 @@ public static partial class Meteorology
             ArrayBuilder<EventDate> lastYear = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2073,6 +2094,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new EventDatePart
             {
                 Date = date.ToImmutable(r),
@@ -2123,8 +2145,8 @@ public static partial class Meteorology
         internal static ClimateProbabilityValuesPart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.ClimateProbabilityValues> climateProbabilityValues = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2132,9 +2154,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClimateProbabilityValuesPart
             {
-                ClimateProbabilityValues = climateProbabilityValues.IsEmpty ? throw r.Missing("ClimateProbabilityValues") : climateProbabilityValues.ToImmutable(r),
+                ClimateProbabilityValues = climateProbabilityValues.IsEmpty ? throw r.Missing(in scope, "ClimateProbabilityValues") : climateProbabilityValues.ToImmutable(r),
             };
         }
     }
@@ -2148,8 +2171,8 @@ public static partial class Meteorology
         internal static SolarZenithAnglePart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.SolarZenithAngle> solarZenithAngle = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2157,9 +2180,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SolarZenithAnglePart
             {
-                SolarZenithAngle = solarZenithAngle.IsEmpty ? throw r.Missing("SolarZenithAngle") : solarZenithAngle.ToImmutable(r),
+                SolarZenithAngle = solarZenithAngle.IsEmpty ? throw r.Missing(in scope, "SolarZenithAngle") : solarZenithAngle.ToImmutable(r),
             };
         }
     }
@@ -2184,8 +2208,8 @@ public static partial class Meteorology
             ArrayBuilder<ElementBasis.UvIndex> uvIndex = default;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2194,9 +2218,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new UvIndexPart
             {
-                UvIndex = uvIndex.IsEmpty ? throw r.Missing("UvIndex") : uvIndex.ToImmutable(r),
+                UvIndex = uvIndex.IsEmpty ? throw r.Missing(in scope, "UvIndex") : uvIndex.ToImmutable(r),
                 Text = text,
             };
         }
@@ -2211,8 +2236,8 @@ public static partial class Meteorology
         internal static FiftyKtWindProbabilityPart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.WeatherForecastProbability> fiftyKtWindProbability = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2220,9 +2245,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new FiftyKtWindProbabilityPart
             {
-                FiftyKtWindProbability = fiftyKtWindProbability.IsEmpty ? throw r.Missing("FiftyKtWindProbability") : fiftyKtWindProbability.ToImmutable(r),
+                FiftyKtWindProbability = fiftyKtWindProbability.IsEmpty ? throw r.Missing(in scope, "FiftyKtWindProbability") : fiftyKtWindProbability.ToImmutable(r),
             };
         }
     }
@@ -2264,8 +2290,8 @@ public static partial class Meteorology
             var overTimeSeen = false;
             ForecastTerm? zoneTime = null;
             var zoneTimeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2276,6 +2302,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Period
             {
                 StartTime = startTime,
@@ -2305,8 +2332,8 @@ public static partial class Meteorology
         {
             var codeType = r.AttributeString("codeType");
             ArrayBuilder<Area> area = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2314,10 +2341,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Areas
             {
                 CodeType = codeType,
-                Area = area.IsEmpty ? throw r.Missing("Area") : area.ToImmutable(r),
+                Area = area.IsEmpty ? throw r.Missing(in scope, "Area") : area.ToImmutable(r),
             };
         }
     }
@@ -2341,8 +2369,8 @@ public static partial class Meteorology
         {
             var codeType = r.AttributeString("codeType");
             ArrayBuilder<Station> station = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2350,10 +2378,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Stations
             {
                 CodeType = codeType,
-                Station = station.IsEmpty ? throw r.Missing("Station") : station.ToImmutable(r),
+                Station = station.IsEmpty ? throw r.Missing(in scope, "Station") : station.ToImmutable(r),
             };
         }
     }
@@ -2549,8 +2578,8 @@ public static partial class Meteorology
             var locationSeen = false;
             string? status = null;
             var statusSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2582,10 +2611,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Area
             {
                 CodeType = codeType,
-                Name = name ?? throw r.Missing("Name"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
                 Code = code,
                 Prefecture = prefecture,
                 PrefectureCode = prefectureCode,
@@ -2681,8 +2711,8 @@ public static partial class Meteorology
             string? status = null;
             var statusSeen = false;
             ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2694,10 +2724,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Station
             {
-                Name = name ?? throw r.Missing("Name"),
-                Code = code.IsEmpty ? throw r.Missing("Code") : code.ToImmutable(r),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code.IsEmpty ? throw r.Missing(in scope, "Code") : code.ToImmutable(r),
                 Location = location,
                 Status = status,
                 Coordinate = coordinate.ToImmutable(r),
@@ -2752,8 +2783,8 @@ public static partial class Meteorology
         internal static OfficeInfo Read(JmaXmlReader r)
         {
             ArrayBuilder<Office> office = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2761,9 +2792,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new OfficeInfo
             {
-                Office = office.IsEmpty ? throw r.Missing("Office") : office.ToImmutable(r),
+                Office = office.IsEmpty ? throw r.Missing(in scope, "Office") : office.ToImmutable(r),
             };
         }
     }
@@ -2818,8 +2850,8 @@ public static partial class Meteorology
             var contactInfoSeen = false;
             string? uRI = null;
             var uRISeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2830,10 +2862,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Office
             {
                 Type = type,
-                Name = name ?? throw r.Missing("Name"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
                 Code = code,
                 ContactInfo = contactInfo,
                 Uri = uRI,
@@ -2870,8 +2903,8 @@ public static partial class Meteorology
             var deviationFromLastYearSeen = false;
             string? text = null;
             var textSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2881,6 +2914,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ObservationAddition
             {
                 DeviationFromNormal = deviationFromNormal,
@@ -2902,8 +2936,8 @@ public static partial class Meteorology
         internal static FloodForecastAddition Read(JmaXmlReader r)
         {
             ArrayBuilder<HydrometricStationPart> hydrometricStationPart = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2911,9 +2945,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new FloodForecastAddition
             {
-                HydrometricStationPart = hydrometricStationPart.IsEmpty ? throw r.Missing("HydrometricStationPart") : hydrometricStationPart.ToImmutable(r),
+                HydrometricStationPart = hydrometricStationPart.IsEmpty ? throw r.Missing(in scope, "HydrometricStationPart") : hydrometricStationPart.ToImmutable(r),
             };
         }
     }
@@ -2938,8 +2973,8 @@ public static partial class Meteorology
             TidalAreaPart? tidalAreaPart = null;
             var tidalAreaPartSeen = false;
             ArrayBuilder<HydrometricStationPart> hydrometricStationPart = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2948,10 +2983,11 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TidalWarningAddition
             {
-                TidalAreaPart = tidalAreaPart ?? throw r.Missing("TidalAreaPart"),
-                HydrometricStationPart = hydrometricStationPart.IsEmpty ? throw r.Missing("HydrometricStationPart") : hydrometricStationPart.ToImmutable(r),
+                TidalAreaPart = tidalAreaPart ?? throw r.Missing(in scope, "TidalAreaPart"),
+                HydrometricStationPart = hydrometricStationPart.IsEmpty ? throw r.Missing(in scope, "HydrometricStationPart") : hydrometricStationPart.ToImmutable(r),
             };
         }
     }
@@ -2973,8 +3009,8 @@ public static partial class Meteorology
             Area? area = null;
             var areaSeen = false;
             ArrayBuilder<string> chargeSection = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -2983,9 +3019,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TidalAreaPart
             {
-                Area = area ?? throw r.Missing("Area"),
+                Area = area ?? throw r.Missing(in scope, "Area"),
                 ChargeSection = chargeSection.ToImmutable(r),
             };
         }
@@ -3062,8 +3099,8 @@ public static partial class Meteorology
             var durationSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3079,6 +3116,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CriteriaPeriod
             {
                 Sentence = sentence,
@@ -3143,8 +3181,8 @@ public static partial class Meteorology
             var durationSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3157,6 +3195,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseCriteria
             {
                 Sentence = sentence,
@@ -3219,8 +3258,8 @@ public static partial class Meteorology
             var durationSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3233,12 +3272,13 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalCriteria
             {
-                AreaName = areaName ?? throw r.Missing("AreaName"),
+                AreaName = areaName ?? throw r.Missing(in scope, "AreaName"),
                 Sentence = sentence,
-                CriteriaClass = criteriaClass ?? throw r.Missing("CriteriaClass"),
-                Time = time ?? throw r.Missing("Time"),
+                CriteriaClass = criteriaClass ?? throw r.Missing(in scope, "CriteriaClass"),
+                Time = time ?? throw r.Missing(in scope, "Time"),
                 Duration = duration,
                 Remark = remark,
             };
@@ -3290,8 +3330,8 @@ public static partial class Meteorology
             var conditionSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3302,12 +3342,13 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CriteriaClass
             {
                 Type = type,
                 RefId = refID,
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Condition = condition,
                 Remark = remark,
             };
@@ -3388,8 +3429,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3407,6 +3448,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WindPart
             {
                 Sentence = sentence,
@@ -3506,8 +3548,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3526,6 +3568,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaWind
             {
                 AreaName = areaName,
@@ -3596,8 +3639,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3612,6 +3655,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseWind
             {
                 TimeModifier = timeModifier,
@@ -3679,8 +3723,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3695,6 +3739,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalWind
             {
                 AreaName = areaName,
@@ -3792,8 +3837,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3808,6 +3853,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WindDirectionPart
             {
                 Sentence = sentence,
@@ -3889,8 +3935,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3906,6 +3952,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaWindDirection
             {
                 AreaName = areaName,
@@ -3958,8 +4005,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -3971,6 +4018,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseWindDirection
             {
                 TimeModifier = timeModifier,
@@ -4020,8 +4068,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4033,6 +4081,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalWindDirection
             {
                 AreaName = areaName,
@@ -4110,8 +4159,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4127,6 +4176,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WindSpeedPart
             {
                 Sentence = sentence,
@@ -4209,8 +4259,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4226,6 +4276,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaWindSpeed
             {
                 AreaName = areaName,
@@ -4278,8 +4329,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4291,6 +4342,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseWindSpeed
             {
                 TimeModifier = timeModifier,
@@ -4340,8 +4392,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4353,6 +4405,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalWindSpeed
             {
                 AreaName = areaName,
@@ -4441,8 +4494,8 @@ public static partial class Meteorology
             ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
             ElementBasis.Circle? circle = null;
             var circleSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4451,11 +4504,12 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WarningAreaPart
             {
                 Type = type,
-                WindSpeed = windSpeed.IsEmpty ? throw r.Missing("WindSpeed") : windSpeed.ToImmutable(r),
-                Circle = circle ?? throw r.Missing("Circle"),
+                WindSpeed = windSpeed.IsEmpty ? throw r.Missing(in scope, "WindSpeed") : windSpeed.ToImmutable(r),
+                Circle = circle ?? throw r.Missing(in scope, "Circle"),
             };
         }
     }
@@ -4519,8 +4573,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4535,6 +4589,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WeatherPart
             {
                 Sentence = sentence,
@@ -4616,8 +4671,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4633,6 +4688,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaWeather
             {
                 AreaName = areaName,
@@ -4685,8 +4741,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4698,6 +4754,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseWeather
             {
                 TimeModifier = timeModifier,
@@ -4747,8 +4804,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4760,6 +4817,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalWeather
             {
                 AreaName = areaName,
@@ -4830,8 +4888,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4846,6 +4904,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new PressurePart
             {
                 Sentence = sentence,
@@ -4927,8 +4986,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -4944,6 +5003,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaPressure
             {
                 AreaName = areaName,
@@ -4996,8 +5056,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5009,6 +5069,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BasePressure
             {
                 TimeModifier = timeModifier,
@@ -5058,8 +5119,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5071,6 +5132,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalPressure
             {
                 AreaName = areaName,
@@ -5141,8 +5203,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5157,6 +5219,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TemperaturePart
             {
                 Sentence = sentence,
@@ -5238,8 +5301,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5255,6 +5318,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaTemperature
             {
                 AreaName = areaName,
@@ -5307,8 +5371,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5320,6 +5384,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseTemperature
             {
                 TimeModifier = timeModifier,
@@ -5369,8 +5434,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5382,6 +5447,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalTemperature
             {
                 AreaName = areaName,
@@ -5452,8 +5518,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5468,6 +5534,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new VisibilityPart
             {
                 Sentence = sentence,
@@ -5549,8 +5616,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5566,6 +5633,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaVisibility
             {
                 AreaName = areaName,
@@ -5618,8 +5686,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5631,6 +5699,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseVisibility
             {
                 TimeModifier = timeModifier,
@@ -5680,8 +5749,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5693,6 +5762,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalVisibility
             {
                 AreaName = areaName,
@@ -5726,8 +5796,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5737,9 +5807,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SynopsisPart
             {
-                Synopsis = synopsis.IsEmpty ? throw r.Missing("Synopsis") : synopsis.ToImmutable(r),
+                Synopsis = synopsis.IsEmpty ? throw r.Missing(in scope, "Synopsis") : synopsis.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5805,8 +5876,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5821,6 +5892,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WaveHeightPart
             {
                 Sentence = sentence,
@@ -5902,8 +5974,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5919,6 +5991,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaWaveHeight
             {
                 AreaName = areaName,
@@ -5971,8 +6044,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -5984,6 +6057,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseWaveHeight
             {
                 TimeModifier = timeModifier,
@@ -6033,8 +6107,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6046,6 +6120,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalWaveHeight
             {
                 AreaName = areaName,
@@ -6123,8 +6198,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6139,6 +6214,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new PrecipitationPart
             {
                 RefId = refID,
@@ -6221,8 +6297,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6238,6 +6314,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaPrecipitation
             {
                 AreaName = areaName,
@@ -6290,8 +6367,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6303,6 +6380,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BasePrecipitation
             {
                 TimeModifier = timeModifier,
@@ -6352,8 +6430,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6365,6 +6443,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalPrecipitation
             {
                 AreaName = areaName,
@@ -6421,8 +6500,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6434,6 +6513,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new PrecipitationBasedIndexPart
             {
                 RefId = refID,
@@ -6483,8 +6563,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6496,6 +6576,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BasePrecipitationBasedIndex
             {
                 TimeModifier = timeModifier,
@@ -6545,8 +6626,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6558,6 +6639,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalPrecipitationBasedIndex
             {
                 AreaName = areaName,
@@ -6635,8 +6717,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6651,6 +6733,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SnowfallDepthPart
             {
                 RefId = refID,
@@ -6733,8 +6816,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6750,6 +6833,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaSnowfallDepth
             {
                 AreaName = areaName,
@@ -6802,8 +6886,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6815,6 +6899,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseSnowfallDepth
             {
                 TimeModifier = timeModifier,
@@ -6864,8 +6949,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6877,6 +6962,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalSnowfallDepth
             {
                 AreaName = areaName,
@@ -6926,8 +7012,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6939,6 +7025,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SnowDepthPart
             {
                 Sentence = sentence,
@@ -6979,8 +7066,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -6991,6 +7078,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseSnowDepth
             {
                 SnowDepth = snowDepth.ToImmutable(r),
@@ -7039,8 +7127,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7052,6 +7140,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalSnowDepth
             {
                 AreaName = areaName,
@@ -7122,8 +7211,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7138,6 +7227,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new HumidityPart
             {
                 Sentence = sentence,
@@ -7219,8 +7309,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7236,6 +7326,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaHumidity
             {
                 AreaName = areaName,
@@ -7288,8 +7379,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7301,6 +7392,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseHumidity
             {
                 TimeModifier = timeModifier,
@@ -7350,8 +7442,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7363,6 +7455,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalHumidity
             {
                 AreaName = areaName,
@@ -7440,8 +7533,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7457,6 +7550,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TidalLevelPart
             {
                 Sentence = sentence,
@@ -7553,8 +7647,8 @@ public static partial class Meteorology
             ArrayBuilder<SequenceTidalLevel> sequence = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7572,6 +7666,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaTidalLevel
             {
                 AreaName = areaName,
@@ -7640,8 +7735,8 @@ public static partial class Meteorology
             ArrayBuilder<SequenceTidalLevel> sequence = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7655,6 +7750,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseTidalLevel
             {
                 TimeModifier = timeModifier,
@@ -7720,8 +7816,8 @@ public static partial class Meteorology
             ArrayBuilder<SequenceTidalLevel> sequence = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7735,6 +7831,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalTidalLevel
             {
                 AreaName = areaName,
@@ -7800,8 +7897,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7814,6 +7911,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SequenceTidalLevel
             {
                 RefId = refID,
@@ -7857,8 +7955,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7869,6 +7967,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SunshinePart
             {
                 Base = @base,
@@ -7901,8 +8000,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7912,6 +8011,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseSunshine
             {
                 Sunshine = sunshine.ToImmutable(r),
@@ -7961,8 +8061,8 @@ public static partial class Meteorology
             ArrayBuilder<SnowfallDepthPart> snowfallDepthForecastPart = default;
             ArrayBuilder<WindForecastPart> windForecastPart = default;
             ArrayBuilder<WaveHeightForecastPart> waveHeightForecastPart = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -7974,6 +8074,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new DetailForecast
             {
                 WeatherForecastPart = weatherForecastPart.ToImmutable(r),
@@ -8051,8 +8152,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8067,6 +8168,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WeatherForecastPart
             {
                 RefId = refID,
@@ -8152,8 +8254,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8169,6 +8271,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WindForecastPart
             {
                 RefId = refID,
@@ -8251,8 +8354,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8267,6 +8370,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WaveHeightForecastPart
             {
                 RefId = refID,
@@ -8291,8 +8395,8 @@ public static partial class Meteorology
         internal static WeatherCodePart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.WeatherCode> weatherCode = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8300,9 +8404,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WeatherCodePart
             {
-                WeatherCode = weatherCode.IsEmpty ? throw r.Missing("WeatherCode") : weatherCode.ToImmutable(r),
+                WeatherCode = weatherCode.IsEmpty ? throw r.Missing(in scope, "WeatherCode") : weatherCode.ToImmutable(r),
             };
         }
     }
@@ -8316,8 +8421,8 @@ public static partial class Meteorology
         internal static ProbabilityOfPrecipitationPart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.ProbabilityOfPrecipitation> probabilityOfPrecipitation = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8325,9 +8430,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ProbabilityOfPrecipitationPart
             {
-                ProbabilityOfPrecipitation = probabilityOfPrecipitation.IsEmpty ? throw r.Missing("ProbabilityOfPrecipitation") : probabilityOfPrecipitation.ToImmutable(r),
+                ProbabilityOfPrecipitation = probabilityOfPrecipitation.IsEmpty ? throw r.Missing(in scope, "ProbabilityOfPrecipitation") : probabilityOfPrecipitation.ToImmutable(r),
             };
         }
     }
@@ -8391,8 +8497,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8407,6 +8513,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SeaIcePart
             {
                 Sentence = sentence,
@@ -8488,8 +8595,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8505,6 +8612,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaSeaIce
             {
                 AreaName = areaName,
@@ -8557,8 +8665,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8570,6 +8678,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseSeaIce
             {
                 TimeModifier = timeModifier,
@@ -8619,8 +8728,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8632,6 +8741,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalSeaIce
             {
                 AreaName = areaName,
@@ -8702,8 +8812,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8718,6 +8828,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IcingPart
             {
                 Sentence = sentence,
@@ -8799,8 +8910,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8816,6 +8927,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SubAreaIcing
             {
                 AreaName = areaName,
@@ -8868,8 +8980,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8881,6 +8993,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseIcing
             {
                 TimeModifier = timeModifier,
@@ -8930,8 +9043,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8943,6 +9056,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalIcing
             {
                 AreaName = areaName,
@@ -8966,8 +9080,8 @@ public static partial class Meteorology
         internal static ReliabilityClassPart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.ReliabilityClass> reliabilityClass = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -8975,9 +9089,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ReliabilityClassPart
             {
-                ReliabilityClass = reliabilityClass.IsEmpty ? throw r.Missing("ReliabilityClass") : reliabilityClass.ToImmutable(r),
+                ReliabilityClass = reliabilityClass.IsEmpty ? throw r.Missing(in scope, "ReliabilityClass") : reliabilityClass.ToImmutable(r),
             };
         }
     }
@@ -8994,8 +9109,8 @@ public static partial class Meteorology
         internal static ReliabilityValuePart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.ReliabilityValue> reliabilityValue = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9003,9 +9118,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ReliabilityValuePart
             {
-                ReliabilityValue = reliabilityValue.IsEmpty ? throw r.Missing("ReliabilityValue") : reliabilityValue.ToImmutable(r),
+                ReliabilityValue = reliabilityValue.IsEmpty ? throw r.Missing(in scope, "ReliabilityValue") : reliabilityValue.ToImmutable(r),
             };
         }
     }
@@ -9019,8 +9135,8 @@ public static partial class Meteorology
         internal static PossibilityRankOfWarningPart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.PossibilityRankOfWarning> possibilityRankOfWarning = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9028,9 +9144,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new PossibilityRankOfWarningPart
             {
-                PossibilityRankOfWarning = possibilityRankOfWarning.IsEmpty ? throw r.Missing("PossibilityRankOfWarning") : possibilityRankOfWarning.ToImmutable(r),
+                PossibilityRankOfWarning = possibilityRankOfWarning.IsEmpty ? throw r.Missing(in scope, "PossibilityRankOfWarning") : possibilityRankOfWarning.ToImmutable(r),
             };
         }
     }
@@ -9077,8 +9194,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9090,6 +9207,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new ClassPart
             {
                 TyphoonClass = typhoonClass,
@@ -9140,8 +9258,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9153,6 +9271,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new TyphoonNamePart
             {
                 Name = name,
@@ -9233,8 +9352,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9250,6 +9369,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CenterPart
             {
                 Coordinate = coordinate.ToImmutable(r),
@@ -9295,8 +9415,8 @@ public static partial class Meteorology
             var timeSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9308,6 +9428,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new CoordinatePart
             {
                 Coordinate = coordinate.ToImmutable(r),
@@ -9348,8 +9469,8 @@ public static partial class Meteorology
             var lineSeen = false;
             ElementBasis.Coordinate? polygon = null;
             var polygonSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9359,9 +9480,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new IsobarPart
             {
-                Pressure = pressure ?? throw r.Missing("Pressure"),
+                Pressure = pressure ?? throw r.Missing(in scope, "Pressure"),
                 Line = line,
                 Polygon = polygon,
             };
@@ -9377,8 +9499,8 @@ public static partial class Meteorology
         internal static WaterLevelPart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.WaterLevel> waterLevel = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9386,6 +9508,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new WaterLevelPart
             {
                 WaterLevel = waterLevel.ToImmutable(r),
@@ -9418,8 +9541,8 @@ public static partial class Meteorology
             ArrayBuilder<FloodAssumptionPart> floodAssumptionPart = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9429,9 +9552,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new FloodAssumptionTable
             {
-                Area = area ?? throw r.Missing("Area"),
+                Area = area ?? throw r.Missing(in scope, "Area"),
                 FloodAssumptionPart = floodAssumptionPart.ToImmutable(r),
                 Remark = remark,
             };
@@ -9462,8 +9586,8 @@ public static partial class Meteorology
             ArrayBuilder<ElementBasis.FloodDepth> floodDepth = default;
             ElementBasis.DateTime? attainmentDeepestTime = null;
             var attainmentDeepestTimeSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9474,6 +9598,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new FloodAssumptionPart
             {
                 FloodAssumptionArea = floodAssumptionArea,
@@ -9493,8 +9618,8 @@ public static partial class Meteorology
         internal static DischargePart Read(JmaXmlReader r)
         {
             ArrayBuilder<ElementBasis.Discharge> discharge = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9502,6 +9627,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new DischargePart
             {
                 Discharge = discharge.ToImmutable(r),
@@ -9538,8 +9664,8 @@ public static partial class Meteorology
             ArrayBuilder<HydrometricStationCriteria> criteria = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9550,9 +9676,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new HydrometricStationPart
             {
-                Area = area ?? throw r.Missing("Area"),
+                Area = area ?? throw r.Missing(in scope, "Area"),
                 ChargeSection = chargeSection.ToImmutable(r),
                 Criteria = criteria.ToImmutable(r),
                 Remark = remark,
@@ -9573,8 +9700,8 @@ public static partial class Meteorology
         {
             ArrayBuilder<ElementBasis.WaterLevel> waterLevel = default;
             ArrayBuilder<ElementBasis.Discharge> discharge = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9583,6 +9710,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new HydrometricStationCriteria
             {
                 WaterLevel = waterLevel.ToImmutable(r),
@@ -9604,8 +9732,8 @@ public static partial class Meteorology
         {
             BaseSignificancy? @base = null;
             var @baseSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9613,9 +9741,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new SignificancyPart
             {
-                Base = @base ?? throw r.Missing("Base"),
+                Base = @base ?? throw r.Missing(in scope, "Base"),
             };
         }
     }
@@ -9665,8 +9794,8 @@ public static partial class Meteorology
             Addition? addition = null;
             var additionSeen = false;
             ArrayBuilder<LocalSignificancy> local = default;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9679,6 +9808,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseSignificancy
             {
                 Significancy = significancy.ToImmutable(r),
@@ -9737,8 +9867,8 @@ public static partial class Meteorology
             var attentionSeen = false;
             Addition? addition = null;
             var additionSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9751,9 +9881,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalSignificancy
             {
-                AreaName = areaName ?? throw r.Missing("AreaName"),
+                AreaName = areaName ?? throw r.Missing(in scope, "AreaName"),
                 Significancy = significancy.ToImmutable(r),
                 Sentence = sentence,
                 PeakTime = peakTime,
@@ -9842,8 +9973,8 @@ public static partial class Meteorology
             var conditionSeen = false;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9855,13 +9986,14 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Significancy
             {
                 Type = type,
                 RefId = refID,
                 Sentence = sentence,
-                Name = name ?? throw r.Missing("Name"),
-                Code = code ?? throw r.Missing("Code"),
+                Name = name ?? throw r.Missing(in scope, "Name"),
+                Code = code ?? throw r.Missing(in scope, "Code"),
                 Condition = condition,
                 Remark = remark,
             };
@@ -9935,8 +10067,8 @@ public static partial class Meteorology
             ArrayBuilder<Event> @event = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -9952,6 +10084,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new EventPart
             {
                 Sentence = sentence,
@@ -10017,8 +10150,8 @@ public static partial class Meteorology
             ArrayBuilder<Event> @event = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -10032,6 +10165,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new BaseEvent
             {
                 TimeModifier = timeModifier,
@@ -10088,8 +10222,8 @@ public static partial class Meteorology
             ArrayBuilder<Event> @event = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -10102,9 +10236,10 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new LocalEvent
             {
-                AreaName = areaName ?? throw r.Missing("AreaName"),
+                AreaName = areaName ?? throw r.Missing(in scope, "AreaName"),
                 Sentence = sentence,
                 Coordinate = coordinate,
                 Location = location,
@@ -10182,8 +10317,8 @@ public static partial class Meteorology
             ArrayBuilder<EventDuration> duration = default;
             string? remark = null;
             var remarkSeen = false;
-            using var scope = r.Enter();
-            while (r.NextChild())
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
             {
                 switch (r.LocalName)
                 {
@@ -10196,6 +10331,7 @@ public static partial class Meteorology
                     default: r.Skip(); break;
                 }
             }
+            r.Exit(in scope);
             return new Event
             {
                 Type = type,

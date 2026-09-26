@@ -210,8 +210,8 @@ public static class CSharpEmitter
                     w.Line($"var {local}Seen = false;");
                 }
             }
-            w.Line("using var scope = r.Enter();");
-            w.Line("while (r.NextChild())");
+            w.Line("var scope = r.Enter();");
+            w.Line("while (r.NextChild(ref scope))");
             w.Line("{");
             w.Indent();
             w.Line("switch (r.LocalName)");
@@ -233,6 +233,7 @@ public static class CSharpEmitter
             w.Line("}");
             w.Outdent();
             w.Line("}");
+            w.Line("r.Exit(in scope);");
             foreach (var element in type.Elements)
             {
                 var local = Naming.LocalName(element.Name);
@@ -242,7 +243,7 @@ public static class CSharpEmitter
                 {
                     inits.Add(element.MinOccurs == 0
                         ? $"{property} = {local}.ToImmutable(r),"
-                        : $"{property} = {local}.IsEmpty ? throw r.Missing(\"{element.Name}\") : {local}.ToImmutable(r),");
+                        : $"{property} = {local}.IsEmpty ? throw r.Missing(in scope, \"{element.Name}\") : {local}.ToImmutable(r),");
                 }
                 else if (element.MinOccurs == 0)
                 {
@@ -250,11 +251,11 @@ public static class CSharpEmitter
                 }
                 else if (IsNullableType(itemType))
                 {
-                    inits.Add($"{property} = {local}Seen ? {local} : throw r.Missing(\"{element.Name}\"),");
+                    inits.Add($"{property} = {local}Seen ? {local} : throw r.Missing(in scope, \"{element.Name}\"),");
                 }
                 else
                 {
-                    inits.Add($"{property} = {local} ?? throw r.Missing(\"{element.Name}\"),");
+                    inits.Add($"{property} = {local} ?? throw r.Missing(in scope, \"{element.Name}\"),");
                 }
             }
         }

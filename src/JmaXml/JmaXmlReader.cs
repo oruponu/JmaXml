@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace JmaXml;
@@ -10,7 +9,6 @@ internal sealed partial class JmaXmlReader
 
     private readonly XmlReader _reader;
     private readonly IXmlLineInfo? _lineInfo;
-    private readonly List<ScopeState> _scopes = [];
     private Segment[] _path = new Segment[16];
     private int _pathCount;
     private Sibling[] _siblings = new Sibling[32];
@@ -55,13 +53,13 @@ internal sealed partial class JmaXmlReader
     public Scope Enter()
     {
         var (line, position) = Position();
-        _scopes.Add(new ScopeState(_reader.Depth, _reader.IsEmptyElement, line, position, _siblingCount));
-        return new Scope(this);
+        return new Scope(_reader.Depth, _reader.IsEmptyElement, line, position, _siblingCount);
     }
 
-    public bool NextChild()
+    public void Exit(in Scope scope) => _siblingCount = scope.SiblingStart;
+
+    public bool NextChild(ref Scope scope)
     {
-        ref var scope = ref CollectionsMarshal.AsSpan(_scopes)[^1];
         if (!scope.Entered)
         {
             scope.Entered = true;
@@ -111,11 +109,8 @@ internal sealed partial class JmaXmlReader
         seen = true;
     }
 
-    public JmaXmlException Missing(string name)
-    {
-        var (line, position) = _scopes.Count > 0 ? (_scopes[^1].Line, _scopes[^1].Position) : Position();
-        return new JmaXmlException($"Required element '{name}' is missing", ScopePath() + "/" + name, line, position);
-    }
+    public JmaXmlException Missing(in Scope scope, string name) =>
+        new($"Required element '{name}' is missing", ScopePath(scope.Depth) + "/" + name, scope.Line, scope.Position);
 
     public JmaXmlException MissingAttribute(string name) => Error($"Required attribute '{name}' is missing", Path + "/@" + name);
 
@@ -132,13 +127,12 @@ internal sealed partial class JmaXmlReader
     private (int Line, int Position) Position() =>
         _lineInfo is { } info && info.HasLineInfo() ? (info.LineNumber, info.LinePosition) : (0, 0);
 
-    private string ScopePath()
+    private string ScopePath(int depth)
     {
-        var depth = _scopes.Count > 0 ? _scopes[^1].Depth : int.MaxValue;
         return string.Join("/", _path.Take(_pathCount).Where(s => s.Depth <= depth).Select(s => s.Ordinal >= 2 ? $"{s.Name}[{s.Ordinal}]" : s.Name));
     }
 
-    private void PushSegment(ref ScopeState scope)
+    private void PushSegment(ref Scope scope)
     {
         var depth = _reader.Depth;
         var name = _reader.LocalName;
@@ -155,7 +149,7 @@ internal sealed partial class JmaXmlReader
         _pathCount = count + 1;
     }
 
-    private int CountInList(ref ScopeState scope, string name)
+    private int CountInList(ref Scope scope, string name)
     {
         var siblings = _siblings;
         var end = _siblingCount;
@@ -195,7 +189,7 @@ internal sealed partial class JmaXmlReader
 
     private readonly record struct Segment(string Name, int Ordinal, int Depth);
 
-    private struct ScopeState(int depth, bool empty, int line, int position, int siblingStart)
+    public struct Scope(int depth, bool empty, int line, int position, int siblingStart)
     {
         public int Depth { get; } = depth;
         public bool Empty { get; } = empty;
@@ -204,15 +198,5 @@ internal sealed partial class JmaXmlReader
         public bool Entered { get; set; }
         public int SiblingStart { get; } = siblingStart;
         public Dictionary<string, int>? Siblings { get; set; }
-    }
-
-    public readonly struct Scope(JmaXmlReader owner) : IDisposable
-    {
-        public void Dispose()
-        {
-            var scope = owner._scopes[^1];
-            owner._scopes.RemoveAt(owner._scopes.Count - 1);
-            owner._siblingCount = scope.SiblingStart;
-        }
     }
 }

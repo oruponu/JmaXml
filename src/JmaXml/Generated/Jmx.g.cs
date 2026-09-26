@@ -77,8 +77,8 @@ public sealed record Control
         var editorialOfficeSeen = false;
         ImmutableArray<string>? publishingOffice = null;
         var publishingOfficeSeen = false;
-        using var scope = r.Enter();
-        while (r.NextChild())
+        var scope = r.Enter();
+        while (r.NextChild(ref scope))
         {
             switch (r.LocalName)
             {
@@ -90,13 +90,14 @@ public sealed record Control
                 default: r.Skip(); break;
             }
         }
+        r.Exit(in scope);
         return new Control
         {
-            Title = title ?? throw r.Missing("Title"),
-            DateTime = dateTime ?? throw r.Missing("DateTime"),
-            Status = status ?? throw r.Missing("Status"),
-            EditorialOffice = editorialOffice ?? throw r.Missing("EditorialOffice"),
-            PublishingOffice = publishingOffice ?? throw r.Missing("PublishingOffice"),
+            Title = title ?? throw r.Missing(in scope, "Title"),
+            DateTime = dateTime ?? throw r.Missing(in scope, "DateTime"),
+            Status = status ?? throw r.Missing(in scope, "Status"),
+            EditorialOffice = editorialOffice ?? throw r.Missing(in scope, "EditorialOffice"),
+            PublishingOffice = publishingOffice ?? throw r.Missing(in scope, "PublishingOffice"),
         };
     }
 }
