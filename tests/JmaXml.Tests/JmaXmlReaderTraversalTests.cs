@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using System.Xml;
 
 namespace JmaXml.Tests;
 
@@ -103,6 +104,23 @@ public class JmaXmlReaderTraversalTests
         stopwatch.Stop();
         Assert.Equal(80_000, count);
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2), $"took {stopwatch.Elapsed.TotalMilliseconds:N0} ms");
+    }
+
+    [Fact]
+    public void Constructor_registers_the_known_namespaces_in_the_name_table()
+    {
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"/>");
+        _ = new JmaXmlReader(reader);
+        Assert.Same(XmlNamespaces.Meteorology, reader.NameTable.Get(XmlNamespaces.Meteorology));
+    }
+
+    [Fact]
+    public void Reader_without_a_name_table_is_accepted()
+    {
+        using var reader = new NoNameTableReader("<a xmlns=\"urn:x\"/>");
+        var r = new JmaXmlReader(reader);
+        r.MoveToElement("a", "urn:x");
+        Assert.Equal("a", r.Path);
     }
 
     [Fact]
@@ -218,5 +236,10 @@ public class JmaXmlReaderTraversalTests
             Assert.True(r.NextChild());
             Assert.Equal("q", r.LocalName);
         }
+    }
+
+    private sealed class NoNameTableReader(string xml) : XmlTextReader(new StringReader(xml))
+    {
+        public override XmlNameTable NameTable => null!;
     }
 }

@@ -3,17 +3,30 @@ using System.Xml;
 
 namespace JmaXml;
 
-internal sealed partial class JmaXmlReader(XmlReader reader)
+internal sealed partial class JmaXmlReader
 {
     private const int LinearSiblingLimit = 16;
     private const int MinBufferLength = 8;
 
-    private readonly XmlReader _reader = reader;
-    private readonly IXmlLineInfo? _lineInfo = reader as IXmlLineInfo;
+    private readonly XmlReader _reader;
+    private readonly IXmlLineInfo? _lineInfo;
     private readonly List<Segment> _path = [];
     private readonly List<ScopeState> _scopes = [];
     private readonly List<(string Name, int Count)> _siblings = [];
     private readonly List<object?[]> _buffers = [];
+
+    public JmaXmlReader(XmlReader reader)
+    {
+        _reader = reader;
+        _lineInfo = reader as IXmlLineInfo;
+        if (reader.NameTable is not { } names) return;
+        names.Add(XmlNamespaces.Jmx);
+        names.Add(XmlNamespaces.InformationBasis);
+        names.Add(XmlNamespaces.ElementBasis);
+        names.Add(XmlNamespaces.Meteorology);
+        names.Add(XmlNamespaces.Seismology);
+        names.Add(XmlNamespaces.Volcanology);
+    }
 
     public string LocalName => _reader.LocalName;
 
