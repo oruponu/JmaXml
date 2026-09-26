@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Text;
+
 namespace JmaXml.Tests;
 
 public class JmaXmlReaderTraversalTests
@@ -29,7 +32,7 @@ public class JmaXmlReaderTraversalTests
     [Fact]
     public void Path_numbers_siblings_within_each_parent()
     {
-        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><p><q/><r/><q/></p><r/><p/><p><q/></p></a>");
+        using var reader = Xml.Reader("<a xmlns=\"urn:x\"><q/><p><q/><r/><q/></p><r/><p/><p><q/></p></a>");
         var r = new JmaXmlReader(reader);
         r.MoveToElement("a", "urn:x");
         var paths = new List<string>();
@@ -48,7 +51,58 @@ public class JmaXmlReaderTraversalTests
                 }
             }
         }
-        Assert.Equal(["a/p", "a/p/q", "a/p/r", "a/p/q[2]", "a/r", "a/p[2]", "a/p[3]", "a/p[3]/q"], paths);
+        Assert.Equal(["a/q", "a/p", "a/p/q", "a/p/r", "a/p/q[2]", "a/r", "a/p[2]", "a/p[3]", "a/p[3]/q"], paths);
+    }
+
+    [Fact]
+    public void Path_numbers_siblings_beyond_the_linear_limit()
+    {
+        var names = Enumerable.Range(0, 20).Select(i => $"n{i}").ToList();
+        var xml = "<a xmlns=\"urn:x\">" + string.Concat(names.Select(n => $"<{n}/>")) + "<n0/><n19/><n3><q/><q/></n3></a>";
+        using var reader = Xml.Reader(xml);
+        var r = new JmaXmlReader(reader);
+        r.MoveToElement("a", "urn:x");
+        var paths = new List<string>();
+        using (r.Enter())
+        {
+            while (r.NextChild())
+            {
+                paths.Add(r.Path);
+                using (r.Enter())
+                {
+                    while (r.NextChild())
+                    {
+                        paths.Add(r.Path);
+                        r.Skip();
+                    }
+                }
+            }
+        }
+        Assert.Equal([.. names.Select(n => $"a/{n}"), "a/n0[2]", "a/n19[2]", "a/n3[2]", "a/n3[2]/q", "a/n3[2]/q[2]"], paths);
+    }
+
+    [Fact]
+    public void Many_distinct_sibling_names_are_numbered_in_linear_time()
+    {
+        var xml = new StringBuilder("<a xmlns=\"urn:x\">");
+        for (var i = 0; i < 80_000; i++) xml.Append($"<e{i}/>");
+        xml.Append("</a>");
+        using var reader = Xml.Reader(xml.ToString());
+        var r = new JmaXmlReader(reader);
+        r.MoveToElement("a", "urn:x");
+        var count = 0;
+        var stopwatch = Stopwatch.StartNew();
+        using (r.Enter())
+        {
+            while (r.NextChild())
+            {
+                count++;
+                r.Skip();
+            }
+        }
+        stopwatch.Stop();
+        Assert.Equal(80_000, count);
+        Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2), $"took {stopwatch.Elapsed.TotalMilliseconds:N0} ms");
     }
 
     [Fact]
