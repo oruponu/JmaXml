@@ -69,7 +69,7 @@ public static partial class Volcanology
         {
             string? notice = null;
             var noticeSeen = false;
-            List<VolcanoInfo>? volcanoInfo = null;
+            ArrayBuilder<VolcanoInfo> volcanoInfo = default;
             AshInfos? ashInfos = null;
             var ashInfosSeen = false;
             VolcanoInfoContent? volcanoInfoContent = null;
@@ -84,7 +84,7 @@ public static partial class Volcanology
                 switch (r.LocalName)
                 {
                     case "Notice" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref noticeSeen, "Notice"); notice = r.ReadString(); break;
-                    case "VolcanoInfo" when r.InNamespace(XmlNamespaces.Volcanology): (volcanoInfo ??= []).Add(global::JmaXml.Volcanology.VolcanoInfo.Read(r)); break;
+                    case "VolcanoInfo" when r.InNamespace(XmlNamespaces.Volcanology): volcanoInfo.Add(r, global::JmaXml.Volcanology.VolcanoInfo.Read(r)); break;
                     case "AshInfos" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref ashInfosSeen, "AshInfos"); ashInfos = global::JmaXml.Volcanology.AshInfos.Read(r); break;
                     case "VolcanoInfoContent" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref volcanoInfoContentSeen, "VolcanoInfoContent"); volcanoInfoContent = global::JmaXml.Volcanology.VolcanoInfoContent.Read(r); break;
                     case "VolcanoObservation" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref volcanoObservationSeen, "VolcanoObservation"); volcanoObservation = global::JmaXml.Volcanology.VolcanoObservation.Read(r); break;
@@ -95,7 +95,7 @@ public static partial class Volcanology
             return new Body
             {
                 Notice = notice,
-                VolcanoInfo = volcanoInfo is null ? [] : [.. volcanoInfo],
+                VolcanoInfo = volcanoInfo.ToImmutable(r),
                 AshInfos = ashInfos,
                 VolcanoInfoContent = volcanoInfoContent,
                 VolcanoObservation = volcanoObservation,
@@ -135,20 +135,20 @@ public static partial class Volcanology
         internal static VolcanoInfo Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<Item>? item = null;
+            ArrayBuilder<Item> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Item" when r.InNamespace(XmlNamespaces.Volcanology): (item ??= []).Add(global::JmaXml.Volcanology.Item.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Volcanology): item.Add(r, global::JmaXml.Volcanology.Item.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new VolcanoInfo
             {
                 Type = type,
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -335,20 +335,20 @@ public static partial class Volcanology
         internal static Areas Read(JmaXmlReader r)
         {
             var codeType = r.RequiredAttributeString("codeType");
-            List<Area>? area = null;
+            ArrayBuilder<Area> area = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Area" when r.InNamespace(XmlNamespaces.Volcanology): (area ??= []).Add(global::JmaXml.Volcanology.Area.Read(r)); break;
+                    case "Area" when r.InNamespace(XmlNamespaces.Volcanology): area.Add(r, global::JmaXml.Volcanology.Area.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Areas
             {
                 CodeType = codeType,
-                Area = area is null ? throw r.Missing("Area") : [.. area],
+                Area = area.IsEmpty ? throw r.Missing("Area") : area.ToImmutable(r),
             };
         }
     }
@@ -457,20 +457,20 @@ public static partial class Volcanology
         internal static AshInfos Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<AshInfo>? ashInfo = null;
+            ArrayBuilder<AshInfo> ashInfo = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "AshInfo" when r.InNamespace(XmlNamespaces.Volcanology): (ashInfo ??= []).Add(global::JmaXml.Volcanology.AshInfo.Read(r)); break;
+                    case "AshInfo" when r.InNamespace(XmlNamespaces.Volcanology): ashInfo.Add(r, global::JmaXml.Volcanology.AshInfo.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new AshInfos
             {
                 Type = type,
-                AshInfo = ashInfo is null ? throw r.Missing("AshInfo") : [.. ashInfo],
+                AshInfo = ashInfo.IsEmpty ? throw r.Missing("AshInfo") : ashInfo.ToImmutable(r),
             };
         }
     }
@@ -514,7 +514,7 @@ public static partial class Volcanology
             var startTimeSeen = false;
             DateTimeOffset? endTime = null;
             var endTimeSeen = false;
-            List<Item>? item = null;
+            ArrayBuilder<Item> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -522,7 +522,7 @@ public static partial class Volcanology
                 {
                     case "StartTime" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref startTimeSeen, "StartTime"); startTime = r.ReadDateTimeOffset(); break;
                     case "EndTime" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref endTimeSeen, "EndTime"); endTime = r.ReadDateTimeOffset(); break;
-                    case "Item" when r.InNamespace(XmlNamespaces.Volcanology): (item ??= []).Add(global::JmaXml.Volcanology.Item.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Volcanology): item.Add(r, global::JmaXml.Volcanology.Item.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -531,7 +531,7 @@ public static partial class Volcanology
                 Type = type,
                 StartTime = startTime ?? throw r.Missing("StartTime"),
                 EndTime = endTime ?? throw r.Missing("EndTime"),
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -567,7 +567,7 @@ public static partial class Volcanology
         {
             Size? size = null;
             var sizeSeen = false;
-            List<ElementBasis.Coordinate>? polygon = null;
+            ArrayBuilder<ElementBasis.Coordinate> polygon = default;
             ElementBasis.PlumeDirection? plumeDirection = null;
             var plumeDirectionSeen = false;
             Distance? distance = null;
@@ -580,7 +580,7 @@ public static partial class Volcanology
                 switch (r.LocalName)
                 {
                     case "Size" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref sizeSeen, "Size"); size = global::JmaXml.Volcanology.Size.Read(r); break;
-                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): (polygon ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): polygon.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     case "PlumeDirection" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref plumeDirectionSeen, "PlumeDirection"); plumeDirection = global::JmaXml.ElementBasis.PlumeDirection.Read(r); break;
                     case "Distance" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref distanceSeen, "Distance"); distance = global::JmaXml.Volcanology.Distance.Read(r); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
@@ -590,7 +590,7 @@ public static partial class Volcanology
             return new Property
             {
                 Size = size,
-                Polygon = polygon is null ? throw r.Missing("Polygon") : [.. polygon],
+                Polygon = polygon.IsEmpty ? throw r.Missing("Polygon") : polygon.ToImmutable(r),
                 PlumeDirection = plumeDirection ?? throw r.Missing("PlumeDirection"),
                 Distance = distance ?? throw r.Missing("Distance"),
                 Remark = remark,
@@ -896,21 +896,21 @@ public static partial class Volcanology
         {
             ElementBasis.DateTime? dateTime = null;
             var dateTimeSeen = false;
-            List<WindAboveCraterElements>? windAboveCraterElements = null;
+            ArrayBuilder<WindAboveCraterElements> windAboveCraterElements = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "DateTime" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref dateTimeSeen, "DateTime"); dateTime = global::JmaXml.ElementBasis.DateTime.Read(r); break;
-                    case "WindAboveCraterElements" when r.InNamespace(XmlNamespaces.Volcanology): (windAboveCraterElements ??= []).Add(global::JmaXml.Volcanology.WindAboveCraterElements.Read(r)); break;
+                    case "WindAboveCraterElements" when r.InNamespace(XmlNamespaces.Volcanology): windAboveCraterElements.Add(r, global::JmaXml.Volcanology.WindAboveCraterElements.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new WindAboveCrater
             {
                 DateTime = dateTime ?? throw r.Missing("DateTime"),
-                WindAboveCraterElements = windAboveCraterElements is null ? [] : [.. windAboveCraterElements],
+                WindAboveCraterElements = windAboveCraterElements.ToImmutable(r),
             };
         }
     }

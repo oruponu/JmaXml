@@ -54,11 +54,11 @@ public class CSharpEmitterTests
         Assert.Contains("case \"Note\" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref noteSeen, \"Note\"); note = r.ReadString(); break;", seis, StringComparison.Ordinal);
         Assert.Contains("Note = note,", seis, StringComparison.Ordinal);
         Assert.Contains("public ImmutableArray<string> Tags { get; init; } = [];", seis, StringComparison.Ordinal);
-        Assert.Contains("case \"Tags\" when r.InNamespace(XmlNamespaces.Seismology): (tags ??= []).Add(r.ReadString()); break;", seis, StringComparison.Ordinal);
-        Assert.Contains("Tags = tags is null ? [] : [.. tags],", seis, StringComparison.Ordinal);
+        Assert.Contains("case \"Tags\" when r.InNamespace(XmlNamespaces.Seismology): tags.Add(r, r.ReadString()); break;", seis, StringComparison.Ordinal);
+        Assert.Contains("Tags = tags.ToImmutable(r),", seis, StringComparison.Ordinal);
         Assert.Contains("public required ImmutableArray<string> Entries { get; init; }", seis, StringComparison.Ordinal);
-        Assert.Contains("case \"Entries\" when r.InNamespace(XmlNamespaces.Seismology): (entries ??= []).Add(r.ReadString()); break;", seis, StringComparison.Ordinal);
-        Assert.Contains("Entries = entries is null ? throw r.Missing(\"Entries\") : [.. entries],", seis, StringComparison.Ordinal);
+        Assert.Contains("case \"Entries\" when r.InNamespace(XmlNamespaces.Seismology): entries.Add(r, r.ReadString()); break;", seis, StringComparison.Ordinal);
+        Assert.Contains("Entries = entries.IsEmpty ? throw r.Missing(\"Entries\") : entries.ToImmutable(r),", seis, StringComparison.Ordinal);
         Assert.Contains("default: r.Skip(); break;", seis, StringComparison.Ordinal);
     }
 
@@ -71,8 +71,8 @@ public class CSharpEmitterTests
         var files = CSharpEmitter.Emit(SchemaOf("jmx_seis", wrap, sample), EmptyDictionary);
         var seis = files["Seismology.g.cs"];
         Assert.Contains("public ImmutableArray<Sample> Sample { get; init; } = [];", seis, StringComparison.Ordinal);
-        Assert.Contains("case \"Sample\" when r.InNamespace(XmlNamespaces.Seismology): (sample ??= []).Add(global::JmaXml.Seismology.Sample.Read(r)); break;", seis, StringComparison.Ordinal);
-        Assert.Contains("Sample = sample is null ? [] : [.. sample],", seis, StringComparison.Ordinal);
+        Assert.Contains("case \"Sample\" when r.InNamespace(XmlNamespaces.Seismology): sample.Add(r, global::JmaXml.Seismology.Sample.Read(r)); break;", seis, StringComparison.Ordinal);
+        Assert.Contains("Sample = sample.ToImmutable(r),", seis, StringComparison.Ordinal);
     }
 
     [Fact]

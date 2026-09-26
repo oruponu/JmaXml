@@ -104,7 +104,7 @@ public static partial class Seismology
             var namingSeen = false;
             Tsunami? tsunami = null;
             var tsunamiSeen = false;
-            List<Earthquake>? earthquake = null;
+            ArrayBuilder<Earthquake> earthquake = default;
             Intensity? intensity = null;
             var intensitySeen = false;
             Tokai? tokai = null;
@@ -128,7 +128,7 @@ public static partial class Seismology
                 {
                     case "Naming" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref namingSeen, "Naming"); naming = global::JmaXml.Seismology.Naming.Read(r); break;
                     case "Tsunami" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref tsunamiSeen, "Tsunami"); tsunami = global::JmaXml.Seismology.Tsunami.Read(r); break;
-                    case "Earthquake" when r.InNamespace(XmlNamespaces.Seismology): (earthquake ??= []).Add(global::JmaXml.Seismology.Earthquake.Read(r)); break;
+                    case "Earthquake" when r.InNamespace(XmlNamespaces.Seismology): earthquake.Add(r, global::JmaXml.Seismology.Earthquake.Read(r)); break;
                     case "Intensity" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref intensitySeen, "Intensity"); intensity = global::JmaXml.Seismology.Intensity.Read(r); break;
                     case "Tokai" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref tokaiSeen, "Tokai"); tokai = global::JmaXml.Seismology.Tokai.Read(r); break;
                     case "EarthquakeInfo" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref earthquakeInfoSeen, "EarthquakeInfo"); earthquakeInfo = global::JmaXml.Seismology.EarthquakeInfo.Read(r); break;
@@ -144,7 +144,7 @@ public static partial class Seismology
             {
                 Naming = naming,
                 Tsunami = tsunami,
-                Earthquake = earthquake is null ? [] : [.. earthquake],
+                Earthquake = earthquake.ToImmutable(r),
                 Intensity = intensity,
                 Tokai = tokai,
                 EarthquakeInfo = earthquakeInfo,
@@ -191,7 +191,7 @@ public static partial class Seismology
             var conditionSeen = false;
             Hypocenter? hypocenter = null;
             var hypocenterSeen = false;
-            List<ElementBasis.Magnitude>? magnitude = null;
+            ArrayBuilder<ElementBasis.Magnitude> magnitude = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -201,7 +201,7 @@ public static partial class Seismology
                     case "ArrivalTime" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref arrivalTimeSeen, "ArrivalTime"); arrivalTime = r.ReadDateTimeOffset(); break;
                     case "Condition" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref conditionSeen, "Condition"); condition = r.ReadString(); break;
                     case "Hypocenter" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref hypocenterSeen, "Hypocenter"); hypocenter = global::JmaXml.Seismology.Hypocenter.Read(r); break;
-                    case "Magnitude" when r.InNamespace(XmlNamespaces.ElementBasis): (magnitude ??= []).Add(global::JmaXml.ElementBasis.Magnitude.Read(r)); break;
+                    case "Magnitude" when r.InNamespace(XmlNamespaces.ElementBasis): magnitude.Add(r, global::JmaXml.ElementBasis.Magnitude.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -211,7 +211,7 @@ public static partial class Seismology
                 ArrivalTime = arrivalTime ?? throw r.Missing("ArrivalTime"),
                 Condition = condition,
                 Hypocenter = hypocenter,
-                Magnitude = magnitude is null ? throw r.Missing("Magnitude") : [.. magnitude],
+                Magnitude = magnitude.IsEmpty ? throw r.Missing("Magnitude") : magnitude.ToImmutable(r),
             };
         }
     }
@@ -347,7 +347,7 @@ public static partial class Seismology
             var nameSeen = false;
             HypoAreaCode? code = null;
             var codeSeen = false;
-            List<ElementBasis.Coordinate>? coordinate = null;
+            ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
             string? reduceName = null;
             var reduceNameSeen = false;
             HypoAreaReduceCode? reduceCode = null;
@@ -373,7 +373,7 @@ public static partial class Seismology
                 {
                     case "Name" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref nameSeen, "Name"); name = r.ReadString(); break;
                     case "Code" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref codeSeen, "Code"); code = global::JmaXml.Seismology.HypoAreaCode.Read(r); break;
-                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): (coordinate ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): coordinate.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     case "ReduceName" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref reduceNameSeen, "ReduceName"); reduceName = r.ReadString(); break;
                     case "ReduceCode" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref reduceCodeSeen, "ReduceCode"); reduceCode = global::JmaXml.Seismology.HypoAreaReduceCode.Read(r); break;
                     case "DetailedName" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref detailedNameSeen, "DetailedName"); detailedName = r.ReadString(); break;
@@ -390,7 +390,7 @@ public static partial class Seismology
             {
                 Name = name ?? throw r.Missing("Name"),
                 Code = code ?? throw r.Missing("Code"),
-                Coordinate = coordinate is null ? throw r.Missing("Coordinate") : [.. coordinate],
+                Coordinate = coordinate.IsEmpty ? throw r.Missing("Coordinate") : coordinate.ToImmutable(r),
                 ReduceName = reduceName,
                 ReduceCode = reduceCode,
                 DetailedName = detailedName,
@@ -702,21 +702,21 @@ public static partial class Seismology
         {
             CodeDefine? codeDefine = null;
             var codeDefineSeen = false;
-            List<TsunamiItem>? item = null;
+            ArrayBuilder<TsunamiItem> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "CodeDefine" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref codeDefineSeen, "CodeDefine"); codeDefine = global::JmaXml.Seismology.CodeDefine.Read(r); break;
-                    case "Item" when r.InNamespace(XmlNamespaces.Seismology): (item ??= []).Add(global::JmaXml.Seismology.TsunamiItem.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Seismology): item.Add(r, global::JmaXml.Seismology.TsunamiItem.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new TsunamiDetail
             {
                 CodeDefine = codeDefine,
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -772,7 +772,7 @@ public static partial class Seismology
             var maxHeightSeen = false;
             TimeSpan? duration = null;
             var durationSeen = false;
-            List<TsunamiStation>? station = null;
+            ArrayBuilder<TsunamiStation> station = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -783,7 +783,7 @@ public static partial class Seismology
                     case "FirstHeight" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref firstHeightSeen, "FirstHeight"); firstHeight = global::JmaXml.Seismology.FirstHeight.Read(r); break;
                     case "MaxHeight" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref maxHeightSeen, "MaxHeight"); maxHeight = global::JmaXml.Seismology.MaxHeight.Read(r); break;
                     case "Duration" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref durationSeen, "Duration"); duration = r.ReadDuration(); break;
-                    case "Station" when r.InNamespace(XmlNamespaces.Seismology): (station ??= []).Add(global::JmaXml.Seismology.TsunamiStation.Read(r)); break;
+                    case "Station" when r.InNamespace(XmlNamespaces.Seismology): station.Add(r, global::JmaXml.Seismology.TsunamiStation.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -794,7 +794,7 @@ public static partial class Seismology
                 FirstHeight = firstHeight,
                 MaxHeight = maxHeight,
                 Duration = duration,
-                Station = station is null ? [] : [.. station],
+                Station = station.ToImmutable(r),
             };
         }
     }
@@ -826,7 +826,7 @@ public static partial class Seismology
             var nameSeen = false;
             string? code = null;
             var codeSeen = false;
-            List<ForecastCity>? city = null;
+            ArrayBuilder<ForecastCity> city = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -834,7 +834,7 @@ public static partial class Seismology
                 {
                     case "Name" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref nameSeen, "Name"); name = r.ReadString(); break;
                     case "Code" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref codeSeen, "Code"); code = r.ReadString(); break;
-                    case "City" when r.InNamespace(XmlNamespaces.Seismology): (city ??= []).Add(global::JmaXml.Seismology.ForecastCity.Read(r)); break;
+                    case "City" when r.InNamespace(XmlNamespaces.Seismology): city.Add(r, global::JmaXml.Seismology.ForecastCity.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -842,7 +842,7 @@ public static partial class Seismology
             {
                 Name = name ?? throw r.Missing("Name"),
                 Code = code ?? throw r.Missing("Code"),
-                City = city is null ? [] : [.. city],
+                City = city.ToImmutable(r),
             };
         }
     }
@@ -1382,7 +1382,7 @@ public static partial class Seismology
             var forecastLgIntSeen = false;
             IntensityAppendix? appendix = null;
             var appendixSeen = false;
-            List<IntensityPref>? pref = null;
+            ArrayBuilder<IntensityPref> pref = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -1395,7 +1395,7 @@ public static partial class Seismology
                     case "ForecastInt" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref forecastIntSeen, "ForecastInt"); forecastInt = global::JmaXml.Seismology.ForecastInt.Read(r); break;
                     case "ForecastLgInt" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref forecastLgIntSeen, "ForecastLgInt"); forecastLgInt = global::JmaXml.Seismology.ForecastLgInt.Read(r); break;
                     case "Appendix" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref appendixSeen, "Appendix"); appendix = global::JmaXml.Seismology.IntensityAppendix.Read(r); break;
-                    case "Pref" when r.InNamespace(XmlNamespaces.Seismology): (pref ??= []).Add(global::JmaXml.Seismology.IntensityPref.Read(r)); break;
+                    case "Pref" when r.InNamespace(XmlNamespaces.Seismology): pref.Add(r, global::JmaXml.Seismology.IntensityPref.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -1408,7 +1408,7 @@ public static partial class Seismology
                 ForecastInt = forecastInt,
                 ForecastLgInt = forecastLgInt,
                 Appendix = appendix,
-                Pref = pref is null ? [] : [.. pref],
+                Pref = pref.ToImmutable(r),
             };
         }
     }
@@ -1624,7 +1624,7 @@ public static partial class Seismology
             var conditionSeen = false;
             string? revise = null;
             var reviseSeen = false;
-            List<IntensityArea>? area = null;
+            ArrayBuilder<IntensityArea> area = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -1640,7 +1640,7 @@ public static partial class Seismology
                     case "ArrivalTime" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref arrivalTimeSeen, "ArrivalTime"); arrivalTime = r.ReadDateTimeOffset(); break;
                     case "Condition" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref conditionSeen, "Condition"); condition = r.ReadString(); break;
                     case "Revise" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref reviseSeen, "Revise"); revise = r.ReadString(); break;
-                    case "Area" when r.InNamespace(XmlNamespaces.Seismology): (area ??= []).Add(global::JmaXml.Seismology.IntensityArea.Read(r)); break;
+                    case "Area" when r.InNamespace(XmlNamespaces.Seismology): area.Add(r, global::JmaXml.Seismology.IntensityArea.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -1656,7 +1656,7 @@ public static partial class Seismology
                 ArrivalTime = arrivalTime,
                 Condition = condition,
                 Revise = revise,
-                Area = area is null ? [] : [.. area],
+                Area = area.ToImmutable(r),
             };
         }
     }
@@ -1740,8 +1740,8 @@ public static partial class Seismology
             var conditionSeen = false;
             string? revise = null;
             var reviseSeen = false;
-            List<IntensityCity>? city = null;
-            List<IntensityStation>? intensityStation = null;
+            ArrayBuilder<IntensityCity> city = default;
+            ArrayBuilder<IntensityStation> intensityStation = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -1757,8 +1757,8 @@ public static partial class Seismology
                     case "ArrivalTime" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref arrivalTimeSeen, "ArrivalTime"); arrivalTime = r.ReadDateTimeOffset(); break;
                     case "Condition" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref conditionSeen, "Condition"); condition = r.ReadString(); break;
                     case "Revise" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref reviseSeen, "Revise"); revise = r.ReadString(); break;
-                    case "City" when r.InNamespace(XmlNamespaces.Seismology): (city ??= []).Add(global::JmaXml.Seismology.IntensityCity.Read(r)); break;
-                    case "IntensityStation" when r.InNamespace(XmlNamespaces.Seismology): (intensityStation ??= []).Add(global::JmaXml.Seismology.IntensityStation.Read(r)); break;
+                    case "City" when r.InNamespace(XmlNamespaces.Seismology): city.Add(r, global::JmaXml.Seismology.IntensityCity.Read(r)); break;
+                    case "IntensityStation" when r.InNamespace(XmlNamespaces.Seismology): intensityStation.Add(r, global::JmaXml.Seismology.IntensityStation.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -1774,8 +1774,8 @@ public static partial class Seismology
                 ArrivalTime = arrivalTime,
                 Condition = condition,
                 Revise = revise,
-                City = city is null ? [] : [.. city],
-                IntensityStation = intensityStation is null ? [] : [.. intensityStation],
+                City = city.ToImmutable(r),
+                IntensityStation = intensityStation.ToImmutable(r),
             };
         }
     }
@@ -1856,7 +1856,7 @@ public static partial class Seismology
             var conditionSeen = false;
             string? revise = null;
             var reviseSeen = false;
-            List<IntensityStation>? intensityStation = null;
+            ArrayBuilder<IntensityStation> intensityStation = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -1872,7 +1872,7 @@ public static partial class Seismology
                     case "ArrivalTime" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref arrivalTimeSeen, "ArrivalTime"); arrivalTime = r.ReadDateTimeOffset(); break;
                     case "Condition" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref conditionSeen, "Condition"); condition = r.ReadString(); break;
                     case "Revise" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref reviseSeen, "Revise"); revise = r.ReadString(); break;
-                    case "IntensityStation" when r.InNamespace(XmlNamespaces.Seismology): (intensityStation ??= []).Add(global::JmaXml.Seismology.IntensityStation.Read(r)); break;
+                    case "IntensityStation" when r.InNamespace(XmlNamespaces.Seismology): intensityStation.Add(r, global::JmaXml.Seismology.IntensityStation.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -1888,7 +1888,7 @@ public static partial class Seismology
                 ArrivalTime = arrivalTime,
                 Condition = condition,
                 Revise = revise,
-                IntensityStation = intensityStation is null ? [] : [.. intensityStation],
+                IntensityStation = intensityStation.ToImmutable(r),
             };
         }
     }
@@ -1947,10 +1947,10 @@ public static partial class Seismology
             var kSeen = false;
             string? lgInt = null;
             var lgIntSeen = false;
-            List<LgIntPerPeriod>? lgIntPerPeriod = null;
+            ArrayBuilder<LgIntPerPeriod> lgIntPerPeriod = default;
             Sva? sva = null;
             var svaSeen = false;
-            List<SvaPerPeriod>? svaPerPeriod = null;
+            ArrayBuilder<SvaPerPeriod> svaPerPeriod = default;
             string? revise = null;
             var reviseSeen = false;
             using var scope = r.Enter();
@@ -1963,9 +1963,9 @@ public static partial class Seismology
                     case "Int" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref @intSeen, "Int"); @int = r.ReadString(); break;
                     case "K" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref kSeen, "K"); k = r.ReadFloat(); break;
                     case "LgInt" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref lgIntSeen, "LgInt"); lgInt = r.ReadString(); break;
-                    case "LgIntPerPeriod" when r.InNamespace(XmlNamespaces.Seismology): (lgIntPerPeriod ??= []).Add(global::JmaXml.Seismology.LgIntPerPeriod.Read(r)); break;
+                    case "LgIntPerPeriod" when r.InNamespace(XmlNamespaces.Seismology): lgIntPerPeriod.Add(r, global::JmaXml.Seismology.LgIntPerPeriod.Read(r)); break;
                     case "Sva" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref svaSeen, "Sva"); sva = global::JmaXml.Seismology.Sva.Read(r); break;
-                    case "SvaPerPeriod" when r.InNamespace(XmlNamespaces.Seismology): (svaPerPeriod ??= []).Add(global::JmaXml.Seismology.SvaPerPeriod.Read(r)); break;
+                    case "SvaPerPeriod" when r.InNamespace(XmlNamespaces.Seismology): svaPerPeriod.Add(r, global::JmaXml.Seismology.SvaPerPeriod.Read(r)); break;
                     case "Revise" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref reviseSeen, "Revise"); revise = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -1977,9 +1977,9 @@ public static partial class Seismology
                 Int = @int,
                 K = k,
                 LgInt = lgInt,
-                LgIntPerPeriod = lgIntPerPeriod is null ? [] : [.. lgIntPerPeriod],
+                LgIntPerPeriod = lgIntPerPeriod.ToImmutable(r),
                 Sva = sva,
-                SvaPerPeriod = svaPerPeriod is null ? [] : [.. svaPerPeriod],
+                SvaPerPeriod = svaPerPeriod.ToImmutable(r),
                 Revise = revise,
             };
         }
@@ -2087,19 +2087,19 @@ public static partial class Seismology
 
         internal static EarthquakeCount Read(JmaXmlReader r)
         {
-            List<CountData>? item = null;
+            ArrayBuilder<CountData> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Item" when r.InNamespace(XmlNamespaces.Seismology): (item ??= []).Add(global::JmaXml.Seismology.CountData.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Seismology): item.Add(r, global::JmaXml.Seismology.CountData.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new EarthquakeCount
             {
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -2355,7 +2355,7 @@ public static partial class Seismology
 
         internal static Aftershocks Read(JmaXmlReader r)
         {
-            List<AftershockItem>? item = null;
+            ArrayBuilder<AftershockItem> item = default;
             string? text = null;
             var textSeen = false;
             using var scope = r.Enter();
@@ -2363,14 +2363,14 @@ public static partial class Seismology
             {
                 switch (r.LocalName)
                 {
-                    case "Item" when r.InNamespace(XmlNamespaces.Seismology): (item ??= []).Add(global::JmaXml.Seismology.AftershockItem.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Seismology): item.Add(r, global::JmaXml.Seismology.AftershockItem.Read(r)); break;
                     case "Text" when r.InNamespace(XmlNamespaces.Seismology): r.Once(ref textSeen, "Text"); text = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
             }
             return new Aftershocks
             {
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
                 Text = text,
             };
         }
@@ -2570,19 +2570,19 @@ public static partial class Seismology
 
         internal static CodeDefine Read(JmaXmlReader r)
         {
-            List<CodeDefineType>? type = null;
+            ArrayBuilder<CodeDefineType> type = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Type" when r.InNamespace(XmlNamespaces.Seismology): (type ??= []).Add(global::JmaXml.Seismology.CodeDefineType.Read(r)); break;
+                    case "Type" when r.InNamespace(XmlNamespaces.Seismology): type.Add(r, global::JmaXml.Seismology.CodeDefineType.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new CodeDefine
             {
-                Type = type is null ? throw r.Missing("Type") : [.. type],
+                Type = type.IsEmpty ? throw r.Missing("Type") : type.ToImmutable(r),
             };
         }
     }

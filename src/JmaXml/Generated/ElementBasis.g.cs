@@ -203,7 +203,7 @@ public static partial class ElementBasis
         internal static Circle Read(JmaXmlReader r)
         {
             var type = r.AttributeString("type");
-            List<Coordinate>? basePoint = null;
+            ArrayBuilder<Coordinate> basePoint = default;
             Axes? axes = null;
             var axesSeen = false;
             using var scope = r.Enter();
@@ -211,7 +211,7 @@ public static partial class ElementBasis
             {
                 switch (r.LocalName)
                 {
-                    case "BasePoint" when r.InNamespace(XmlNamespaces.ElementBasis): (basePoint ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "BasePoint" when r.InNamespace(XmlNamespaces.ElementBasis): basePoint.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     case "Axes" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref axesSeen, "Axes"); axes = global::JmaXml.ElementBasis.Axes.Read(r); break;
                     default: r.Skip(); break;
                 }
@@ -219,7 +219,7 @@ public static partial class ElementBasis
             return new Circle
             {
                 Type = type,
-                BasePoint = basePoint is null ? [] : [.. basePoint],
+                BasePoint = basePoint.ToImmutable(r),
                 Axes = axes,
             };
         }
@@ -239,25 +239,25 @@ public static partial class ElementBasis
 
         internal static Axes Read(JmaXmlReader r)
         {
-            List<Axis>? axis = null;
-            List<Axis>? longAxis = null;
-            List<Axis>? shortAxis = null;
+            ArrayBuilder<Axis> axis = default;
+            ArrayBuilder<Axis> longAxis = default;
+            ArrayBuilder<Axis> shortAxis = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Axis" when r.InNamespace(XmlNamespaces.ElementBasis): (axis ??= []).Add(global::JmaXml.ElementBasis.Axis.Read(r)); break;
-                    case "LongAxis" when r.InNamespace(XmlNamespaces.ElementBasis): (longAxis ??= []).Add(global::JmaXml.ElementBasis.Axis.Read(r)); break;
-                    case "ShortAxis" when r.InNamespace(XmlNamespaces.ElementBasis): (shortAxis ??= []).Add(global::JmaXml.ElementBasis.Axis.Read(r)); break;
+                    case "Axis" when r.InNamespace(XmlNamespaces.ElementBasis): axis.Add(r, global::JmaXml.ElementBasis.Axis.Read(r)); break;
+                    case "LongAxis" when r.InNamespace(XmlNamespaces.ElementBasis): longAxis.Add(r, global::JmaXml.ElementBasis.Axis.Read(r)); break;
+                    case "ShortAxis" when r.InNamespace(XmlNamespaces.ElementBasis): shortAxis.Add(r, global::JmaXml.ElementBasis.Axis.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Axes
             {
-                Axis = axis is null ? [] : [.. axis],
-                LongAxis = longAxis is null ? [] : [.. longAxis],
-                ShortAxis = shortAxis is null ? [] : [.. shortAxis],
+                Axis = axis.ToImmutable(r),
+                LongAxis = longAxis.ToImmutable(r),
+                ShortAxis = shortAxis.ToImmutable(r),
             };
         }
     }
@@ -285,25 +285,25 @@ public static partial class ElementBasis
 
         internal static Axis Read(JmaXmlReader r)
         {
-            List<Direction>? direction = null;
-            List<Bearings>? bearings = null;
-            List<Radius>? radius = null;
+            ArrayBuilder<Direction> direction = default;
+            ArrayBuilder<Bearings> bearings = default;
+            ArrayBuilder<Radius> radius = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Direction" when r.InNamespace(XmlNamespaces.ElementBasis): (direction ??= []).Add(global::JmaXml.ElementBasis.Direction.Read(r)); break;
-                    case "Bearings" when r.InNamespace(XmlNamespaces.ElementBasis): (bearings ??= []).Add(global::JmaXml.ElementBasis.Bearings.Read(r)); break;
-                    case "Radius" when r.InNamespace(XmlNamespaces.ElementBasis): (radius ??= []).Add(global::JmaXml.ElementBasis.Radius.Read(r)); break;
+                    case "Direction" when r.InNamespace(XmlNamespaces.ElementBasis): direction.Add(r, global::JmaXml.ElementBasis.Direction.Read(r)); break;
+                    case "Bearings" when r.InNamespace(XmlNamespaces.ElementBasis): bearings.Add(r, global::JmaXml.ElementBasis.Bearings.Read(r)); break;
+                    case "Radius" when r.InNamespace(XmlNamespaces.ElementBasis): radius.Add(r, global::JmaXml.ElementBasis.Radius.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Axis
             {
-                Direction = direction is null ? [] : [.. direction],
-                Bearings = bearings is null ? [] : [.. bearings],
-                Radius = radius is null ? throw r.Missing("Radius") : [.. radius],
+                Direction = direction.ToImmutable(r),
+                Bearings = bearings.ToImmutable(r),
+                Radius = radius.IsEmpty ? throw r.Missing("Radius") : radius.ToImmutable(r),
             };
         }
     }
@@ -2087,22 +2087,22 @@ public static partial class ElementBasis
 
         internal static ClimateFeature Read(JmaXmlReader r)
         {
-            List<ReferableString>? generalSituationText = null;
-            List<SignificantClimateElement>? significantClimateElement = null;
+            ArrayBuilder<ReferableString> generalSituationText = default;
+            ArrayBuilder<SignificantClimateElement> significantClimateElement = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "GeneralSituationText" when r.InNamespace(XmlNamespaces.ElementBasis): (generalSituationText ??= []).Add(global::JmaXml.ElementBasis.ReferableString.Read(r)); break;
-                    case "SignificantClimateElement" when r.InNamespace(XmlNamespaces.ElementBasis): (significantClimateElement ??= []).Add(global::JmaXml.ElementBasis.SignificantClimateElement.Read(r)); break;
+                    case "GeneralSituationText" when r.InNamespace(XmlNamespaces.ElementBasis): generalSituationText.Add(r, global::JmaXml.ElementBasis.ReferableString.Read(r)); break;
+                    case "SignificantClimateElement" when r.InNamespace(XmlNamespaces.ElementBasis): significantClimateElement.Add(r, global::JmaXml.ElementBasis.SignificantClimateElement.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new ClimateFeature
             {
-                GeneralSituationText = generalSituationText is null ? [] : [.. generalSituationText],
-                SignificantClimateElement = significantClimateElement is null ? [] : [.. significantClimateElement],
+                GeneralSituationText = generalSituationText.ToImmutable(r),
+                SignificantClimateElement = significantClimateElement.ToImmutable(r),
             };
         }
     }
@@ -2268,7 +2268,7 @@ public static partial class ElementBasis
         internal static SignificantClimateElement Read(JmaXmlReader r)
         {
             var kind = r.RequiredAttributeString("kind");
-            List<ReferableString>? text = null;
+            ArrayBuilder<ReferableString> text = default;
             Probability? probabilityOfBelowNormal = null;
             var probabilityOfBelowNormalSeen = false;
             Probability? probabilityOfNormal = null;
@@ -2292,7 +2292,7 @@ public static partial class ElementBasis
             {
                 switch (r.LocalName)
                 {
-                    case "Text" when r.InNamespace(XmlNamespaces.ElementBasis): (text ??= []).Add(global::JmaXml.ElementBasis.ReferableString.Read(r)); break;
+                    case "Text" when r.InNamespace(XmlNamespaces.ElementBasis): text.Add(r, global::JmaXml.ElementBasis.ReferableString.Read(r)); break;
                     case "ProbabilityOfBelowNormal" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref probabilityOfBelowNormalSeen, "ProbabilityOfBelowNormal"); probabilityOfBelowNormal = global::JmaXml.ElementBasis.Probability.Read(r); break;
                     case "ProbabilityOfNormal" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref probabilityOfNormalSeen, "ProbabilityOfNormal"); probabilityOfNormal = global::JmaXml.ElementBasis.Probability.Read(r); break;
                     case "ProbabilityOfAboveNormal" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref probabilityOfAboveNormalSeen, "ProbabilityOfAboveNormal"); probabilityOfAboveNormal = global::JmaXml.ElementBasis.Probability.Read(r); break;
@@ -2308,7 +2308,7 @@ public static partial class ElementBasis
             return new SignificantClimateElement
             {
                 Kind = kind,
-                Text = text is null ? throw r.Missing("Text") : [.. text],
+                Text = text.IsEmpty ? throw r.Missing("Text") : text.ToImmutable(r),
                 ProbabilityOfBelowNormal = probabilityOfBelowNormal,
                 ProbabilityOfNormal = probabilityOfNormal,
                 ProbabilityOfAboveNormal = probabilityOfAboveNormal,

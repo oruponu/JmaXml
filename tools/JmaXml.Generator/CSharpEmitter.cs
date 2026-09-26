@@ -202,7 +202,7 @@ public static class CSharpEmitter
                 var itemType = ElementItemType(ns, element);
                 if (element.Unbounded)
                 {
-                    w.Line($"List<{itemType}>? {local} = null;");
+                    w.Line($"ArrayBuilder<{itemType}> {local} = default;");
                 }
                 else
                 {
@@ -225,7 +225,7 @@ public static class CSharpEmitter
                     : $"r.{ReadMethod(element.Type.Primitive!.Value, element.Nillable)}()";
                 var nsExpr = NamespaceExpression(SchemaLoader.PrefixOf(element.Namespace));
                 w.Line(element.Unbounded
-                    ? $"case \"{element.Name}\" when r.InNamespace({nsExpr}): ({local} ??= []).Add({read}); break;"
+                    ? $"case \"{element.Name}\" when r.InNamespace({nsExpr}): {local}.Add(r, {read}); break;"
                     : $"case \"{element.Name}\" when r.InNamespace({nsExpr}): r.Once(ref {local}Seen, \"{element.Name}\"); {local} = {read}; break;");
             }
             w.Line("default: r.Skip(); break;");
@@ -241,8 +241,8 @@ public static class CSharpEmitter
                 if (element.Unbounded)
                 {
                     inits.Add(element.MinOccurs == 0
-                        ? $"{property} = {local} is null ? [] : [.. {local}],"
-                        : $"{property} = {local} is null ? throw r.Missing(\"{element.Name}\") : [.. {local}],");
+                        ? $"{property} = {local}.ToImmutable(r),"
+                        : $"{property} = {local}.IsEmpty ? throw r.Missing(\"{element.Name}\") : {local}.ToImmutable(r),");
                 }
                 else if (element.MinOccurs == 0)
                 {

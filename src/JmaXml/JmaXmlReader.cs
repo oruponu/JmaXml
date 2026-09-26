@@ -6,12 +6,14 @@ namespace JmaXml;
 internal sealed partial class JmaXmlReader(XmlReader reader)
 {
     private const int LinearSiblingLimit = 16;
+    private const int MinBufferLength = 8;
 
     private readonly XmlReader _reader = reader;
     private readonly IXmlLineInfo? _lineInfo = reader as IXmlLineInfo;
     private readonly List<Segment> _path = [];
     private readonly List<ScopeState> _scopes = [];
     private readonly List<(string Name, int Count)> _siblings = [];
+    private readonly List<object?[]> _buffers = [];
 
     public string LocalName => _reader.LocalName;
 
@@ -71,6 +73,22 @@ internal sealed partial class JmaXmlReader(XmlReader reader)
     }
 
     public void Skip() => _reader.Skip();
+
+    public object?[] RentBuffer(int minLength)
+    {
+        for (var i = _buffers.Count - 1; i >= 0; i--)
+        {
+            var buffer = _buffers[i];
+            if (buffer.Length >= minLength)
+            {
+                _buffers.RemoveAt(i);
+                return buffer;
+            }
+        }
+        return new object?[Math.Max(MinBufferLength, minLength)];
+    }
+
+    public void ReturnBuffer(object?[] buffer) => _buffers.Add(buffer);
 
     public void Once(ref bool seen, string name)
     {

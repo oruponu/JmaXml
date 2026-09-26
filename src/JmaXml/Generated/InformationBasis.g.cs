@@ -256,21 +256,21 @@ public static partial class InformationBasis
         {
             string? text = null;
             var textSeen = false;
-            List<Information>? information = null;
+            ArrayBuilder<Information> information = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "Text" when r.InNamespace(XmlNamespaces.InformationBasis): r.Once(ref textSeen, "Text"); text = r.ReadString(); break;
-                    case "Information" when r.InNamespace(XmlNamespaces.InformationBasis): (information ??= []).Add(global::JmaXml.InformationBasis.Information.Read(r)); break;
+                    case "Information" when r.InNamespace(XmlNamespaces.InformationBasis): information.Add(r, global::JmaXml.InformationBasis.Information.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Headline
             {
                 Text = text ?? throw r.Missing("Text"),
-                Information = information is null ? [] : [.. information],
+                Information = information.ToImmutable(r),
             };
         }
     }
@@ -344,20 +344,20 @@ public static partial class InformationBasis
         internal static Information Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<Item>? item = null;
+            ArrayBuilder<Item> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Item" when r.InNamespace(XmlNamespaces.InformationBasis): (item ??= []).Add(global::JmaXml.InformationBasis.Item.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.InformationBasis): item.Add(r, global::JmaXml.InformationBasis.Item.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Information
             {
                 Type = type,
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -382,8 +382,8 @@ public static partial class InformationBasis
 
         internal static Item Read(JmaXmlReader r)
         {
-            List<Kind>? kind = null;
-            List<Kind>? lastKind = null;
+            ArrayBuilder<Kind> kind = default;
+            ArrayBuilder<Kind> lastKind = default;
             Areas? areas = null;
             var areasSeen = false;
             using var scope = r.Enter();
@@ -391,16 +391,16 @@ public static partial class InformationBasis
             {
                 switch (r.LocalName)
                 {
-                    case "Kind" when r.InNamespace(XmlNamespaces.InformationBasis): (kind ??= []).Add(global::JmaXml.InformationBasis.Kind.Read(r)); break;
-                    case "LastKind" when r.InNamespace(XmlNamespaces.InformationBasis): (lastKind ??= []).Add(global::JmaXml.InformationBasis.Kind.Read(r)); break;
+                    case "Kind" when r.InNamespace(XmlNamespaces.InformationBasis): kind.Add(r, global::JmaXml.InformationBasis.Kind.Read(r)); break;
+                    case "LastKind" when r.InNamespace(XmlNamespaces.InformationBasis): lastKind.Add(r, global::JmaXml.InformationBasis.Kind.Read(r)); break;
                     case "Areas" when r.InNamespace(XmlNamespaces.InformationBasis): r.Once(ref areasSeen, "Areas"); areas = global::JmaXml.InformationBasis.Areas.Read(r); break;
                     default: r.Skip(); break;
                 }
             }
             return new Item
             {
-                Kind = kind is null ? throw r.Missing("Kind") : [.. kind],
-                LastKind = lastKind is null ? [] : [.. lastKind],
+                Kind = kind.IsEmpty ? throw r.Missing("Kind") : kind.ToImmutable(r),
+                LastKind = lastKind.ToImmutable(r),
                 Areas = areas ?? throw r.Missing("Areas"),
             };
         }
@@ -484,20 +484,20 @@ public static partial class InformationBasis
         internal static Areas Read(JmaXmlReader r)
         {
             var codeType = r.RequiredAttributeString("codeType");
-            List<Area>? area = null;
+            ArrayBuilder<Area> area = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Area" when r.InNamespace(XmlNamespaces.InformationBasis): (area ??= []).Add(global::JmaXml.InformationBasis.Area.Read(r)); break;
+                    case "Area" when r.InNamespace(XmlNamespaces.InformationBasis): area.Add(r, global::JmaXml.InformationBasis.Area.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Areas
             {
                 CodeType = codeType,
-                Area = area is null ? throw r.Missing("Area") : [.. area],
+                Area = area.IsEmpty ? throw r.Missing("Area") : area.ToImmutable(r),
             };
         }
     }
@@ -558,10 +558,10 @@ public static partial class InformationBasis
             var nameSeen = false;
             string? code = null;
             var codeSeen = false;
-            List<ElementBasis.Circle>? circle = null;
-            List<ElementBasis.Coordinate>? coordinate = null;
-            List<ElementBasis.Coordinate>? line = null;
-            List<ElementBasis.Coordinate>? polygon = null;
+            ArrayBuilder<ElementBasis.Circle> circle = default;
+            ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
+            ArrayBuilder<ElementBasis.Coordinate> line = default;
+            ArrayBuilder<ElementBasis.Coordinate> polygon = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -569,10 +569,10 @@ public static partial class InformationBasis
                 {
                     case "Name" when r.InNamespace(XmlNamespaces.InformationBasis): r.Once(ref nameSeen, "Name"); name = r.ReadString(); break;
                     case "Code" when r.InNamespace(XmlNamespaces.InformationBasis): r.Once(ref codeSeen, "Code"); code = r.ReadString(); break;
-                    case "Circle" when r.InNamespace(XmlNamespaces.ElementBasis): (circle ??= []).Add(global::JmaXml.ElementBasis.Circle.Read(r)); break;
-                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): (coordinate ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "Line" when r.InNamespace(XmlNamespaces.ElementBasis): (line ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): (polygon ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Circle" when r.InNamespace(XmlNamespaces.ElementBasis): circle.Add(r, global::JmaXml.ElementBasis.Circle.Read(r)); break;
+                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): coordinate.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Line" when r.InNamespace(XmlNamespaces.ElementBasis): line.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): polygon.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -580,10 +580,10 @@ public static partial class InformationBasis
             {
                 Name = name ?? throw r.Missing("Name"),
                 Code = code,
-                Circle = circle is null ? [] : [.. circle],
-                Coordinate = coordinate is null ? [] : [.. coordinate],
-                Line = line is null ? [] : [.. line],
-                Polygon = polygon is null ? [] : [.. polygon],
+                Circle = circle.ToImmutable(r),
+                Coordinate = coordinate.ToImmutable(r),
+                Line = line.ToImmutable(r),
+                Polygon = polygon.ToImmutable(r),
             };
         }
     }

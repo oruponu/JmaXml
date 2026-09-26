@@ -72,9 +72,9 @@ public static partial class Meteorology
         {
             Area? targetArea = null;
             var targetAreaSeen = false;
-            List<string>? notice = null;
-            List<Warning>? warning = null;
-            List<MeteorologicalInfos>? meteorologicalInfos = null;
+            ArrayBuilder<string> notice = default;
+            ArrayBuilder<Warning> warning = default;
+            ArrayBuilder<MeteorologicalInfos> meteorologicalInfos = default;
             Comment? comment = null;
             var commentSeen = false;
             OfficeInfo? officeInfo = null;
@@ -87,9 +87,9 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TargetArea" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref targetAreaSeen, "TargetArea"); targetArea = global::JmaXml.Meteorology.Area.Read(r); break;
-                    case "Notice" when r.InNamespace(XmlNamespaces.Meteorology): (notice ??= []).Add(r.ReadString()); break;
-                    case "Warning" when r.InNamespace(XmlNamespaces.Meteorology): (warning ??= []).Add(global::JmaXml.Meteorology.Warning.Read(r)); break;
-                    case "MeteorologicalInfos" when r.InNamespace(XmlNamespaces.Meteorology): (meteorologicalInfos ??= []).Add(global::JmaXml.Meteorology.MeteorologicalInfos.Read(r)); break;
+                    case "Notice" when r.InNamespace(XmlNamespaces.Meteorology): notice.Add(r, r.ReadString()); break;
+                    case "Warning" when r.InNamespace(XmlNamespaces.Meteorology): warning.Add(r, global::JmaXml.Meteorology.Warning.Read(r)); break;
+                    case "MeteorologicalInfos" when r.InNamespace(XmlNamespaces.Meteorology): meteorologicalInfos.Add(r, global::JmaXml.Meteorology.MeteorologicalInfos.Read(r)); break;
                     case "Comment" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref commentSeen, "Comment"); comment = global::JmaXml.Meteorology.Comment.Read(r); break;
                     case "OfficeInfo" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref officeInfoSeen, "OfficeInfo"); officeInfo = global::JmaXml.Meteorology.OfficeInfo.Read(r); break;
                     case "AdditionalInfo" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref additionalInfoSeen, "AdditionalInfo"); additionalInfo = global::JmaXml.Meteorology.AdditionalInfo.Read(r); break;
@@ -99,9 +99,9 @@ public static partial class Meteorology
             return new Body
             {
                 TargetArea = targetArea,
-                Notice = notice is null ? [] : [.. notice],
-                Warning = warning is null ? [] : [.. warning],
-                MeteorologicalInfos = meteorologicalInfos is null ? [] : [.. meteorologicalInfos],
+                Notice = notice.ToImmutable(r),
+                Warning = warning.ToImmutable(r),
+                MeteorologicalInfos = meteorologicalInfos.ToImmutable(r),
                 Comment = comment,
                 OfficeInfo = officeInfo,
                 AdditionalInfo = additionalInfo,
@@ -127,20 +127,20 @@ public static partial class Meteorology
         internal static Warning Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<Item>? item = null;
+            ArrayBuilder<Item> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Item" when r.InNamespace(XmlNamespaces.Meteorology): (item ??= []).Add(global::JmaXml.Meteorology.Item.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Meteorology): item.Add(r, global::JmaXml.Meteorology.Item.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Warning
             {
                 Type = type,
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -207,23 +207,23 @@ public static partial class Meteorology
         internal static MeteorologicalInfos Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<MeteorologicalInfo>? meteorologicalInfo = null;
-            List<TimeSeriesInfo>? timeSeriesInfo = null;
+            ArrayBuilder<MeteorologicalInfo> meteorologicalInfo = default;
+            ArrayBuilder<TimeSeriesInfo> timeSeriesInfo = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "MeteorologicalInfo" when r.InNamespace(XmlNamespaces.Meteorology): (meteorologicalInfo ??= []).Add(global::JmaXml.Meteorology.MeteorologicalInfo.Read(r)); break;
-                    case "TimeSeriesInfo" when r.InNamespace(XmlNamespaces.Meteorology): (timeSeriesInfo ??= []).Add(global::JmaXml.Meteorology.TimeSeriesInfo.Read(r)); break;
+                    case "MeteorologicalInfo" when r.InNamespace(XmlNamespaces.Meteorology): meteorologicalInfo.Add(r, global::JmaXml.Meteorology.MeteorologicalInfo.Read(r)); break;
+                    case "TimeSeriesInfo" when r.InNamespace(XmlNamespaces.Meteorology): timeSeriesInfo.Add(r, global::JmaXml.Meteorology.TimeSeriesInfo.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new MeteorologicalInfos
             {
                 Type = type,
-                MeteorologicalInfo = meteorologicalInfo is null ? [] : [.. meteorologicalInfo],
-                TimeSeriesInfo = timeSeriesInfo is null ? [] : [.. timeSeriesInfo],
+                MeteorologicalInfo = meteorologicalInfo.ToImmutable(r),
+                TimeSeriesInfo = timeSeriesInfo.ToImmutable(r),
             };
         }
     }
@@ -264,7 +264,7 @@ public static partial class Meteorology
             var durationSeen = false;
             string? name = null;
             var nameSeen = false;
-            List<Item>? item = null;
+            ArrayBuilder<Item> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -273,7 +273,7 @@ public static partial class Meteorology
                     case "DateTime" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref dateTimeSeen, "DateTime"); dateTime = global::JmaXml.ElementBasis.DateTime.Read(r); break;
                     case "Duration" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref durationSeen, "Duration"); duration = r.ReadDuration(); break;
                     case "Name" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref nameSeen, "Name"); name = r.ReadString(); break;
-                    case "Item" when r.InNamespace(XmlNamespaces.Meteorology): (item ??= []).Add(global::JmaXml.Meteorology.Item.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Meteorology): item.Add(r, global::JmaXml.Meteorology.Item.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -283,7 +283,7 @@ public static partial class Meteorology
                 DateTime = dateTime ?? throw r.Missing("DateTime"),
                 Duration = duration,
                 Name = name,
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -307,21 +307,21 @@ public static partial class Meteorology
         {
             TimeDefines? timeDefines = null;
             var timeDefinesSeen = false;
-            List<Item>? item = null;
+            ArrayBuilder<Item> item = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "TimeDefines" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeDefinesSeen, "TimeDefines"); timeDefines = global::JmaXml.Meteorology.TimeDefines.Read(r); break;
-                    case "Item" when r.InNamespace(XmlNamespaces.Meteorology): (item ??= []).Add(global::JmaXml.Meteorology.Item.Read(r)); break;
+                    case "Item" when r.InNamespace(XmlNamespaces.Meteorology): item.Add(r, global::JmaXml.Meteorology.Item.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new TimeSeriesInfo
             {
                 TimeDefines = timeDefines ?? throw r.Missing("TimeDefines"),
-                Item = item is null ? throw r.Missing("Item") : [.. item],
+                Item = item.IsEmpty ? throw r.Missing("Item") : item.ToImmutable(r),
             };
         }
     }
@@ -337,19 +337,19 @@ public static partial class Meteorology
 
         internal static TimeDefines Read(JmaXmlReader r)
         {
-            List<TimeDefine>? timeDefine = null;
+            ArrayBuilder<TimeDefine> timeDefine = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "TimeDefine" when r.InNamespace(XmlNamespaces.Meteorology): (timeDefine ??= []).Add(global::JmaXml.Meteorology.TimeDefine.Read(r)); break;
+                    case "TimeDefine" when r.InNamespace(XmlNamespaces.Meteorology): timeDefine.Add(r, global::JmaXml.Meteorology.TimeDefine.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new TimeDefines
             {
-                TimeDefine = timeDefine is null ? throw r.Missing("TimeDefine") : [.. timeDefine],
+                TimeDefine = timeDefine.IsEmpty ? throw r.Missing("TimeDefine") : timeDefine.ToImmutable(r),
             };
         }
     }
@@ -443,7 +443,7 @@ public static partial class Meteorology
             var climateForecastAdditionSeen = false;
             FloodForecastAddition? floodForecastAddition = null;
             var floodForecastAdditionSeen = false;
-            List<TidalWarningAddition>? tidalWarningAddition = null;
+            ArrayBuilder<TidalWarningAddition> tidalWarningAddition = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -452,7 +452,7 @@ public static partial class Meteorology
                     case "ObservationAddition" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref observationAdditionSeen, "ObservationAddition"); observationAddition = global::JmaXml.Meteorology.ObservationAddition.Read(r); break;
                     case "ClimateForecastAddition" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref climateForecastAdditionSeen, "ClimateForecastAddition"); climateForecastAddition = global::JmaXml.Meteorology.ClimateForecastAddition.Read(r); break;
                     case "FloodForecastAddition" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref floodForecastAdditionSeen, "FloodForecastAddition"); floodForecastAddition = global::JmaXml.Meteorology.FloodForecastAddition.Read(r); break;
-                    case "TidalWarningAddition" when r.InNamespace(XmlNamespaces.Meteorology): (tidalWarningAddition ??= []).Add(global::JmaXml.Meteorology.TidalWarningAddition.Read(r)); break;
+                    case "TidalWarningAddition" when r.InNamespace(XmlNamespaces.Meteorology): tidalWarningAddition.Add(r, global::JmaXml.Meteorology.TidalWarningAddition.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -461,7 +461,7 @@ public static partial class Meteorology
                 ObservationAddition = observationAddition,
                 ClimateForecastAddition = climateForecastAddition,
                 FloodForecastAddition = floodForecastAddition,
-                TidalWarningAddition = tidalWarningAddition is null ? [] : [.. tidalWarningAddition],
+                TidalWarningAddition = tidalWarningAddition.ToImmutable(r),
             };
         }
     }
@@ -491,7 +491,7 @@ public static partial class Meteorology
         {
             string? targetDateTimeNotice = null;
             var targetDateTimeNoticeSeen = false;
-            List<ForecastSchedule>? nextForecastSchedule = null;
+            ArrayBuilder<ForecastSchedule> nextForecastSchedule = default;
             string? noticeOfSchedule = null;
             var noticeOfScheduleSeen = false;
             string? additionalNotice = null;
@@ -502,7 +502,7 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TargetDateTimeNotice" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref targetDateTimeNoticeSeen, "TargetDateTimeNotice"); targetDateTimeNotice = r.ReadString(); break;
-                    case "NextForecastSchedule" when r.InNamespace(XmlNamespaces.Meteorology): (nextForecastSchedule ??= []).Add(global::JmaXml.Meteorology.ForecastSchedule.Read(r)); break;
+                    case "NextForecastSchedule" when r.InNamespace(XmlNamespaces.Meteorology): nextForecastSchedule.Add(r, global::JmaXml.Meteorology.ForecastSchedule.Read(r)); break;
                     case "NoticeOfSchedule" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref noticeOfScheduleSeen, "NoticeOfSchedule"); noticeOfSchedule = r.ReadString(); break;
                     case "AdditionalNotice" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref additionalNoticeSeen, "AdditionalNotice"); additionalNotice = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -511,7 +511,7 @@ public static partial class Meteorology
             return new ClimateForecastAddition
             {
                 TargetDateTimeNotice = targetDateTimeNotice,
-                NextForecastSchedule = nextForecastSchedule is null ? [] : [.. nextForecastSchedule],
+                NextForecastSchedule = nextForecastSchedule.ToImmutable(r),
                 NoticeOfSchedule = noticeOfSchedule,
                 AdditionalNotice = additionalNotice,
             };
@@ -581,7 +581,7 @@ public static partial class Meteorology
 
         internal static Comment Read(JmaXmlReader r)
         {
-            List<Text>? text = null;
+            ArrayBuilder<Text> text = default;
             ImmutableArray<string>? code = null;
             var codeSeen = false;
             using var scope = r.Enter();
@@ -589,14 +589,14 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Text" when r.InNamespace(XmlNamespaces.Meteorology): (text ??= []).Add(global::JmaXml.Meteorology.Text.Read(r)); break;
+                    case "Text" when r.InNamespace(XmlNamespaces.Meteorology): text.Add(r, global::JmaXml.Meteorology.Text.Read(r)); break;
                     case "Code" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref codeSeen, "Code"); code = r.ReadList(); break;
                     default: r.Skip(); break;
                 }
             }
             return new Comment
             {
-                Text = text is null ? throw r.Missing("Text") : [.. text],
+                Text = text.IsEmpty ? throw r.Missing("Text") : text.ToImmutable(r),
                 Code = code,
             };
         }
@@ -695,7 +695,7 @@ public static partial class Meteorology
 
         internal static Item Read(JmaXmlReader r)
         {
-            List<Kind>? kind = null;
+            ArrayBuilder<Kind> kind = default;
             Areas? areas = null;
             var areasSeen = false;
             Stations? stations = null;
@@ -710,13 +710,13 @@ public static partial class Meteorology
             var fullStatusSeen = false;
             string? editingMark = null;
             var editingMarkSeen = false;
-            List<string>? otherReport = null;
+            ArrayBuilder<string> otherReport = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Kind" when r.InNamespace(XmlNamespaces.Meteorology): (kind ??= []).Add(global::JmaXml.Meteorology.Kind.Read(r)); break;
+                    case "Kind" when r.InNamespace(XmlNamespaces.Meteorology): kind.Add(r, global::JmaXml.Meteorology.Kind.Read(r)); break;
                     case "Areas" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areasSeen, "Areas"); areas = global::JmaXml.Meteorology.Areas.Read(r); break;
                     case "Stations" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref stationsSeen, "Stations"); stations = global::JmaXml.Meteorology.Stations.Read(r); break;
                     case "Area" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaSeen, "Area"); area = global::JmaXml.Meteorology.Area.Read(r); break;
@@ -724,13 +724,13 @@ public static partial class Meteorology
                     case "ChangeStatus" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref changeStatusSeen, "ChangeStatus"); changeStatus = r.ReadString(); break;
                     case "FullStatus" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref fullStatusSeen, "FullStatus"); fullStatus = r.ReadString(); break;
                     case "EditingMark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref editingMarkSeen, "EditingMark"); editingMark = r.ReadString(); break;
-                    case "OtherReport" when r.InNamespace(XmlNamespaces.Meteorology): (otherReport ??= []).Add(r.ReadString()); break;
+                    case "OtherReport" when r.InNamespace(XmlNamespaces.Meteorology): otherReport.Add(r, r.ReadString()); break;
                     default: r.Skip(); break;
                 }
             }
             return new Item
             {
-                Kind = kind is null ? throw r.Missing("Kind") : [.. kind],
+                Kind = kind.IsEmpty ? throw r.Missing("Kind") : kind.ToImmutable(r),
                 Areas = areas,
                 Stations = stations,
                 Area = area,
@@ -738,7 +738,7 @@ public static partial class Meteorology
                 ChangeStatus = changeStatus,
                 FullStatus = fullStatus,
                 EditingMark = editingMark,
-                OtherReport = otherReport is null ? [] : [.. otherReport],
+                OtherReport = otherReport.ToImmutable(r),
             };
         }
     }
@@ -980,7 +980,7 @@ public static partial class Meteorology
             var additionSeen = false;
             ElementBasis.DateTime? dateTime = null;
             var dateTimeSeen = false;
-            List<Property>? property = null;
+            ArrayBuilder<Property> property = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
@@ -997,7 +997,7 @@ public static partial class Meteorology
                     case "WarningNotice" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref warningNoticeSeen, "WarningNotice"); warningNotice = global::JmaXml.Meteorology.WarningNotice.Read(r); break;
                     case "Addition" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref additionSeen, "Addition"); addition = global::JmaXml.Meteorology.Addition.Read(r); break;
                     case "DateTime" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref dateTimeSeen, "DateTime"); dateTime = global::JmaXml.ElementBasis.DateTime.Read(r); break;
-                    case "Property" when r.InNamespace(XmlNamespaces.Meteorology): (property ??= []).Add(global::JmaXml.Meteorology.Property.Read(r)); break;
+                    case "Property" when r.InNamespace(XmlNamespaces.Meteorology): property.Add(r, global::JmaXml.Meteorology.Property.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
@@ -1014,7 +1014,7 @@ public static partial class Meteorology
                 WarningNotice = warningNotice,
                 Addition = addition,
                 DateTime = dateTime,
-                Property = property is null ? [] : [.. property],
+                Property = property.ToImmutable(r),
             };
         }
     }
@@ -1027,19 +1027,19 @@ public static partial class Meteorology
 
         internal static NextKinds Read(JmaXmlReader r)
         {
-            List<NextKind>? nextKind = null;
+            ArrayBuilder<NextKind> nextKind = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "NextKind" when r.InNamespace(XmlNamespaces.Meteorology): (nextKind ??= []).Add(global::JmaXml.Meteorology.NextKind.Read(r)); break;
+                    case "NextKind" when r.InNamespace(XmlNamespaces.Meteorology): nextKind.Add(r, global::JmaXml.Meteorology.NextKind.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new NextKinds
             {
-                NextKind = nextKind is null ? throw r.Missing("NextKind") : [.. nextKind],
+                NextKind = nextKind.IsEmpty ? throw r.Missing("NextKind") : nextKind.ToImmutable(r),
             };
         }
     }
@@ -1131,19 +1131,19 @@ public static partial class Meteorology
 
         internal static Attention Read(JmaXmlReader r)
         {
-            List<string>? note = null;
+            ArrayBuilder<string> note = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Note" when r.InNamespace(XmlNamespaces.Meteorology): (note ??= []).Add(r.ReadString()); break;
+                    case "Note" when r.InNamespace(XmlNamespaces.Meteorology): note.Add(r, r.ReadString()); break;
                     default: r.Skip(); break;
                 }
             }
             return new Attention
             {
-                Note = note is null ? throw r.Missing("Note") : [.. note],
+                Note = note.IsEmpty ? throw r.Missing("Note") : note.ToImmutable(r),
             };
         }
     }
@@ -1293,19 +1293,19 @@ public static partial class Meteorology
 
         internal static Addition Read(JmaXmlReader r)
         {
-            List<string>? note = null;
+            ArrayBuilder<string> note = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Note" when r.InNamespace(XmlNamespaces.Meteorology): (note ??= []).Add(r.ReadString()); break;
+                    case "Note" when r.InNamespace(XmlNamespaces.Meteorology): note.Add(r, r.ReadString()); break;
                     default: r.Skip(); break;
                 }
             }
             return new Addition
             {
-                Note = note is null ? throw r.Missing("Note") : [.. note],
+                Note = note.IsEmpty ? throw r.Missing("Note") : note.ToImmutable(r),
             };
         }
     }
@@ -1762,8 +1762,8 @@ public static partial class Meteorology
         {
             string? type = null;
             var typeSeen = false;
-            List<SignificancyPart>? significancyPart = null;
-            List<SignificancyPart>? subsequentSignificancyPart = null;
+            ArrayBuilder<SignificancyPart> significancyPart = default;
+            ArrayBuilder<SignificancyPart> subsequentSignificancyPart = default;
             Period? warningPeriod = null;
             var warningPeriodSeen = false;
             Period? advisoryPeriod = null;
@@ -1780,7 +1780,7 @@ public static partial class Meteorology
             var windDirectionPartSeen = false;
             WindSpeedPart? windSpeedPart = null;
             var windSpeedPartSeen = false;
-            List<WarningAreaPart>? warningAreaPart = null;
+            ArrayBuilder<WarningAreaPart> warningAreaPart = default;
             WeatherPart? weatherPart = null;
             var weatherPartSeen = false;
             PressurePart? pressurePart = null;
@@ -1793,13 +1793,13 @@ public static partial class Meteorology
             var synopsisPartSeen = false;
             WaveHeightPart? waveHeightPart = null;
             var waveHeightPartSeen = false;
-            List<PrecipitationPart>? precipitationPart = null;
-            List<PrecipitationBasedIndexPart>? precipitationBasedIndexPart = null;
+            ArrayBuilder<PrecipitationPart> precipitationPart = default;
+            ArrayBuilder<PrecipitationBasedIndexPart> precipitationBasedIndexPart = default;
             SnowfallDepthPart? snowfallDepthPart = null;
             var snowfallDepthPartSeen = false;
             SnowDepthPart? snowDepthPart = null;
             var snowDepthPartSeen = false;
-            List<HumidityPart>? humidityPart = null;
+            ArrayBuilder<HumidityPart> humidityPart = default;
             TidalLevelPart? tidalLevelPart = null;
             var tidalLevelPartSeen = false;
             SunshinePart? sunshinePart = null;
@@ -1834,8 +1834,8 @@ public static partial class Meteorology
             var floodAssumptionTableSeen = false;
             DischargePart? dischargePart = null;
             var dischargePartSeen = false;
-            List<ElementBasis.ClimateFeature>? climateFeaturePart = null;
-            List<ClimateValuesPart>? climateValuesPart = null;
+            ArrayBuilder<ElementBasis.ClimateFeature> climateFeaturePart = default;
+            ArrayBuilder<ClimateValuesPart> climateValuesPart = default;
             ClimateProbabilityValuesPart? climateProbabilityValuesPart = null;
             var climateProbabilityValuesPartSeen = false;
             EventDatePart? eventDatePart = null;
@@ -1846,17 +1846,17 @@ public static partial class Meteorology
             var solarZenithAnglePartSeen = false;
             UvIndexPart? uvIndexPart = null;
             var uvIndexPartSeen = false;
-            List<FiftyKtWindProbabilityPart>? fiftyKtWindProbabilityPart = null;
-            List<EventPart>? eventPart = null;
-            List<ElementBasis.ReferableString>? text = null;
+            ArrayBuilder<FiftyKtWindProbabilityPart> fiftyKtWindProbabilityPart = default;
+            ArrayBuilder<EventPart> eventPart = default;
+            ArrayBuilder<ElementBasis.ReferableString> text = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "Type" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref typeSeen, "Type"); type = r.ReadString(); break;
-                    case "SignificancyPart" when r.InNamespace(XmlNamespaces.Meteorology): (significancyPart ??= []).Add(global::JmaXml.Meteorology.SignificancyPart.Read(r)); break;
-                    case "SubsequentSignificancyPart" when r.InNamespace(XmlNamespaces.Meteorology): (subsequentSignificancyPart ??= []).Add(global::JmaXml.Meteorology.SignificancyPart.Read(r)); break;
+                    case "SignificancyPart" when r.InNamespace(XmlNamespaces.Meteorology): significancyPart.Add(r, global::JmaXml.Meteorology.SignificancyPart.Read(r)); break;
+                    case "SubsequentSignificancyPart" when r.InNamespace(XmlNamespaces.Meteorology): subsequentSignificancyPart.Add(r, global::JmaXml.Meteorology.SignificancyPart.Read(r)); break;
                     case "WarningPeriod" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref warningPeriodSeen, "WarningPeriod"); warningPeriod = global::JmaXml.Meteorology.Period.Read(r); break;
                     case "AdvisoryPeriod" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref advisoryPeriodSeen, "AdvisoryPeriod"); advisoryPeriod = global::JmaXml.Meteorology.Period.Read(r); break;
                     case "CriteriaPeriod" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref criteriaPeriodSeen, "CriteriaPeriod"); criteriaPeriod = global::JmaXml.Meteorology.CriteriaPeriod.Read(r); break;
@@ -1865,18 +1865,18 @@ public static partial class Meteorology
                     case "WindPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref windPartSeen, "WindPart"); windPart = global::JmaXml.Meteorology.WindPart.Read(r); break;
                     case "WindDirectionPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref windDirectionPartSeen, "WindDirectionPart"); windDirectionPart = global::JmaXml.Meteorology.WindDirectionPart.Read(r); break;
                     case "WindSpeedPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref windSpeedPartSeen, "WindSpeedPart"); windSpeedPart = global::JmaXml.Meteorology.WindSpeedPart.Read(r); break;
-                    case "WarningAreaPart" when r.InNamespace(XmlNamespaces.Meteorology): (warningAreaPart ??= []).Add(global::JmaXml.Meteorology.WarningAreaPart.Read(r)); break;
+                    case "WarningAreaPart" when r.InNamespace(XmlNamespaces.Meteorology): warningAreaPart.Add(r, global::JmaXml.Meteorology.WarningAreaPart.Read(r)); break;
                     case "WeatherPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref weatherPartSeen, "WeatherPart"); weatherPart = global::JmaXml.Meteorology.WeatherPart.Read(r); break;
                     case "PressurePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref pressurePartSeen, "PressurePart"); pressurePart = global::JmaXml.Meteorology.PressurePart.Read(r); break;
                     case "TemperaturePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref temperaturePartSeen, "TemperaturePart"); temperaturePart = global::JmaXml.Meteorology.TemperaturePart.Read(r); break;
                     case "VisibilityPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref visibilityPartSeen, "VisibilityPart"); visibilityPart = global::JmaXml.Meteorology.VisibilityPart.Read(r); break;
                     case "SynopsisPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref synopsisPartSeen, "SynopsisPart"); synopsisPart = global::JmaXml.Meteorology.SynopsisPart.Read(r); break;
                     case "WaveHeightPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref waveHeightPartSeen, "WaveHeightPart"); waveHeightPart = global::JmaXml.Meteorology.WaveHeightPart.Read(r); break;
-                    case "PrecipitationPart" when r.InNamespace(XmlNamespaces.Meteorology): (precipitationPart ??= []).Add(global::JmaXml.Meteorology.PrecipitationPart.Read(r)); break;
-                    case "PrecipitationBasedIndexPart" when r.InNamespace(XmlNamespaces.Meteorology): (precipitationBasedIndexPart ??= []).Add(global::JmaXml.Meteorology.PrecipitationBasedIndexPart.Read(r)); break;
+                    case "PrecipitationPart" when r.InNamespace(XmlNamespaces.Meteorology): precipitationPart.Add(r, global::JmaXml.Meteorology.PrecipitationPart.Read(r)); break;
+                    case "PrecipitationBasedIndexPart" when r.InNamespace(XmlNamespaces.Meteorology): precipitationBasedIndexPart.Add(r, global::JmaXml.Meteorology.PrecipitationBasedIndexPart.Read(r)); break;
                     case "SnowfallDepthPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref snowfallDepthPartSeen, "SnowfallDepthPart"); snowfallDepthPart = global::JmaXml.Meteorology.SnowfallDepthPart.Read(r); break;
                     case "SnowDepthPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref snowDepthPartSeen, "SnowDepthPart"); snowDepthPart = global::JmaXml.Meteorology.SnowDepthPart.Read(r); break;
-                    case "HumidityPart" when r.InNamespace(XmlNamespaces.Meteorology): (humidityPart ??= []).Add(global::JmaXml.Meteorology.HumidityPart.Read(r)); break;
+                    case "HumidityPart" when r.InNamespace(XmlNamespaces.Meteorology): humidityPart.Add(r, global::JmaXml.Meteorology.HumidityPart.Read(r)); break;
                     case "TidalLevelPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref tidalLevelPartSeen, "TidalLevelPart"); tidalLevelPart = global::JmaXml.Meteorology.TidalLevelPart.Read(r); break;
                     case "SunshinePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sunshinePartSeen, "SunshinePart"); sunshinePart = global::JmaXml.Meteorology.SunshinePart.Read(r); break;
                     case "WeatherCodePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref weatherCodePartSeen, "WeatherCodePart"); weatherCodePart = global::JmaXml.Meteorology.WeatherCodePart.Read(r); break;
@@ -1894,24 +1894,24 @@ public static partial class Meteorology
                     case "WaterLevelPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref waterLevelPartSeen, "WaterLevelPart"); waterLevelPart = global::JmaXml.Meteorology.WaterLevelPart.Read(r); break;
                     case "FloodAssumptionTable" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref floodAssumptionTableSeen, "FloodAssumptionTable"); floodAssumptionTable = global::JmaXml.Meteorology.FloodAssumptionTable.Read(r); break;
                     case "DischargePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref dischargePartSeen, "DischargePart"); dischargePart = global::JmaXml.Meteorology.DischargePart.Read(r); break;
-                    case "ClimateFeaturePart" when r.InNamespace(XmlNamespaces.Meteorology): (climateFeaturePart ??= []).Add(global::JmaXml.ElementBasis.ClimateFeature.Read(r)); break;
-                    case "ClimateValuesPart" when r.InNamespace(XmlNamespaces.Meteorology): (climateValuesPart ??= []).Add(global::JmaXml.Meteorology.ClimateValuesPart.Read(r)); break;
+                    case "ClimateFeaturePart" when r.InNamespace(XmlNamespaces.Meteorology): climateFeaturePart.Add(r, global::JmaXml.ElementBasis.ClimateFeature.Read(r)); break;
+                    case "ClimateValuesPart" when r.InNamespace(XmlNamespaces.Meteorology): climateValuesPart.Add(r, global::JmaXml.Meteorology.ClimateValuesPart.Read(r)); break;
                     case "ClimateProbabilityValuesPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref climateProbabilityValuesPartSeen, "ClimateProbabilityValuesPart"); climateProbabilityValuesPart = global::JmaXml.Meteorology.ClimateProbabilityValuesPart.Read(r); break;
                     case "EventDatePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref eventDatePartSeen, "EventDatePart"); eventDatePart = global::JmaXml.Meteorology.EventDatePart.Read(r); break;
                     case "PrecipitationClassPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref precipitationClassPartSeen, "PrecipitationClassPart"); precipitationClassPart = global::JmaXml.ElementBasis.ClassThresholdOfAverage.Read(r); break;
                     case "SolarZenithAnglePart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref solarZenithAnglePartSeen, "SolarZenithAnglePart"); solarZenithAnglePart = global::JmaXml.Meteorology.SolarZenithAnglePart.Read(r); break;
                     case "UvIndexPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref uvIndexPartSeen, "UvIndexPart"); uvIndexPart = global::JmaXml.Meteorology.UvIndexPart.Read(r); break;
-                    case "FiftyKtWindProbabilityPart" when r.InNamespace(XmlNamespaces.Meteorology): (fiftyKtWindProbabilityPart ??= []).Add(global::JmaXml.Meteorology.FiftyKtWindProbabilityPart.Read(r)); break;
-                    case "EventPart" when r.InNamespace(XmlNamespaces.Meteorology): (eventPart ??= []).Add(global::JmaXml.Meteorology.EventPart.Read(r)); break;
-                    case "Text" when r.InNamespace(XmlNamespaces.Meteorology): (text ??= []).Add(global::JmaXml.ElementBasis.ReferableString.Read(r)); break;
+                    case "FiftyKtWindProbabilityPart" when r.InNamespace(XmlNamespaces.Meteorology): fiftyKtWindProbabilityPart.Add(r, global::JmaXml.Meteorology.FiftyKtWindProbabilityPart.Read(r)); break;
+                    case "EventPart" when r.InNamespace(XmlNamespaces.Meteorology): eventPart.Add(r, global::JmaXml.Meteorology.EventPart.Read(r)); break;
+                    case "Text" when r.InNamespace(XmlNamespaces.Meteorology): text.Add(r, global::JmaXml.ElementBasis.ReferableString.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Property
             {
                 Type = type ?? throw r.Missing("Type"),
-                SignificancyPart = significancyPart is null ? [] : [.. significancyPart],
-                SubsequentSignificancyPart = subsequentSignificancyPart is null ? [] : [.. subsequentSignificancyPart],
+                SignificancyPart = significancyPart.ToImmutable(r),
+                SubsequentSignificancyPart = subsequentSignificancyPart.ToImmutable(r),
                 WarningPeriod = warningPeriod,
                 AdvisoryPeriod = advisoryPeriod,
                 CriteriaPeriod = criteriaPeriod,
@@ -1920,18 +1920,18 @@ public static partial class Meteorology
                 WindPart = windPart,
                 WindDirectionPart = windDirectionPart,
                 WindSpeedPart = windSpeedPart,
-                WarningAreaPart = warningAreaPart is null ? [] : [.. warningAreaPart],
+                WarningAreaPart = warningAreaPart.ToImmutable(r),
                 WeatherPart = weatherPart,
                 PressurePart = pressurePart,
                 TemperaturePart = temperaturePart,
                 VisibilityPart = visibilityPart,
                 SynopsisPart = synopsisPart,
                 WaveHeightPart = waveHeightPart,
-                PrecipitationPart = precipitationPart is null ? [] : [.. precipitationPart],
-                PrecipitationBasedIndexPart = precipitationBasedIndexPart is null ? [] : [.. precipitationBasedIndexPart],
+                PrecipitationPart = precipitationPart.ToImmutable(r),
+                PrecipitationBasedIndexPart = precipitationBasedIndexPart.ToImmutable(r),
                 SnowfallDepthPart = snowfallDepthPart,
                 SnowDepthPart = snowDepthPart,
-                HumidityPart = humidityPart is null ? [] : [.. humidityPart],
+                HumidityPart = humidityPart.ToImmutable(r),
                 TidalLevelPart = tidalLevelPart,
                 SunshinePart = sunshinePart,
                 WeatherCodePart = weatherCodePart,
@@ -1949,16 +1949,16 @@ public static partial class Meteorology
                 WaterLevelPart = waterLevelPart,
                 FloodAssumptionTable = floodAssumptionTable,
                 DischargePart = dischargePart,
-                ClimateFeaturePart = climateFeaturePart is null ? [] : [.. climateFeaturePart],
-                ClimateValuesPart = climateValuesPart is null ? [] : [.. climateValuesPart],
+                ClimateFeaturePart = climateFeaturePart.ToImmutable(r),
+                ClimateValuesPart = climateValuesPart.ToImmutable(r),
                 ClimateProbabilityValuesPart = climateProbabilityValuesPart,
                 EventDatePart = eventDatePart,
                 PrecipitationClassPart = precipitationClassPart,
                 SolarZenithAnglePart = solarZenithAnglePart,
                 UvIndexPart = uvIndexPart,
-                FiftyKtWindProbabilityPart = fiftyKtWindProbabilityPart is null ? [] : [.. fiftyKtWindProbabilityPart],
-                EventPart = eventPart is null ? [] : [.. eventPart],
-                Text = text is null ? [] : [.. text],
+                FiftyKtWindProbabilityPart = fiftyKtWindProbabilityPart.ToImmutable(r),
+                EventPart = eventPart.ToImmutable(r),
+                Text = text.ToImmutable(r),
             };
         }
     }
@@ -1996,12 +1996,12 @@ public static partial class Meteorology
         internal static ClimateValuesPart Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<ElementBasis.Temperature>? temperature = null;
-            List<ElementBasis.Precipitation>? precipitation = null;
-            List<ElementBasis.Sunshine>? sunshine = null;
-            List<ElementBasis.SnowfallDepth>? snowfallDepth = null;
-            List<ElementBasis.SnowDepth>? snowDepth = null;
-            List<ElementBasis.Comparison>? comparison = null;
+            ArrayBuilder<ElementBasis.Temperature> temperature = default;
+            ArrayBuilder<ElementBasis.Precipitation> precipitation = default;
+            ArrayBuilder<ElementBasis.Sunshine> sunshine = default;
+            ArrayBuilder<ElementBasis.SnowfallDepth> snowfallDepth = default;
+            ArrayBuilder<ElementBasis.SnowDepth> snowDepth = default;
+            ArrayBuilder<ElementBasis.Comparison> comparison = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -2009,12 +2009,12 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): (temperature ??= []).Add(global::JmaXml.ElementBasis.Temperature.Read(r)); break;
-                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitation ??= []).Add(global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
-                    case "Sunshine" when r.InNamespace(XmlNamespaces.ElementBasis): (sunshine ??= []).Add(global::JmaXml.ElementBasis.Sunshine.Read(r)); break;
-                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowfallDepth ??= []).Add(global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
-                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowDepth ??= []).Add(global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
-                    case "Comparison" when r.InNamespace(XmlNamespaces.ElementBasis): (comparison ??= []).Add(global::JmaXml.ElementBasis.Comparison.Read(r)); break;
+                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): temperature.Add(r, global::JmaXml.ElementBasis.Temperature.Read(r)); break;
+                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): precipitation.Add(r, global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
+                    case "Sunshine" when r.InNamespace(XmlNamespaces.ElementBasis): sunshine.Add(r, global::JmaXml.ElementBasis.Sunshine.Read(r)); break;
+                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowfallDepth.Add(r, global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
+                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowDepth.Add(r, global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
+                    case "Comparison" when r.InNamespace(XmlNamespaces.ElementBasis): comparison.Add(r, global::JmaXml.ElementBasis.Comparison.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -2022,12 +2022,12 @@ public static partial class Meteorology
             return new ClimateValuesPart
             {
                 Type = type,
-                Temperature = temperature is null ? [] : [.. temperature],
-                Precipitation = precipitation is null ? [] : [.. precipitation],
-                Sunshine = sunshine is null ? [] : [.. sunshine],
-                SnowfallDepth = snowfallDepth is null ? [] : [.. snowfallDepth],
-                SnowDepth = snowDepth is null ? [] : [.. snowDepth],
-                Comparison = comparison is null ? [] : [.. comparison],
+                Temperature = temperature.ToImmutable(r),
+                Precipitation = precipitation.ToImmutable(r),
+                Sunshine = sunshine.ToImmutable(r),
+                SnowfallDepth = snowfallDepth.ToImmutable(r),
+                SnowDepth = snowDepth.ToImmutable(r),
+                Comparison = comparison.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -2056,9 +2056,9 @@ public static partial class Meteorology
 
         internal static EventDatePart Read(JmaXmlReader r)
         {
-            List<EventDate>? date = null;
-            List<EventDate>? normal = null;
-            List<EventDate>? lastYear = null;
+            ArrayBuilder<EventDate> date = default;
+            ArrayBuilder<EventDate> normal = default;
+            ArrayBuilder<EventDate> lastYear = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -2066,18 +2066,18 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Date" when r.InNamespace(XmlNamespaces.Meteorology): (date ??= []).Add(global::JmaXml.Meteorology.EventDate.Read(r)); break;
-                    case "Normal" when r.InNamespace(XmlNamespaces.Meteorology): (normal ??= []).Add(global::JmaXml.Meteorology.EventDate.Read(r)); break;
-                    case "LastYear" when r.InNamespace(XmlNamespaces.Meteorology): (lastYear ??= []).Add(global::JmaXml.Meteorology.EventDate.Read(r)); break;
+                    case "Date" when r.InNamespace(XmlNamespaces.Meteorology): date.Add(r, global::JmaXml.Meteorology.EventDate.Read(r)); break;
+                    case "Normal" when r.InNamespace(XmlNamespaces.Meteorology): normal.Add(r, global::JmaXml.Meteorology.EventDate.Read(r)); break;
+                    case "LastYear" when r.InNamespace(XmlNamespaces.Meteorology): lastYear.Add(r, global::JmaXml.Meteorology.EventDate.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
             }
             return new EventDatePart
             {
-                Date = date is null ? [] : [.. date],
-                Normal = normal is null ? [] : [.. normal],
-                LastYear = lastYear is null ? [] : [.. lastYear],
+                Date = date.ToImmutable(r),
+                Normal = normal.ToImmutable(r),
+                LastYear = lastYear.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -2122,19 +2122,19 @@ public static partial class Meteorology
 
         internal static ClimateProbabilityValuesPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.ClimateProbabilityValues>? climateProbabilityValues = null;
+            ArrayBuilder<ElementBasis.ClimateProbabilityValues> climateProbabilityValues = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "ClimateProbabilityValues" when r.InNamespace(XmlNamespaces.ElementBasis): (climateProbabilityValues ??= []).Add(global::JmaXml.ElementBasis.ClimateProbabilityValues.Read(r)); break;
+                    case "ClimateProbabilityValues" when r.InNamespace(XmlNamespaces.ElementBasis): climateProbabilityValues.Add(r, global::JmaXml.ElementBasis.ClimateProbabilityValues.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new ClimateProbabilityValuesPart
             {
-                ClimateProbabilityValues = climateProbabilityValues is null ? throw r.Missing("ClimateProbabilityValues") : [.. climateProbabilityValues],
+                ClimateProbabilityValues = climateProbabilityValues.IsEmpty ? throw r.Missing("ClimateProbabilityValues") : climateProbabilityValues.ToImmutable(r),
             };
         }
     }
@@ -2147,19 +2147,19 @@ public static partial class Meteorology
 
         internal static SolarZenithAnglePart Read(JmaXmlReader r)
         {
-            List<ElementBasis.SolarZenithAngle>? solarZenithAngle = null;
+            ArrayBuilder<ElementBasis.SolarZenithAngle> solarZenithAngle = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "SolarZenithAngle" when r.InNamespace(XmlNamespaces.ElementBasis): (solarZenithAngle ??= []).Add(global::JmaXml.ElementBasis.SolarZenithAngle.Read(r)); break;
+                    case "SolarZenithAngle" when r.InNamespace(XmlNamespaces.ElementBasis): solarZenithAngle.Add(r, global::JmaXml.ElementBasis.SolarZenithAngle.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new SolarZenithAnglePart
             {
-                SolarZenithAngle = solarZenithAngle is null ? throw r.Missing("SolarZenithAngle") : [.. solarZenithAngle],
+                SolarZenithAngle = solarZenithAngle.IsEmpty ? throw r.Missing("SolarZenithAngle") : solarZenithAngle.ToImmutable(r),
             };
         }
     }
@@ -2181,7 +2181,7 @@ public static partial class Meteorology
 
         internal static UvIndexPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.UvIndex>? uvIndex = null;
+            ArrayBuilder<ElementBasis.UvIndex> uvIndex = default;
             string? text = null;
             var textSeen = false;
             using var scope = r.Enter();
@@ -2189,14 +2189,14 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "UvIndex" when r.InNamespace(XmlNamespaces.ElementBasis): (uvIndex ??= []).Add(global::JmaXml.ElementBasis.UvIndex.Read(r)); break;
+                    case "UvIndex" when r.InNamespace(XmlNamespaces.ElementBasis): uvIndex.Add(r, global::JmaXml.ElementBasis.UvIndex.Read(r)); break;
                     case "Text" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref textSeen, "Text"); text = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
             }
             return new UvIndexPart
             {
-                UvIndex = uvIndex is null ? throw r.Missing("UvIndex") : [.. uvIndex],
+                UvIndex = uvIndex.IsEmpty ? throw r.Missing("UvIndex") : uvIndex.ToImmutable(r),
                 Text = text,
             };
         }
@@ -2210,19 +2210,19 @@ public static partial class Meteorology
 
         internal static FiftyKtWindProbabilityPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.WeatherForecastProbability>? fiftyKtWindProbability = null;
+            ArrayBuilder<ElementBasis.WeatherForecastProbability> fiftyKtWindProbability = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "FiftyKtWindProbability" when r.InNamespace(XmlNamespaces.Meteorology): (fiftyKtWindProbability ??= []).Add(global::JmaXml.ElementBasis.WeatherForecastProbability.Read(r)); break;
+                    case "FiftyKtWindProbability" when r.InNamespace(XmlNamespaces.Meteorology): fiftyKtWindProbability.Add(r, global::JmaXml.ElementBasis.WeatherForecastProbability.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new FiftyKtWindProbabilityPart
             {
-                FiftyKtWindProbability = fiftyKtWindProbability is null ? throw r.Missing("FiftyKtWindProbability") : [.. fiftyKtWindProbability],
+                FiftyKtWindProbability = fiftyKtWindProbability.IsEmpty ? throw r.Missing("FiftyKtWindProbability") : fiftyKtWindProbability.ToImmutable(r),
             };
         }
     }
@@ -2304,20 +2304,20 @@ public static partial class Meteorology
         internal static Areas Read(JmaXmlReader r)
         {
             var codeType = r.AttributeString("codeType");
-            List<Area>? area = null;
+            ArrayBuilder<Area> area = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Area" when r.InNamespace(XmlNamespaces.Meteorology): (area ??= []).Add(global::JmaXml.Meteorology.Area.Read(r)); break;
+                    case "Area" when r.InNamespace(XmlNamespaces.Meteorology): area.Add(r, global::JmaXml.Meteorology.Area.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Areas
             {
                 CodeType = codeType,
-                Area = area is null ? throw r.Missing("Area") : [.. area],
+                Area = area.IsEmpty ? throw r.Missing("Area") : area.ToImmutable(r),
             };
         }
     }
@@ -2340,20 +2340,20 @@ public static partial class Meteorology
         internal static Stations Read(JmaXmlReader r)
         {
             var codeType = r.AttributeString("codeType");
-            List<Station>? station = null;
+            ArrayBuilder<Station> station = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Station" when r.InNamespace(XmlNamespaces.Meteorology): (station ??= []).Add(global::JmaXml.Meteorology.Station.Read(r)); break;
+                    case "Station" when r.InNamespace(XmlNamespaces.Meteorology): station.Add(r, global::JmaXml.Meteorology.Station.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Stations
             {
                 CodeType = codeType,
-                Station = station is null ? throw r.Missing("Station") : [.. station],
+                Station = station.IsEmpty ? throw r.Missing("Station") : station.ToImmutable(r),
             };
         }
     }
@@ -2541,10 +2541,10 @@ public static partial class Meteorology
             var subCityCodeListSeen = false;
             ImmutableArray<string>? codeList = null;
             var codeListSeen = false;
-            List<ElementBasis.Circle>? circle = null;
-            List<ElementBasis.Coordinate>? coordinate = null;
-            List<ElementBasis.Coordinate>? line = null;
-            List<ElementBasis.Coordinate>? polygon = null;
+            ArrayBuilder<ElementBasis.Circle> circle = default;
+            ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
+            ArrayBuilder<ElementBasis.Coordinate> line = default;
+            ArrayBuilder<ElementBasis.Coordinate> polygon = default;
             string? location = null;
             var locationSeen = false;
             string? status = null;
@@ -2573,10 +2573,10 @@ public static partial class Meteorology
                     case "SubCityList" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref subCityListSeen, "SubCityList"); subCityList = r.ReadList(); break;
                     case "SubCityCodeList" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref subCityCodeListSeen, "SubCityCodeList"); subCityCodeList = r.ReadList(); break;
                     case "CodeList" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref codeListSeen, "CodeList"); codeList = r.ReadList(); break;
-                    case "Circle" when r.InNamespace(XmlNamespaces.ElementBasis): (circle ??= []).Add(global::JmaXml.ElementBasis.Circle.Read(r)); break;
-                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): (coordinate ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "Line" when r.InNamespace(XmlNamespaces.ElementBasis): (line ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): (polygon ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Circle" when r.InNamespace(XmlNamespaces.ElementBasis): circle.Add(r, global::JmaXml.ElementBasis.Circle.Read(r)); break;
+                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): coordinate.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Line" when r.InNamespace(XmlNamespaces.ElementBasis): line.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): polygon.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     case "Location" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref locationSeen, "Location"); location = r.ReadString(); break;
                     case "Status" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref statusSeen, "Status"); status = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -2604,10 +2604,10 @@ public static partial class Meteorology
                 SubCityList = subCityList,
                 SubCityCodeList = subCityCodeList,
                 CodeList = codeList,
-                Circle = circle is null ? [] : [.. circle],
-                Coordinate = coordinate is null ? [] : [.. coordinate],
-                Line = line is null ? [] : [.. line],
-                Polygon = polygon is null ? [] : [.. polygon],
+                Circle = circle.ToImmutable(r),
+                Coordinate = coordinate.ToImmutable(r),
+                Line = line.ToImmutable(r),
+                Polygon = polygon.ToImmutable(r),
                 Location = location,
                 Status = status,
             };
@@ -2675,32 +2675,32 @@ public static partial class Meteorology
         {
             string? name = null;
             var nameSeen = false;
-            List<StationCode>? code = null;
+            ArrayBuilder<StationCode> code = default;
             string? location = null;
             var locationSeen = false;
             string? status = null;
             var statusSeen = false;
-            List<ElementBasis.Coordinate>? coordinate = null;
+            ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "Name" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref nameSeen, "Name"); name = r.ReadString(); break;
-                    case "Code" when r.InNamespace(XmlNamespaces.Meteorology): (code ??= []).Add(global::JmaXml.Meteorology.StationCode.Read(r)); break;
+                    case "Code" when r.InNamespace(XmlNamespaces.Meteorology): code.Add(r, global::JmaXml.Meteorology.StationCode.Read(r)); break;
                     case "Location" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref locationSeen, "Location"); location = r.ReadString(); break;
                     case "Status" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref statusSeen, "Status"); status = r.ReadString(); break;
-                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): (coordinate ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): coordinate.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new Station
             {
                 Name = name ?? throw r.Missing("Name"),
-                Code = code is null ? throw r.Missing("Code") : [.. code],
+                Code = code.IsEmpty ? throw r.Missing("Code") : code.ToImmutable(r),
                 Location = location,
                 Status = status,
-                Coordinate = coordinate is null ? [] : [.. coordinate],
+                Coordinate = coordinate.ToImmutable(r),
             };
         }
     }
@@ -2751,19 +2751,19 @@ public static partial class Meteorology
 
         internal static OfficeInfo Read(JmaXmlReader r)
         {
-            List<Office>? office = null;
+            ArrayBuilder<Office> office = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Office" when r.InNamespace(XmlNamespaces.Meteorology): (office ??= []).Add(global::JmaXml.Meteorology.Office.Read(r)); break;
+                    case "Office" when r.InNamespace(XmlNamespaces.Meteorology): office.Add(r, global::JmaXml.Meteorology.Office.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new OfficeInfo
             {
-                Office = office is null ? throw r.Missing("Office") : [.. office],
+                Office = office.IsEmpty ? throw r.Missing("Office") : office.ToImmutable(r),
             };
         }
     }
@@ -2901,19 +2901,19 @@ public static partial class Meteorology
 
         internal static FloodForecastAddition Read(JmaXmlReader r)
         {
-            List<HydrometricStationPart>? hydrometricStationPart = null;
+            ArrayBuilder<HydrometricStationPart> hydrometricStationPart = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "HydrometricStationPart" when r.InNamespace(XmlNamespaces.Meteorology): (hydrometricStationPart ??= []).Add(global::JmaXml.Meteorology.HydrometricStationPart.Read(r)); break;
+                    case "HydrometricStationPart" when r.InNamespace(XmlNamespaces.Meteorology): hydrometricStationPart.Add(r, global::JmaXml.Meteorology.HydrometricStationPart.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new FloodForecastAddition
             {
-                HydrometricStationPart = hydrometricStationPart is null ? throw r.Missing("HydrometricStationPart") : [.. hydrometricStationPart],
+                HydrometricStationPart = hydrometricStationPart.IsEmpty ? throw r.Missing("HydrometricStationPart") : hydrometricStationPart.ToImmutable(r),
             };
         }
     }
@@ -2937,21 +2937,21 @@ public static partial class Meteorology
         {
             TidalAreaPart? tidalAreaPart = null;
             var tidalAreaPartSeen = false;
-            List<HydrometricStationPart>? hydrometricStationPart = null;
+            ArrayBuilder<HydrometricStationPart> hydrometricStationPart = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "TidalAreaPart" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref tidalAreaPartSeen, "TidalAreaPart"); tidalAreaPart = global::JmaXml.Meteorology.TidalAreaPart.Read(r); break;
-                    case "HydrometricStationPart" when r.InNamespace(XmlNamespaces.Meteorology): (hydrometricStationPart ??= []).Add(global::JmaXml.Meteorology.HydrometricStationPart.Read(r)); break;
+                    case "HydrometricStationPart" when r.InNamespace(XmlNamespaces.Meteorology): hydrometricStationPart.Add(r, global::JmaXml.Meteorology.HydrometricStationPart.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new TidalWarningAddition
             {
                 TidalAreaPart = tidalAreaPart ?? throw r.Missing("TidalAreaPart"),
-                HydrometricStationPart = hydrometricStationPart is null ? throw r.Missing("HydrometricStationPart") : [.. hydrometricStationPart],
+                HydrometricStationPart = hydrometricStationPart.IsEmpty ? throw r.Missing("HydrometricStationPart") : hydrometricStationPart.ToImmutable(r),
             };
         }
     }
@@ -2972,21 +2972,21 @@ public static partial class Meteorology
         {
             Area? area = null;
             var areaSeen = false;
-            List<string>? chargeSection = null;
+            ArrayBuilder<string> chargeSection = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
                     case "Area" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaSeen, "Area"); area = global::JmaXml.Meteorology.Area.Read(r); break;
-                    case "ChargeSection" when r.InNamespace(XmlNamespaces.Meteorology): (chargeSection ??= []).Add(r.ReadString()); break;
+                    case "ChargeSection" when r.InNamespace(XmlNamespaces.Meteorology): chargeSection.Add(r, r.ReadString()); break;
                     default: r.Skip(); break;
                 }
             }
             return new TidalAreaPart
             {
                 Area = area ?? throw r.Missing("Area"),
-                ChargeSection = chargeSection is null ? [] : [.. chargeSection],
+                ChargeSection = chargeSection.ToImmutable(r),
             };
         }
     }
@@ -3051,9 +3051,9 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseCriteria? @base = null;
             var @baseSeen = false;
-            List<BaseCriteria>? temporary = null;
-            List<BaseCriteria>? becoming = null;
-            List<LocalCriteria>? local = null;
+            ArrayBuilder<BaseCriteria> temporary = default;
+            ArrayBuilder<BaseCriteria> becoming = default;
+            ArrayBuilder<LocalCriteria> local = default;
             CriteriaClass? criteriaClass = null;
             var criteriaClassSeen = false;
             DateTimeOffset? time = null;
@@ -3069,9 +3069,9 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseCriteria.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseCriteria.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseCriteria.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalCriteria.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseCriteria.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseCriteria.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalCriteria.Read(r)); break;
                     case "CriteriaClass" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref criteriaClassSeen, "CriteriaClass"); criteriaClass = global::JmaXml.Meteorology.CriteriaClass.Read(r); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Duration" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref durationSeen, "Duration"); duration = r.ReadDuration(); break;
@@ -3083,9 +3083,9 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 CriteriaClass = criteriaClass,
                 Time = time,
                 Duration = duration,
@@ -3136,7 +3136,7 @@ public static partial class Meteorology
             var sentenceSeen = false;
             CriteriaClass? criteriaClass = null;
             var criteriaClassSeen = false;
-            List<LocalCriteria>? local = null;
+            ArrayBuilder<LocalCriteria> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             TimeSpan? duration = null;
@@ -3150,7 +3150,7 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "CriteriaClass" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref criteriaClassSeen, "CriteriaClass"); criteriaClass = global::JmaXml.Meteorology.CriteriaClass.Read(r); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalCriteria.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalCriteria.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Duration" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref durationSeen, "Duration"); duration = r.ReadDuration(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
@@ -3161,7 +3161,7 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 CriteriaClass = criteriaClass,
-                Local = local is null ? [] : [.. local],
+                Local = local.ToImmutable(r),
                 Time = time,
                 Duration = duration,
                 Remark = remark,
@@ -3377,13 +3377,13 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWind? @base = null;
             var @baseSeen = false;
-            List<BaseWind>? temporary = null;
-            List<BaseWind>? becoming = null;
-            List<SubAreaWind>? subArea = null;
-            List<ElementBasis.WindDirection>? windDirection = null;
-            List<ElementBasis.WindDegree>? windDegree = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
-            List<ElementBasis.WindScale>? windScale = null;
+            ArrayBuilder<BaseWind> temporary = default;
+            ArrayBuilder<BaseWind> becoming = default;
+            ArrayBuilder<SubAreaWind> subArea = default;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
+            ArrayBuilder<ElementBasis.WindDegree> windDegree = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
+            ArrayBuilder<ElementBasis.WindScale> windScale = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3395,13 +3395,13 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWind.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWind.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWind.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWind.Read(r)); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
-                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): (windDegree ??= []).Add(global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
-                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): (windScale ??= []).Add(global::JmaXml.ElementBasis.WindScale.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWind.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWind.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWind.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): windDegree.Add(r, global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): windScale.Add(r, global::JmaXml.ElementBasis.WindScale.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3411,13 +3411,13 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                WindDirection = windDirection is null ? [] : [.. windDirection],
-                WindDegree = windDegree is null ? [] : [.. windDegree],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
-                WindScale = windScale is null ? [] : [.. windScale],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                WindDirection = windDirection.ToImmutable(r),
+                WindDegree = windDegree.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
+                WindScale = windScale.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -3495,13 +3495,13 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWind? @base = null;
             var @baseSeen = false;
-            List<BaseWind>? temporary = null;
-            List<BaseWind>? becoming = null;
-            List<LocalWind>? local = null;
-            List<ElementBasis.WindDirection>? windDirection = null;
-            List<ElementBasis.WindDegree>? windDegree = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
-            List<ElementBasis.WindScale>? windScale = null;
+            ArrayBuilder<BaseWind> temporary = default;
+            ArrayBuilder<BaseWind> becoming = default;
+            ArrayBuilder<LocalWind> local = default;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
+            ArrayBuilder<ElementBasis.WindDegree> windDegree = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
+            ArrayBuilder<ElementBasis.WindScale> windScale = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3514,13 +3514,13 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWind.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWind.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWind.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWind.Read(r)); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
-                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): (windDegree ??= []).Add(global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
-                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): (windScale ??= []).Add(global::JmaXml.ElementBasis.WindScale.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWind.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWind.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWind.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): windDegree.Add(r, global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): windScale.Add(r, global::JmaXml.ElementBasis.WindScale.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3531,13 +3531,13 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                WindDirection = windDirection is null ? [] : [.. windDirection],
-                WindDegree = windDegree is null ? [] : [.. windDegree],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
-                WindScale = windScale is null ? [] : [.. windScale],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                WindDirection = windDirection.ToImmutable(r),
+                WindDegree = windDegree.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
+                WindScale = windScale.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -3587,11 +3587,11 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.WindDirection>? windDirection = null;
-            List<ElementBasis.WindDegree>? windDegree = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
-            List<ElementBasis.WindScale>? windScale = null;
-            List<LocalWind>? local = null;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
+            ArrayBuilder<ElementBasis.WindDegree> windDegree = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
+            ArrayBuilder<ElementBasis.WindScale> windScale = default;
+            ArrayBuilder<LocalWind> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3602,11 +3602,11 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
-                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): (windDegree ??= []).Add(global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
-                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): (windScale ??= []).Add(global::JmaXml.ElementBasis.WindScale.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWind.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): windDegree.Add(r, global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): windScale.Add(r, global::JmaXml.ElementBasis.WindScale.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWind.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3615,11 +3615,11 @@ public static partial class Meteorology
             return new BaseWind
             {
                 TimeModifier = timeModifier,
-                WindDirection = windDirection is null ? [] : [.. windDirection],
-                WindDegree = windDegree is null ? [] : [.. windDegree],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
-                WindScale = windScale is null ? [] : [.. windScale],
-                Local = local is null ? [] : [.. local],
+                WindDirection = windDirection.ToImmutable(r),
+                WindDegree = windDegree.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
+                WindScale = windScale.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -3671,10 +3671,10 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.WindDirection>? windDirection = null;
-            List<ElementBasis.WindDegree>? windDegree = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
-            List<ElementBasis.WindScale>? windScale = null;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
+            ArrayBuilder<ElementBasis.WindDegree> windDegree = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
+            ArrayBuilder<ElementBasis.WindScale> windScale = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3686,10 +3686,10 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
-                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): (windDegree ??= []).Add(global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
-                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): (windScale ??= []).Add(global::JmaXml.ElementBasis.WindScale.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "WindDegree" when r.InNamespace(XmlNamespaces.ElementBasis): windDegree.Add(r, global::JmaXml.ElementBasis.WindDegree.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindScale" when r.InNamespace(XmlNamespaces.ElementBasis): windScale.Add(r, global::JmaXml.ElementBasis.WindScale.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3699,10 +3699,10 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                WindDirection = windDirection is null ? [] : [.. windDirection],
-                WindDegree = windDegree is null ? [] : [.. windDegree],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
-                WindScale = windScale is null ? [] : [.. windScale],
+                WindDirection = windDirection.ToImmutable(r),
+                WindDegree = windDegree.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
+                WindScale = windScale.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -3784,10 +3784,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWindDirection? @base = null;
             var @baseSeen = false;
-            List<BaseWindDirection>? temporary = null;
-            List<BaseWindDirection>? becoming = null;
-            List<SubAreaWindDirection>? subArea = null;
-            List<ElementBasis.WindDirection>? windDirection = null;
+            ArrayBuilder<BaseWindDirection> temporary = default;
+            ArrayBuilder<BaseWindDirection> becoming = default;
+            ArrayBuilder<SubAreaWindDirection> subArea = default;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3799,10 +3799,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWindDirection.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWindDirection.Read(r)); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWindDirection.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3812,10 +3812,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                WindDirection = windDirection is null ? [] : [.. windDirection],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                WindDirection = windDirection.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -3881,10 +3881,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWindDirection? @base = null;
             var @baseSeen = false;
-            List<BaseWindDirection>? temporary = null;
-            List<BaseWindDirection>? becoming = null;
-            List<LocalWindDirection>? local = null;
-            List<ElementBasis.WindDirection>? windDirection = null;
+            ArrayBuilder<BaseWindDirection> temporary = default;
+            ArrayBuilder<BaseWindDirection> becoming = default;
+            ArrayBuilder<LocalWindDirection> local = default;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3897,10 +3897,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWindDirection.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWindDirection.Read(r)); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWindDirection.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWindDirection.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3911,10 +3911,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                WindDirection = windDirection is null ? [] : [.. windDirection],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                WindDirection = windDirection.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -3952,8 +3952,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.WindDirection>? windDirection = null;
-            List<LocalWindDirection>? local = null;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
+            ArrayBuilder<LocalWindDirection> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -3964,8 +3964,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWindDirection.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWindDirection.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -3974,8 +3974,8 @@ public static partial class Meteorology
             return new BaseWindDirection
             {
                 TimeModifier = timeModifier,
-                WindDirection = windDirection is null ? [] : [.. windDirection],
-                Local = local is null ? [] : [.. local],
+                WindDirection = windDirection.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4015,7 +4015,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.WindDirection>? windDirection = null;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4027,7 +4027,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4037,7 +4037,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                WindDirection = windDirection is null ? [] : [.. windDirection],
+                WindDirection = windDirection.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4101,11 +4101,11 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWindSpeed? @base = null;
             var @baseSeen = false;
-            List<BaseWindSpeed>? temporary = null;
-            List<BaseWindSpeed>? becoming = null;
-            List<SubAreaWindSpeed>? subArea = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
-            List<WindSpeedLevel>? windSpeedLevel = null;
+            ArrayBuilder<BaseWindSpeed> temporary = default;
+            ArrayBuilder<BaseWindSpeed> becoming = default;
+            ArrayBuilder<SubAreaWindSpeed> subArea = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
+            ArrayBuilder<WindSpeedLevel> windSpeedLevel = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4117,11 +4117,11 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWindSpeed.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWindSpeed.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
-                    case "WindSpeedLevel" when r.InNamespace(XmlNamespaces.Meteorology): (windSpeedLevel ??= []).Add(global::JmaXml.Meteorology.WindSpeedLevel.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWindSpeed.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindSpeedLevel" when r.InNamespace(XmlNamespaces.Meteorology): windSpeedLevel.Add(r, global::JmaXml.Meteorology.WindSpeedLevel.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4131,11 +4131,11 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
-                WindSpeedLevel = windSpeedLevel is null ? [] : [.. windSpeedLevel],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
+                WindSpeedLevel = windSpeedLevel.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4201,10 +4201,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWindSpeed? @base = null;
             var @baseSeen = false;
-            List<BaseWindSpeed>? temporary = null;
-            List<BaseWindSpeed>? becoming = null;
-            List<LocalWindSpeed>? local = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
+            ArrayBuilder<BaseWindSpeed> temporary = default;
+            ArrayBuilder<BaseWindSpeed> becoming = default;
+            ArrayBuilder<LocalWindSpeed> local = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4217,10 +4217,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWindSpeed.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWindSpeed.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWindSpeed.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWindSpeed.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4231,10 +4231,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4272,8 +4272,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
-            List<LocalWindSpeed>? local = null;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
+            ArrayBuilder<LocalWindSpeed> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4284,8 +4284,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWindSpeed.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWindSpeed.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4294,8 +4294,8 @@ public static partial class Meteorology
             return new BaseWindSpeed
             {
                 TimeModifier = timeModifier,
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
-                Local = local is null ? [] : [.. local],
+                WindSpeed = windSpeed.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4335,7 +4335,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4347,7 +4347,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4357,7 +4357,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
+                WindSpeed = windSpeed.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4438,7 +4438,7 @@ public static partial class Meteorology
         internal static WarningAreaPart Read(JmaXmlReader r)
         {
             var type = r.RequiredAttributeString("type");
-            List<ElementBasis.WindSpeed>? windSpeed = null;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
             ElementBasis.Circle? circle = null;
             var circleSeen = false;
             using var scope = r.Enter();
@@ -4446,7 +4446,7 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
                     case "Circle" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref circleSeen, "Circle"); circle = global::JmaXml.ElementBasis.Circle.Read(r); break;
                     default: r.Skip(); break;
                 }
@@ -4454,7 +4454,7 @@ public static partial class Meteorology
             return new WarningAreaPart
             {
                 Type = type,
-                WindSpeed = windSpeed is null ? throw r.Missing("WindSpeed") : [.. windSpeed],
+                WindSpeed = windSpeed.IsEmpty ? throw r.Missing("WindSpeed") : windSpeed.ToImmutable(r),
                 Circle = circle ?? throw r.Missing("Circle"),
             };
         }
@@ -4511,10 +4511,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWeather? @base = null;
             var @baseSeen = false;
-            List<BaseWeather>? temporary = null;
-            List<BaseWeather>? becoming = null;
-            List<SubAreaWeather>? subArea = null;
-            List<ElementBasis.Weather>? weather = null;
+            ArrayBuilder<BaseWeather> temporary = default;
+            ArrayBuilder<BaseWeather> becoming = default;
+            ArrayBuilder<SubAreaWeather> subArea = default;
+            ArrayBuilder<ElementBasis.Weather> weather = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4526,10 +4526,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWeather.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWeather.Read(r)); break;
-                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): (weather ??= []).Add(global::JmaXml.ElementBasis.Weather.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWeather.Read(r)); break;
+                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): weather.Add(r, global::JmaXml.ElementBasis.Weather.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4539,10 +4539,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Weather = weather is null ? [] : [.. weather],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Weather = weather.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4608,10 +4608,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWeather? @base = null;
             var @baseSeen = false;
-            List<BaseWeather>? temporary = null;
-            List<BaseWeather>? becoming = null;
-            List<LocalWeather>? local = null;
-            List<ElementBasis.Weather>? weather = null;
+            ArrayBuilder<BaseWeather> temporary = default;
+            ArrayBuilder<BaseWeather> becoming = default;
+            ArrayBuilder<LocalWeather> local = default;
+            ArrayBuilder<ElementBasis.Weather> weather = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4624,10 +4624,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWeather.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWeather.Read(r)); break;
-                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): (weather ??= []).Add(global::JmaXml.ElementBasis.Weather.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWeather.Read(r)); break;
+                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): weather.Add(r, global::JmaXml.ElementBasis.Weather.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4638,10 +4638,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Weather = weather is null ? [] : [.. weather],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Weather = weather.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4679,8 +4679,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Weather>? weather = null;
-            List<LocalWeather>? local = null;
+            ArrayBuilder<ElementBasis.Weather> weather = default;
+            ArrayBuilder<LocalWeather> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4691,8 +4691,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): (weather ??= []).Add(global::JmaXml.ElementBasis.Weather.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWeather.Read(r)); break;
+                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): weather.Add(r, global::JmaXml.ElementBasis.Weather.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWeather.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4701,8 +4701,8 @@ public static partial class Meteorology
             return new BaseWeather
             {
                 TimeModifier = timeModifier,
-                Weather = weather is null ? [] : [.. weather],
-                Local = local is null ? [] : [.. local],
+                Weather = weather.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4742,7 +4742,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Weather>? weather = null;
+            ArrayBuilder<ElementBasis.Weather> weather = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4754,7 +4754,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): (weather ??= []).Add(global::JmaXml.ElementBasis.Weather.Read(r)); break;
+                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): weather.Add(r, global::JmaXml.ElementBasis.Weather.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4764,7 +4764,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Weather = weather is null ? [] : [.. weather],
+                Weather = weather.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4822,10 +4822,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BasePressure? @base = null;
             var @baseSeen = false;
-            List<BasePressure>? temporary = null;
-            List<BasePressure>? becoming = null;
-            List<SubAreaPressure>? subArea = null;
-            List<ElementBasis.Pressure>? pressure = null;
+            ArrayBuilder<BasePressure> temporary = default;
+            ArrayBuilder<BasePressure> becoming = default;
+            ArrayBuilder<SubAreaPressure> subArea = default;
+            ArrayBuilder<ElementBasis.Pressure> pressure = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4837,10 +4837,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BasePressure.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BasePressure.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BasePressure.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaPressure.Read(r)); break;
-                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): (pressure ??= []).Add(global::JmaXml.ElementBasis.Pressure.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BasePressure.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BasePressure.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaPressure.Read(r)); break;
+                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): pressure.Add(r, global::JmaXml.ElementBasis.Pressure.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4850,10 +4850,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Pressure = pressure is null ? [] : [.. pressure],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Pressure = pressure.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4919,10 +4919,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BasePressure? @base = null;
             var @baseSeen = false;
-            List<BasePressure>? temporary = null;
-            List<BasePressure>? becoming = null;
-            List<LocalPressure>? local = null;
-            List<ElementBasis.Pressure>? pressure = null;
+            ArrayBuilder<BasePressure> temporary = default;
+            ArrayBuilder<BasePressure> becoming = default;
+            ArrayBuilder<LocalPressure> local = default;
+            ArrayBuilder<ElementBasis.Pressure> pressure = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -4935,10 +4935,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BasePressure.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BasePressure.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BasePressure.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalPressure.Read(r)); break;
-                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): (pressure ??= []).Add(global::JmaXml.ElementBasis.Pressure.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BasePressure.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BasePressure.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalPressure.Read(r)); break;
+                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): pressure.Add(r, global::JmaXml.ElementBasis.Pressure.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -4949,10 +4949,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Pressure = pressure is null ? [] : [.. pressure],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Pressure = pressure.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -4990,8 +4990,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Pressure>? pressure = null;
-            List<LocalPressure>? local = null;
+            ArrayBuilder<ElementBasis.Pressure> pressure = default;
+            ArrayBuilder<LocalPressure> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5002,8 +5002,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): (pressure ??= []).Add(global::JmaXml.ElementBasis.Pressure.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalPressure.Read(r)); break;
+                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): pressure.Add(r, global::JmaXml.ElementBasis.Pressure.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalPressure.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5012,8 +5012,8 @@ public static partial class Meteorology
             return new BasePressure
             {
                 TimeModifier = timeModifier,
-                Pressure = pressure is null ? [] : [.. pressure],
-                Local = local is null ? [] : [.. local],
+                Pressure = pressure.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5053,7 +5053,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Pressure>? pressure = null;
+            ArrayBuilder<ElementBasis.Pressure> pressure = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5065,7 +5065,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): (pressure ??= []).Add(global::JmaXml.ElementBasis.Pressure.Read(r)); break;
+                    case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): pressure.Add(r, global::JmaXml.ElementBasis.Pressure.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5075,7 +5075,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Pressure = pressure is null ? [] : [.. pressure],
+                Pressure = pressure.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5133,10 +5133,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseTemperature? @base = null;
             var @baseSeen = false;
-            List<BaseTemperature>? temporary = null;
-            List<BaseTemperature>? becoming = null;
-            List<SubAreaTemperature>? subArea = null;
-            List<ElementBasis.Temperature>? temperature = null;
+            ArrayBuilder<BaseTemperature> temporary = default;
+            ArrayBuilder<BaseTemperature> becoming = default;
+            ArrayBuilder<SubAreaTemperature> subArea = default;
+            ArrayBuilder<ElementBasis.Temperature> temperature = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5148,10 +5148,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseTemperature.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaTemperature.Read(r)); break;
-                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): (temperature ??= []).Add(global::JmaXml.ElementBasis.Temperature.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaTemperature.Read(r)); break;
+                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): temperature.Add(r, global::JmaXml.ElementBasis.Temperature.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5161,10 +5161,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Temperature = temperature is null ? [] : [.. temperature],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Temperature = temperature.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5230,10 +5230,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseTemperature? @base = null;
             var @baseSeen = false;
-            List<BaseTemperature>? temporary = null;
-            List<BaseTemperature>? becoming = null;
-            List<LocalTemperature>? local = null;
-            List<ElementBasis.Temperature>? temperature = null;
+            ArrayBuilder<BaseTemperature> temporary = default;
+            ArrayBuilder<BaseTemperature> becoming = default;
+            ArrayBuilder<LocalTemperature> local = default;
+            ArrayBuilder<ElementBasis.Temperature> temperature = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5246,10 +5246,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseTemperature.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalTemperature.Read(r)); break;
-                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): (temperature ??= []).Add(global::JmaXml.ElementBasis.Temperature.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseTemperature.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalTemperature.Read(r)); break;
+                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): temperature.Add(r, global::JmaXml.ElementBasis.Temperature.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5260,10 +5260,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Temperature = temperature is null ? [] : [.. temperature],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Temperature = temperature.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5301,8 +5301,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Temperature>? temperature = null;
-            List<LocalTemperature>? local = null;
+            ArrayBuilder<ElementBasis.Temperature> temperature = default;
+            ArrayBuilder<LocalTemperature> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5313,8 +5313,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): (temperature ??= []).Add(global::JmaXml.ElementBasis.Temperature.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalTemperature.Read(r)); break;
+                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): temperature.Add(r, global::JmaXml.ElementBasis.Temperature.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalTemperature.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5323,8 +5323,8 @@ public static partial class Meteorology
             return new BaseTemperature
             {
                 TimeModifier = timeModifier,
-                Temperature = temperature is null ? [] : [.. temperature],
-                Local = local is null ? [] : [.. local],
+                Temperature = temperature.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5364,7 +5364,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Temperature>? temperature = null;
+            ArrayBuilder<ElementBasis.Temperature> temperature = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5376,7 +5376,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): (temperature ??= []).Add(global::JmaXml.ElementBasis.Temperature.Read(r)); break;
+                    case "Temperature" when r.InNamespace(XmlNamespaces.ElementBasis): temperature.Add(r, global::JmaXml.ElementBasis.Temperature.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5386,7 +5386,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Temperature = temperature is null ? [] : [.. temperature],
+                Temperature = temperature.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5444,10 +5444,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseVisibility? @base = null;
             var @baseSeen = false;
-            List<BaseVisibility>? temporary = null;
-            List<BaseVisibility>? becoming = null;
-            List<SubAreaVisibility>? subArea = null;
-            List<ElementBasis.Visibility>? visibility = null;
+            ArrayBuilder<BaseVisibility> temporary = default;
+            ArrayBuilder<BaseVisibility> becoming = default;
+            ArrayBuilder<SubAreaVisibility> subArea = default;
+            ArrayBuilder<ElementBasis.Visibility> visibility = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5459,10 +5459,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseVisibility.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaVisibility.Read(r)); break;
-                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): (visibility ??= []).Add(global::JmaXml.ElementBasis.Visibility.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaVisibility.Read(r)); break;
+                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): visibility.Add(r, global::JmaXml.ElementBasis.Visibility.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5472,10 +5472,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Visibility = visibility is null ? [] : [.. visibility],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Visibility = visibility.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5541,10 +5541,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseVisibility? @base = null;
             var @baseSeen = false;
-            List<BaseVisibility>? temporary = null;
-            List<BaseVisibility>? becoming = null;
-            List<LocalVisibility>? local = null;
-            List<ElementBasis.Visibility>? visibility = null;
+            ArrayBuilder<BaseVisibility> temporary = default;
+            ArrayBuilder<BaseVisibility> becoming = default;
+            ArrayBuilder<LocalVisibility> local = default;
+            ArrayBuilder<ElementBasis.Visibility> visibility = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5557,10 +5557,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseVisibility.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalVisibility.Read(r)); break;
-                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): (visibility ??= []).Add(global::JmaXml.ElementBasis.Visibility.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseVisibility.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalVisibility.Read(r)); break;
+                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): visibility.Add(r, global::JmaXml.ElementBasis.Visibility.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5571,10 +5571,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Visibility = visibility is null ? [] : [.. visibility],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Visibility = visibility.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5612,8 +5612,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Visibility>? visibility = null;
-            List<LocalVisibility>? local = null;
+            ArrayBuilder<ElementBasis.Visibility> visibility = default;
+            ArrayBuilder<LocalVisibility> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5624,8 +5624,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): (visibility ??= []).Add(global::JmaXml.ElementBasis.Visibility.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalVisibility.Read(r)); break;
+                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): visibility.Add(r, global::JmaXml.ElementBasis.Visibility.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalVisibility.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5634,8 +5634,8 @@ public static partial class Meteorology
             return new BaseVisibility
             {
                 TimeModifier = timeModifier,
-                Visibility = visibility is null ? [] : [.. visibility],
-                Local = local is null ? [] : [.. local],
+                Visibility = visibility.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5675,7 +5675,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Visibility>? visibility = null;
+            ArrayBuilder<ElementBasis.Visibility> visibility = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5687,7 +5687,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): (visibility ??= []).Add(global::JmaXml.ElementBasis.Visibility.Read(r)); break;
+                    case "Visibility" when r.InNamespace(XmlNamespaces.ElementBasis): visibility.Add(r, global::JmaXml.ElementBasis.Visibility.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5697,7 +5697,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Visibility = visibility is null ? [] : [.. visibility],
+                Visibility = visibility.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5721,7 +5721,7 @@ public static partial class Meteorology
 
         internal static SynopsisPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.Synopsis>? synopsis = null;
+            ArrayBuilder<ElementBasis.Synopsis> synopsis = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5731,7 +5731,7 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Synopsis" when r.InNamespace(XmlNamespaces.ElementBasis): (synopsis ??= []).Add(global::JmaXml.ElementBasis.Synopsis.Read(r)); break;
+                    case "Synopsis" when r.InNamespace(XmlNamespaces.ElementBasis): synopsis.Add(r, global::JmaXml.ElementBasis.Synopsis.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5739,7 +5739,7 @@ public static partial class Meteorology
             }
             return new SynopsisPart
             {
-                Synopsis = synopsis is null ? throw r.Missing("Synopsis") : [.. synopsis],
+                Synopsis = synopsis.IsEmpty ? throw r.Missing("Synopsis") : synopsis.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5797,10 +5797,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWaveHeight? @base = null;
             var @baseSeen = false;
-            List<BaseWaveHeight>? temporary = null;
-            List<BaseWaveHeight>? becoming = null;
-            List<SubAreaWaveHeight>? subArea = null;
-            List<ElementBasis.WaveHeight>? waveHeight = null;
+            ArrayBuilder<BaseWaveHeight> temporary = default;
+            ArrayBuilder<BaseWaveHeight> becoming = default;
+            ArrayBuilder<SubAreaWaveHeight> subArea = default;
+            ArrayBuilder<ElementBasis.WaveHeight> waveHeight = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5812,10 +5812,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWaveHeight.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWaveHeight.Read(r)); break;
-                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): (waveHeight ??= []).Add(global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWaveHeight.Read(r)); break;
+                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): waveHeight.Add(r, global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5825,10 +5825,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                WaveHeight = waveHeight is null ? [] : [.. waveHeight],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                WaveHeight = waveHeight.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5894,10 +5894,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWaveHeight? @base = null;
             var @baseSeen = false;
-            List<BaseWaveHeight>? temporary = null;
-            List<BaseWaveHeight>? becoming = null;
-            List<LocalWaveHeight>? local = null;
-            List<ElementBasis.WaveHeight>? waveHeight = null;
+            ArrayBuilder<BaseWaveHeight> temporary = default;
+            ArrayBuilder<BaseWaveHeight> becoming = default;
+            ArrayBuilder<LocalWaveHeight> local = default;
+            ArrayBuilder<ElementBasis.WaveHeight> waveHeight = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5910,10 +5910,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWaveHeight.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWaveHeight.Read(r)); break;
-                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): (waveHeight ??= []).Add(global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWaveHeight.Read(r)); break;
+                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): waveHeight.Add(r, global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5924,10 +5924,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                WaveHeight = waveHeight is null ? [] : [.. waveHeight],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                WaveHeight = waveHeight.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -5965,8 +5965,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.WaveHeight>? waveHeight = null;
-            List<LocalWaveHeight>? local = null;
+            ArrayBuilder<ElementBasis.WaveHeight> waveHeight = default;
+            ArrayBuilder<LocalWaveHeight> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -5977,8 +5977,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): (waveHeight ??= []).Add(global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalWaveHeight.Read(r)); break;
+                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): waveHeight.Add(r, global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalWaveHeight.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -5987,8 +5987,8 @@ public static partial class Meteorology
             return new BaseWaveHeight
             {
                 TimeModifier = timeModifier,
-                WaveHeight = waveHeight is null ? [] : [.. waveHeight],
-                Local = local is null ? [] : [.. local],
+                WaveHeight = waveHeight.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6028,7 +6028,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.WaveHeight>? waveHeight = null;
+            ArrayBuilder<ElementBasis.WaveHeight> waveHeight = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6040,7 +6040,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): (waveHeight ??= []).Add(global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
+                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): waveHeight.Add(r, global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6050,7 +6050,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                WaveHeight = waveHeight is null ? [] : [.. waveHeight],
+                WaveHeight = waveHeight.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6115,10 +6115,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BasePrecipitation? @base = null;
             var @baseSeen = false;
-            List<BasePrecipitation>? temporary = null;
-            List<BasePrecipitation>? becoming = null;
-            List<SubAreaPrecipitation>? subArea = null;
-            List<ElementBasis.Precipitation>? precipitation = null;
+            ArrayBuilder<BasePrecipitation> temporary = default;
+            ArrayBuilder<BasePrecipitation> becoming = default;
+            ArrayBuilder<SubAreaPrecipitation> subArea = default;
+            ArrayBuilder<ElementBasis.Precipitation> precipitation = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6130,10 +6130,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BasePrecipitation.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaPrecipitation.Read(r)); break;
-                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitation ??= []).Add(global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaPrecipitation.Read(r)); break;
+                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): precipitation.Add(r, global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6144,10 +6144,10 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Precipitation = precipitation is null ? [] : [.. precipitation],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Precipitation = precipitation.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6213,10 +6213,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BasePrecipitation? @base = null;
             var @baseSeen = false;
-            List<BasePrecipitation>? temporary = null;
-            List<BasePrecipitation>? becoming = null;
-            List<LocalPrecipitation>? local = null;
-            List<ElementBasis.Precipitation>? precipitation = null;
+            ArrayBuilder<BasePrecipitation> temporary = default;
+            ArrayBuilder<BasePrecipitation> becoming = default;
+            ArrayBuilder<LocalPrecipitation> local = default;
+            ArrayBuilder<ElementBasis.Precipitation> precipitation = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6229,10 +6229,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BasePrecipitation.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalPrecipitation.Read(r)); break;
-                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitation ??= []).Add(global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BasePrecipitation.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalPrecipitation.Read(r)); break;
+                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): precipitation.Add(r, global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6243,10 +6243,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Precipitation = precipitation is null ? [] : [.. precipitation],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Precipitation = precipitation.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6284,8 +6284,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Precipitation>? precipitation = null;
-            List<LocalPrecipitation>? local = null;
+            ArrayBuilder<ElementBasis.Precipitation> precipitation = default;
+            ArrayBuilder<LocalPrecipitation> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6296,8 +6296,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitation ??= []).Add(global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalPrecipitation.Read(r)); break;
+                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): precipitation.Add(r, global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalPrecipitation.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6306,8 +6306,8 @@ public static partial class Meteorology
             return new BasePrecipitation
             {
                 TimeModifier = timeModifier,
-                Precipitation = precipitation is null ? [] : [.. precipitation],
-                Local = local is null ? [] : [.. local],
+                Precipitation = precipitation.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6347,7 +6347,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Precipitation>? precipitation = null;
+            ArrayBuilder<ElementBasis.Precipitation> precipitation = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6359,7 +6359,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitation ??= []).Add(global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
+                    case "Precipitation" when r.InNamespace(XmlNamespaces.ElementBasis): precipitation.Add(r, global::JmaXml.ElementBasis.Precipitation.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6369,7 +6369,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Precipitation = precipitation is null ? [] : [.. precipitation],
+                Precipitation = precipitation.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6416,7 +6416,7 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BasePrecipitationBasedIndex? @base = null;
             var @baseSeen = false;
-            List<ElementBasis.PrecipitationBasedIndex>? precipitationBasedIndex = null;
+            ArrayBuilder<ElementBasis.PrecipitationBasedIndex> precipitationBasedIndex = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6428,7 +6428,7 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BasePrecipitationBasedIndex.Read(r); break;
-                    case "PrecipitationBasedIndex" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitationBasedIndex ??= []).Add(global::JmaXml.ElementBasis.PrecipitationBasedIndex.Read(r)); break;
+                    case "PrecipitationBasedIndex" when r.InNamespace(XmlNamespaces.ElementBasis): precipitationBasedIndex.Add(r, global::JmaXml.ElementBasis.PrecipitationBasedIndex.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6439,7 +6439,7 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 Base = @base,
-                PrecipitationBasedIndex = precipitationBasedIndex is null ? [] : [.. precipitationBasedIndex],
+                PrecipitationBasedIndex = precipitationBasedIndex.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6477,8 +6477,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.PrecipitationBasedIndex>? precipitationBasedIndex = null;
-            List<LocalPrecipitationBasedIndex>? local = null;
+            ArrayBuilder<ElementBasis.PrecipitationBasedIndex> precipitationBasedIndex = default;
+            ArrayBuilder<LocalPrecipitationBasedIndex> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6489,8 +6489,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "PrecipitationBasedIndex" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitationBasedIndex ??= []).Add(global::JmaXml.ElementBasis.PrecipitationBasedIndex.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalPrecipitationBasedIndex.Read(r)); break;
+                    case "PrecipitationBasedIndex" when r.InNamespace(XmlNamespaces.ElementBasis): precipitationBasedIndex.Add(r, global::JmaXml.ElementBasis.PrecipitationBasedIndex.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalPrecipitationBasedIndex.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6499,8 +6499,8 @@ public static partial class Meteorology
             return new BasePrecipitationBasedIndex
             {
                 TimeModifier = timeModifier,
-                PrecipitationBasedIndex = precipitationBasedIndex is null ? [] : [.. precipitationBasedIndex],
-                Local = local is null ? [] : [.. local],
+                PrecipitationBasedIndex = precipitationBasedIndex.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6540,7 +6540,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.PrecipitationBasedIndex>? precipitationBasedIndex = null;
+            ArrayBuilder<ElementBasis.PrecipitationBasedIndex> precipitationBasedIndex = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6552,7 +6552,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "PrecipitationBasedIndex" when r.InNamespace(XmlNamespaces.ElementBasis): (precipitationBasedIndex ??= []).Add(global::JmaXml.ElementBasis.PrecipitationBasedIndex.Read(r)); break;
+                    case "PrecipitationBasedIndex" when r.InNamespace(XmlNamespaces.ElementBasis): precipitationBasedIndex.Add(r, global::JmaXml.ElementBasis.PrecipitationBasedIndex.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6562,7 +6562,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                PrecipitationBasedIndex = precipitationBasedIndex is null ? [] : [.. precipitationBasedIndex],
+                PrecipitationBasedIndex = precipitationBasedIndex.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6627,10 +6627,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseSnowfallDepth? @base = null;
             var @baseSeen = false;
-            List<BaseSnowfallDepth>? temporary = null;
-            List<BaseSnowfallDepth>? becoming = null;
-            List<SubAreaSnowfallDepth>? subArea = null;
-            List<ElementBasis.SnowfallDepth>? snowfallDepth = null;
+            ArrayBuilder<BaseSnowfallDepth> temporary = default;
+            ArrayBuilder<BaseSnowfallDepth> becoming = default;
+            ArrayBuilder<SubAreaSnowfallDepth> subArea = default;
+            ArrayBuilder<ElementBasis.SnowfallDepth> snowfallDepth = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6642,10 +6642,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaSnowfallDepth.Read(r)); break;
-                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowfallDepth ??= []).Add(global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaSnowfallDepth.Read(r)); break;
+                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowfallDepth.Add(r, global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6656,10 +6656,10 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                SnowfallDepth = snowfallDepth is null ? [] : [.. snowfallDepth],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                SnowfallDepth = snowfallDepth.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6725,10 +6725,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseSnowfallDepth? @base = null;
             var @baseSeen = false;
-            List<BaseSnowfallDepth>? temporary = null;
-            List<BaseSnowfallDepth>? becoming = null;
-            List<LocalSnowfallDepth>? local = null;
-            List<ElementBasis.SnowfallDepth>? snowfallDepth = null;
+            ArrayBuilder<BaseSnowfallDepth> temporary = default;
+            ArrayBuilder<BaseSnowfallDepth> becoming = default;
+            ArrayBuilder<LocalSnowfallDepth> local = default;
+            ArrayBuilder<ElementBasis.SnowfallDepth> snowfallDepth = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6741,10 +6741,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalSnowfallDepth.Read(r)); break;
-                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowfallDepth ??= []).Add(global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseSnowfallDepth.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalSnowfallDepth.Read(r)); break;
+                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowfallDepth.Add(r, global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6755,10 +6755,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                SnowfallDepth = snowfallDepth is null ? [] : [.. snowfallDepth],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                SnowfallDepth = snowfallDepth.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6796,8 +6796,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.SnowfallDepth>? snowfallDepth = null;
-            List<LocalSnowfallDepth>? local = null;
+            ArrayBuilder<ElementBasis.SnowfallDepth> snowfallDepth = default;
+            ArrayBuilder<LocalSnowfallDepth> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6808,8 +6808,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowfallDepth ??= []).Add(global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalSnowfallDepth.Read(r)); break;
+                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowfallDepth.Add(r, global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalSnowfallDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6818,8 +6818,8 @@ public static partial class Meteorology
             return new BaseSnowfallDepth
             {
                 TimeModifier = timeModifier,
-                SnowfallDepth = snowfallDepth is null ? [] : [.. snowfallDepth],
-                Local = local is null ? [] : [.. local],
+                SnowfallDepth = snowfallDepth.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6859,7 +6859,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.SnowfallDepth>? snowfallDepth = null;
+            ArrayBuilder<ElementBasis.SnowfallDepth> snowfallDepth = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6871,7 +6871,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowfallDepth ??= []).Add(global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
+                    case "SnowfallDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowfallDepth.Add(r, global::JmaXml.ElementBasis.SnowfallDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6881,7 +6881,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                SnowfallDepth = snowfallDepth is null ? [] : [.. snowfallDepth],
+                SnowfallDepth = snowfallDepth.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6921,7 +6921,7 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseSnowDepth? @base = null;
             var @baseSeen = false;
-            List<ElementBasis.SnowDepth>? snowDepth = null;
+            ArrayBuilder<ElementBasis.SnowDepth> snowDepth = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6933,7 +6933,7 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseSnowDepth.Read(r); break;
-                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowDepth ??= []).Add(global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
+                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowDepth.Add(r, global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6943,7 +6943,7 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                SnowDepth = snowDepth is null ? [] : [.. snowDepth],
+                SnowDepth = snowDepth.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -6973,8 +6973,8 @@ public static partial class Meteorology
 
         internal static BaseSnowDepth Read(JmaXmlReader r)
         {
-            List<ElementBasis.SnowDepth>? snowDepth = null;
-            List<LocalSnowDepth>? local = null;
+            ArrayBuilder<ElementBasis.SnowDepth> snowDepth = default;
+            ArrayBuilder<LocalSnowDepth> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -6984,8 +6984,8 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowDepth ??= []).Add(global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalSnowDepth.Read(r)); break;
+                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowDepth.Add(r, global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalSnowDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -6993,8 +6993,8 @@ public static partial class Meteorology
             }
             return new BaseSnowDepth
             {
-                SnowDepth = snowDepth is null ? [] : [.. snowDepth],
-                Local = local is null ? [] : [.. local],
+                SnowDepth = snowDepth.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7034,7 +7034,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.SnowDepth>? snowDepth = null;
+            ArrayBuilder<ElementBasis.SnowDepth> snowDepth = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7046,7 +7046,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (snowDepth ??= []).Add(global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
+                    case "SnowDepth" when r.InNamespace(XmlNamespaces.ElementBasis): snowDepth.Add(r, global::JmaXml.ElementBasis.SnowDepth.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7056,7 +7056,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                SnowDepth = snowDepth is null ? [] : [.. snowDepth],
+                SnowDepth = snowDepth.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7114,10 +7114,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseHumidity? @base = null;
             var @baseSeen = false;
-            List<BaseHumidity>? temporary = null;
-            List<BaseHumidity>? becoming = null;
-            List<SubAreaHumidity>? subArea = null;
-            List<ElementBasis.Humidity>? humidity = null;
+            ArrayBuilder<BaseHumidity> temporary = default;
+            ArrayBuilder<BaseHumidity> becoming = default;
+            ArrayBuilder<SubAreaHumidity> subArea = default;
+            ArrayBuilder<ElementBasis.Humidity> humidity = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7129,10 +7129,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseHumidity.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaHumidity.Read(r)); break;
-                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): (humidity ??= []).Add(global::JmaXml.ElementBasis.Humidity.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaHumidity.Read(r)); break;
+                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): humidity.Add(r, global::JmaXml.ElementBasis.Humidity.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7142,10 +7142,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Humidity = humidity is null ? [] : [.. humidity],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Humidity = humidity.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7211,10 +7211,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseHumidity? @base = null;
             var @baseSeen = false;
-            List<BaseHumidity>? temporary = null;
-            List<BaseHumidity>? becoming = null;
-            List<LocalHumidity>? local = null;
-            List<ElementBasis.Humidity>? humidity = null;
+            ArrayBuilder<BaseHumidity> temporary = default;
+            ArrayBuilder<BaseHumidity> becoming = default;
+            ArrayBuilder<LocalHumidity> local = default;
+            ArrayBuilder<ElementBasis.Humidity> humidity = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7227,10 +7227,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseHumidity.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalHumidity.Read(r)); break;
-                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): (humidity ??= []).Add(global::JmaXml.ElementBasis.Humidity.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseHumidity.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalHumidity.Read(r)); break;
+                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): humidity.Add(r, global::JmaXml.ElementBasis.Humidity.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7241,10 +7241,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Humidity = humidity is null ? [] : [.. humidity],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Humidity = humidity.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7282,8 +7282,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Humidity>? humidity = null;
-            List<LocalHumidity>? local = null;
+            ArrayBuilder<ElementBasis.Humidity> humidity = default;
+            ArrayBuilder<LocalHumidity> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7294,8 +7294,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): (humidity ??= []).Add(global::JmaXml.ElementBasis.Humidity.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalHumidity.Read(r)); break;
+                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): humidity.Add(r, global::JmaXml.ElementBasis.Humidity.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalHumidity.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7304,8 +7304,8 @@ public static partial class Meteorology
             return new BaseHumidity
             {
                 TimeModifier = timeModifier,
-                Humidity = humidity is null ? [] : [.. humidity],
-                Local = local is null ? [] : [.. local],
+                Humidity = humidity.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7345,7 +7345,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Humidity>? humidity = null;
+            ArrayBuilder<ElementBasis.Humidity> humidity = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7357,7 +7357,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): (humidity ??= []).Add(global::JmaXml.ElementBasis.Humidity.Read(r)); break;
+                    case "Humidity" when r.InNamespace(XmlNamespaces.ElementBasis): humidity.Add(r, global::JmaXml.ElementBasis.Humidity.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7367,7 +7367,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Humidity = humidity is null ? [] : [.. humidity],
+                Humidity = humidity.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7431,11 +7431,11 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseTidalLevel? @base = null;
             var @baseSeen = false;
-            List<BaseTidalLevel>? temporary = null;
-            List<BaseTidalLevel>? becoming = null;
-            List<SubAreaTidalLevel>? subArea = null;
-            List<ElementBasis.TidalLevel>? tidalLevel = null;
-            List<ElementBasis.TidalPeriod>? tidalPeriod = null;
+            ArrayBuilder<BaseTidalLevel> temporary = default;
+            ArrayBuilder<BaseTidalLevel> becoming = default;
+            ArrayBuilder<SubAreaTidalLevel> subArea = default;
+            ArrayBuilder<ElementBasis.TidalLevel> tidalLevel = default;
+            ArrayBuilder<ElementBasis.TidalPeriod> tidalPeriod = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7447,11 +7447,11 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseTidalLevel.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaTidalLevel.Read(r)); break;
-                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalLevel ??= []).Add(global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
-                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalPeriod ??= []).Add(global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaTidalLevel.Read(r)); break;
+                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): tidalLevel.Add(r, global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
+                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): tidalPeriod.Add(r, global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7461,11 +7461,11 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                TidalLevel = tidalLevel is null ? [] : [.. tidalLevel],
-                TidalPeriod = tidalPeriod is null ? [] : [.. tidalPeriod],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                TidalLevel = tidalLevel.ToImmutable(r),
+                TidalPeriod = tidalPeriod.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7543,14 +7543,14 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseTidalLevel? @base = null;
             var @baseSeen = false;
-            List<BaseTidalLevel>? temporary = null;
-            List<BaseTidalLevel>? becoming = null;
-            List<LocalTidalLevel>? local = null;
-            List<ElementBasis.TidalLevel>? tidalLevel = null;
-            List<ElementBasis.TidalPeriod>? tidalPeriod = null;
+            ArrayBuilder<BaseTidalLevel> temporary = default;
+            ArrayBuilder<BaseTidalLevel> becoming = default;
+            ArrayBuilder<LocalTidalLevel> local = default;
+            ArrayBuilder<ElementBasis.TidalLevel> tidalLevel = default;
+            ArrayBuilder<ElementBasis.TidalPeriod> tidalPeriod = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
-            List<SequenceTidalLevel>? sequence = null;
+            ArrayBuilder<SequenceTidalLevel> sequence = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -7561,13 +7561,13 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseTidalLevel.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalTidalLevel.Read(r)); break;
-                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalLevel ??= []).Add(global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
-                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalPeriod ??= []).Add(global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseTidalLevel.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalTidalLevel.Read(r)); break;
+                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): tidalLevel.Add(r, global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
+                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): tidalPeriod.Add(r, global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
-                    case "Sequence" when r.InNamespace(XmlNamespaces.Meteorology): (sequence ??= []).Add(global::JmaXml.Meteorology.SequenceTidalLevel.Read(r)); break;
+                    case "Sequence" when r.InNamespace(XmlNamespaces.Meteorology): sequence.Add(r, global::JmaXml.Meteorology.SequenceTidalLevel.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -7577,13 +7577,13 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                TidalLevel = tidalLevel is null ? [] : [.. tidalLevel],
-                TidalPeriod = tidalPeriod is null ? [] : [.. tidalPeriod],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                TidalLevel = tidalLevel.ToImmutable(r),
+                TidalPeriod = tidalPeriod.ToImmutable(r),
                 Time = time,
-                Sequence = sequence is null ? [] : [.. sequence],
+                Sequence = sequence.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -7632,12 +7632,12 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.TidalLevel>? tidalLevel = null;
-            List<ElementBasis.TidalPeriod>? tidalPeriod = null;
-            List<LocalTidalLevel>? local = null;
+            ArrayBuilder<ElementBasis.TidalLevel> tidalLevel = default;
+            ArrayBuilder<ElementBasis.TidalPeriod> tidalPeriod = default;
+            ArrayBuilder<LocalTidalLevel> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
-            List<SequenceTidalLevel>? sequence = null;
+            ArrayBuilder<SequenceTidalLevel> sequence = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -7646,11 +7646,11 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalLevel ??= []).Add(global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
-                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalPeriod ??= []).Add(global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalTidalLevel.Read(r)); break;
+                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): tidalLevel.Add(r, global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
+                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): tidalPeriod.Add(r, global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalTidalLevel.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
-                    case "Sequence" when r.InNamespace(XmlNamespaces.Meteorology): (sequence ??= []).Add(global::JmaXml.Meteorology.SequenceTidalLevel.Read(r)); break;
+                    case "Sequence" when r.InNamespace(XmlNamespaces.Meteorology): sequence.Add(r, global::JmaXml.Meteorology.SequenceTidalLevel.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -7658,11 +7658,11 @@ public static partial class Meteorology
             return new BaseTidalLevel
             {
                 TimeModifier = timeModifier,
-                TidalLevel = tidalLevel is null ? [] : [.. tidalLevel],
-                TidalPeriod = tidalPeriod is null ? [] : [.. tidalPeriod],
-                Local = local is null ? [] : [.. local],
+                TidalLevel = tidalLevel.ToImmutable(r),
+                TidalPeriod = tidalPeriod.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
-                Sequence = sequence is null ? [] : [.. sequence],
+                Sequence = sequence.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -7713,11 +7713,11 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.TidalLevel>? tidalLevel = null;
-            List<ElementBasis.TidalPeriod>? tidalPeriod = null;
+            ArrayBuilder<ElementBasis.TidalLevel> tidalLevel = default;
+            ArrayBuilder<ElementBasis.TidalPeriod> tidalPeriod = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
-            List<SequenceTidalLevel>? sequence = null;
+            ArrayBuilder<SequenceTidalLevel> sequence = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -7727,10 +7727,10 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalLevel ??= []).Add(global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
-                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalPeriod ??= []).Add(global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
+                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): tidalLevel.Add(r, global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
+                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): tidalPeriod.Add(r, global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
-                    case "Sequence" when r.InNamespace(XmlNamespaces.Meteorology): (sequence ??= []).Add(global::JmaXml.Meteorology.SequenceTidalLevel.Read(r)); break;
+                    case "Sequence" when r.InNamespace(XmlNamespaces.Meteorology): sequence.Add(r, global::JmaXml.Meteorology.SequenceTidalLevel.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -7739,10 +7739,10 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                TidalLevel = tidalLevel is null ? [] : [.. tidalLevel],
-                TidalPeriod = tidalPeriod is null ? [] : [.. tidalPeriod],
+                TidalLevel = tidalLevel.ToImmutable(r),
+                TidalPeriod = tidalPeriod.ToImmutable(r),
                 Time = time,
-                Sequence = sequence is null ? [] : [.. sequence],
+                Sequence = sequence.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -7794,8 +7794,8 @@ public static partial class Meteorology
             var sentenceSeen = false;
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.TidalLevel>? tidalLevel = null;
-            List<ElementBasis.TidalPeriod>? tidalPeriod = null;
+            ArrayBuilder<ElementBasis.TidalLevel> tidalLevel = default;
+            ArrayBuilder<ElementBasis.TidalPeriod> tidalPeriod = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7807,8 +7807,8 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalLevel ??= []).Add(global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
-                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): (tidalPeriod ??= []).Add(global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
+                    case "TidalLevel" when r.InNamespace(XmlNamespaces.ElementBasis): tidalLevel.Add(r, global::JmaXml.ElementBasis.TidalLevel.Read(r)); break;
+                    case "TidalPeriod" when r.InNamespace(XmlNamespaces.ElementBasis): tidalPeriod.Add(r, global::JmaXml.ElementBasis.TidalPeriod.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7819,8 +7819,8 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 TimeModifier = timeModifier,
-                TidalLevel = tidalLevel is null ? [] : [.. tidalLevel],
-                TidalPeriod = tidalPeriod is null ? [] : [.. tidalPeriod],
+                TidalLevel = tidalLevel.ToImmutable(r),
+                TidalPeriod = tidalPeriod.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7852,7 +7852,7 @@ public static partial class Meteorology
         {
             BaseSunshine? @base = null;
             var @baseSeen = false;
-            List<ElementBasis.Sunshine>? sunshine = null;
+            ArrayBuilder<ElementBasis.Sunshine> sunshine = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7863,7 +7863,7 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseSunshine.Read(r); break;
-                    case "Sunshine" when r.InNamespace(XmlNamespaces.ElementBasis): (sunshine ??= []).Add(global::JmaXml.ElementBasis.Sunshine.Read(r)); break;
+                    case "Sunshine" when r.InNamespace(XmlNamespaces.ElementBasis): sunshine.Add(r, global::JmaXml.ElementBasis.Sunshine.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7872,7 +7872,7 @@ public static partial class Meteorology
             return new SunshinePart
             {
                 Base = @base,
-                Sunshine = sunshine is null ? [] : [.. sunshine],
+                Sunshine = sunshine.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7896,7 +7896,7 @@ public static partial class Meteorology
 
         internal static BaseSunshine Read(JmaXmlReader r)
         {
-            List<ElementBasis.Sunshine>? sunshine = null;
+            ArrayBuilder<ElementBasis.Sunshine> sunshine = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -7906,7 +7906,7 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Sunshine" when r.InNamespace(XmlNamespaces.ElementBasis): (sunshine ??= []).Add(global::JmaXml.ElementBasis.Sunshine.Read(r)); break;
+                    case "Sunshine" when r.InNamespace(XmlNamespaces.ElementBasis): sunshine.Add(r, global::JmaXml.ElementBasis.Sunshine.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -7914,7 +7914,7 @@ public static partial class Meteorology
             }
             return new BaseSunshine
             {
-                Sunshine = sunshine is null ? [] : [.. sunshine],
+                Sunshine = sunshine.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -7956,31 +7956,31 @@ public static partial class Meteorology
 
         internal static DetailForecast Read(JmaXmlReader r)
         {
-            List<WeatherForecastPart>? weatherForecastPart = null;
-            List<PrecipitationPart>? precipitationForecastPart = null;
-            List<SnowfallDepthPart>? snowfallDepthForecastPart = null;
-            List<WindForecastPart>? windForecastPart = null;
-            List<WaveHeightForecastPart>? waveHeightForecastPart = null;
+            ArrayBuilder<WeatherForecastPart> weatherForecastPart = default;
+            ArrayBuilder<PrecipitationPart> precipitationForecastPart = default;
+            ArrayBuilder<SnowfallDepthPart> snowfallDepthForecastPart = default;
+            ArrayBuilder<WindForecastPart> windForecastPart = default;
+            ArrayBuilder<WaveHeightForecastPart> waveHeightForecastPart = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "WeatherForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): (weatherForecastPart ??= []).Add(global::JmaXml.Meteorology.WeatherForecastPart.Read(r)); break;
-                    case "PrecipitationForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): (precipitationForecastPart ??= []).Add(global::JmaXml.Meteorology.PrecipitationPart.Read(r)); break;
-                    case "SnowfallDepthForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): (snowfallDepthForecastPart ??= []).Add(global::JmaXml.Meteorology.SnowfallDepthPart.Read(r)); break;
-                    case "WindForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): (windForecastPart ??= []).Add(global::JmaXml.Meteorology.WindForecastPart.Read(r)); break;
-                    case "WaveHeightForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): (waveHeightForecastPart ??= []).Add(global::JmaXml.Meteorology.WaveHeightForecastPart.Read(r)); break;
+                    case "WeatherForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): weatherForecastPart.Add(r, global::JmaXml.Meteorology.WeatherForecastPart.Read(r)); break;
+                    case "PrecipitationForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): precipitationForecastPart.Add(r, global::JmaXml.Meteorology.PrecipitationPart.Read(r)); break;
+                    case "SnowfallDepthForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): snowfallDepthForecastPart.Add(r, global::JmaXml.Meteorology.SnowfallDepthPart.Read(r)); break;
+                    case "WindForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): windForecastPart.Add(r, global::JmaXml.Meteorology.WindForecastPart.Read(r)); break;
+                    case "WaveHeightForecastPart" when r.InNamespace(XmlNamespaces.Meteorology): waveHeightForecastPart.Add(r, global::JmaXml.Meteorology.WaveHeightForecastPart.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new DetailForecast
             {
-                WeatherForecastPart = weatherForecastPart is null ? [] : [.. weatherForecastPart],
-                PrecipitationForecastPart = precipitationForecastPart is null ? [] : [.. precipitationForecastPart],
-                SnowfallDepthForecastPart = snowfallDepthForecastPart is null ? [] : [.. snowfallDepthForecastPart],
-                WindForecastPart = windForecastPart is null ? [] : [.. windForecastPart],
-                WaveHeightForecastPart = waveHeightForecastPart is null ? [] : [.. waveHeightForecastPart],
+                WeatherForecastPart = weatherForecastPart.ToImmutable(r),
+                PrecipitationForecastPart = precipitationForecastPart.ToImmutable(r),
+                SnowfallDepthForecastPart = snowfallDepthForecastPart.ToImmutable(r),
+                WindForecastPart = windForecastPart.ToImmutable(r),
+                WaveHeightForecastPart = waveHeightForecastPart.ToImmutable(r),
             };
         }
     }
@@ -8043,10 +8043,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWeather? @base = null;
             var @baseSeen = false;
-            List<BaseWeather>? temporary = null;
-            List<BaseWeather>? becoming = null;
-            List<SubAreaWeather>? subArea = null;
-            List<ElementBasis.Weather>? weather = null;
+            ArrayBuilder<BaseWeather> temporary = default;
+            ArrayBuilder<BaseWeather> becoming = default;
+            ArrayBuilder<SubAreaWeather> subArea = default;
+            ArrayBuilder<ElementBasis.Weather> weather = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8058,10 +8058,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWeather.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWeather.Read(r)); break;
-                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): (weather ??= []).Add(global::JmaXml.ElementBasis.Weather.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWeather.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWeather.Read(r)); break;
+                    case "Weather" when r.InNamespace(XmlNamespaces.ElementBasis): weather.Add(r, global::JmaXml.ElementBasis.Weather.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8072,10 +8072,10 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Weather = weather is null ? [] : [.. weather],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Weather = weather.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8143,11 +8143,11 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWind? @base = null;
             var @baseSeen = false;
-            List<BaseWind>? temporary = null;
-            List<BaseWind>? becoming = null;
-            List<SubAreaWind>? subArea = null;
-            List<ElementBasis.WindDirection>? windDirection = null;
-            List<ElementBasis.WindSpeed>? windSpeed = null;
+            ArrayBuilder<BaseWind> temporary = default;
+            ArrayBuilder<BaseWind> becoming = default;
+            ArrayBuilder<SubAreaWind> subArea = default;
+            ArrayBuilder<ElementBasis.WindDirection> windDirection = default;
+            ArrayBuilder<ElementBasis.WindSpeed> windSpeed = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8159,11 +8159,11 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWind.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWind.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWind.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWind.Read(r)); break;
-                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): (windDirection ??= []).Add(global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
-                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): (windSpeed ??= []).Add(global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWind.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWind.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWind.Read(r)); break;
+                    case "WindDirection" when r.InNamespace(XmlNamespaces.ElementBasis): windDirection.Add(r, global::JmaXml.ElementBasis.WindDirection.Read(r)); break;
+                    case "WindSpeed" when r.InNamespace(XmlNamespaces.ElementBasis): windSpeed.Add(r, global::JmaXml.ElementBasis.WindSpeed.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8174,11 +8174,11 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                WindDirection = windDirection is null ? [] : [.. windDirection],
-                WindSpeed = windSpeed is null ? [] : [.. windSpeed],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                WindDirection = windDirection.ToImmutable(r),
+                WindSpeed = windSpeed.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8243,10 +8243,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseWaveHeight? @base = null;
             var @baseSeen = false;
-            List<BaseWaveHeight>? temporary = null;
-            List<BaseWaveHeight>? becoming = null;
-            List<SubAreaWaveHeight>? subArea = null;
-            List<ElementBasis.WaveHeight>? waveHeight = null;
+            ArrayBuilder<BaseWaveHeight> temporary = default;
+            ArrayBuilder<BaseWaveHeight> becoming = default;
+            ArrayBuilder<SubAreaWaveHeight> subArea = default;
+            ArrayBuilder<ElementBasis.WaveHeight> waveHeight = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8258,10 +8258,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseWaveHeight.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaWaveHeight.Read(r)); break;
-                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): (waveHeight ??= []).Add(global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseWaveHeight.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaWaveHeight.Read(r)); break;
+                    case "WaveHeight" when r.InNamespace(XmlNamespaces.ElementBasis): waveHeight.Add(r, global::JmaXml.ElementBasis.WaveHeight.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8272,10 +8272,10 @@ public static partial class Meteorology
                 RefId = refID,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                WaveHeight = waveHeight is null ? [] : [.. waveHeight],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                WaveHeight = waveHeight.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8290,19 +8290,19 @@ public static partial class Meteorology
 
         internal static WeatherCodePart Read(JmaXmlReader r)
         {
-            List<ElementBasis.WeatherCode>? weatherCode = null;
+            ArrayBuilder<ElementBasis.WeatherCode> weatherCode = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "WeatherCode" when r.InNamespace(XmlNamespaces.ElementBasis): (weatherCode ??= []).Add(global::JmaXml.ElementBasis.WeatherCode.Read(r)); break;
+                    case "WeatherCode" when r.InNamespace(XmlNamespaces.ElementBasis): weatherCode.Add(r, global::JmaXml.ElementBasis.WeatherCode.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new WeatherCodePart
             {
-                WeatherCode = weatherCode is null ? throw r.Missing("WeatherCode") : [.. weatherCode],
+                WeatherCode = weatherCode.IsEmpty ? throw r.Missing("WeatherCode") : weatherCode.ToImmutable(r),
             };
         }
     }
@@ -8315,19 +8315,19 @@ public static partial class Meteorology
 
         internal static ProbabilityOfPrecipitationPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.ProbabilityOfPrecipitation>? probabilityOfPrecipitation = null;
+            ArrayBuilder<ElementBasis.ProbabilityOfPrecipitation> probabilityOfPrecipitation = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "ProbabilityOfPrecipitation" when r.InNamespace(XmlNamespaces.ElementBasis): (probabilityOfPrecipitation ??= []).Add(global::JmaXml.ElementBasis.ProbabilityOfPrecipitation.Read(r)); break;
+                    case "ProbabilityOfPrecipitation" when r.InNamespace(XmlNamespaces.ElementBasis): probabilityOfPrecipitation.Add(r, global::JmaXml.ElementBasis.ProbabilityOfPrecipitation.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new ProbabilityOfPrecipitationPart
             {
-                ProbabilityOfPrecipitation = probabilityOfPrecipitation is null ? throw r.Missing("ProbabilityOfPrecipitation") : [.. probabilityOfPrecipitation],
+                ProbabilityOfPrecipitation = probabilityOfPrecipitation.IsEmpty ? throw r.Missing("ProbabilityOfPrecipitation") : probabilityOfPrecipitation.ToImmutable(r),
             };
         }
     }
@@ -8383,10 +8383,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseSeaIce? @base = null;
             var @baseSeen = false;
-            List<BaseSeaIce>? temporary = null;
-            List<BaseSeaIce>? becoming = null;
-            List<SubAreaSeaIce>? subArea = null;
-            List<ElementBasis.SeaIce>? seaIce = null;
+            ArrayBuilder<BaseSeaIce> temporary = default;
+            ArrayBuilder<BaseSeaIce> becoming = default;
+            ArrayBuilder<SubAreaSeaIce> subArea = default;
+            ArrayBuilder<ElementBasis.SeaIce> seaIce = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8398,10 +8398,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseSeaIce.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaSeaIce.Read(r)); break;
-                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): (seaIce ??= []).Add(global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaSeaIce.Read(r)); break;
+                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): seaIce.Add(r, global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8411,10 +8411,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                SeaIce = seaIce is null ? [] : [.. seaIce],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                SeaIce = seaIce.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8480,10 +8480,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseSeaIce? @base = null;
             var @baseSeen = false;
-            List<BaseSeaIce>? temporary = null;
-            List<BaseSeaIce>? becoming = null;
-            List<LocalSeaIce>? local = null;
-            List<ElementBasis.SeaIce>? seaIce = null;
+            ArrayBuilder<BaseSeaIce> temporary = default;
+            ArrayBuilder<BaseSeaIce> becoming = default;
+            ArrayBuilder<LocalSeaIce> local = default;
+            ArrayBuilder<ElementBasis.SeaIce> seaIce = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8496,10 +8496,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseSeaIce.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalSeaIce.Read(r)); break;
-                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): (seaIce ??= []).Add(global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseSeaIce.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalSeaIce.Read(r)); break;
+                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): seaIce.Add(r, global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8510,10 +8510,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                SeaIce = seaIce is null ? [] : [.. seaIce],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                SeaIce = seaIce.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8551,8 +8551,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.SeaIce>? seaIce = null;
-            List<LocalSeaIce>? local = null;
+            ArrayBuilder<ElementBasis.SeaIce> seaIce = default;
+            ArrayBuilder<LocalSeaIce> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8563,8 +8563,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): (seaIce ??= []).Add(global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalSeaIce.Read(r)); break;
+                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): seaIce.Add(r, global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalSeaIce.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8573,8 +8573,8 @@ public static partial class Meteorology
             return new BaseSeaIce
             {
                 TimeModifier = timeModifier,
-                SeaIce = seaIce is null ? [] : [.. seaIce],
-                Local = local is null ? [] : [.. local],
+                SeaIce = seaIce.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8614,7 +8614,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.SeaIce>? seaIce = null;
+            ArrayBuilder<ElementBasis.SeaIce> seaIce = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8626,7 +8626,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): (seaIce ??= []).Add(global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
+                    case "SeaIce" when r.InNamespace(XmlNamespaces.ElementBasis): seaIce.Add(r, global::JmaXml.ElementBasis.SeaIce.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8636,7 +8636,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                SeaIce = seaIce is null ? [] : [.. seaIce],
+                SeaIce = seaIce.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8694,10 +8694,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseIcing? @base = null;
             var @baseSeen = false;
-            List<BaseIcing>? temporary = null;
-            List<BaseIcing>? becoming = null;
-            List<SubAreaIcing>? subArea = null;
-            List<ElementBasis.Icing>? icing = null;
+            ArrayBuilder<BaseIcing> temporary = default;
+            ArrayBuilder<BaseIcing> becoming = default;
+            ArrayBuilder<SubAreaIcing> subArea = default;
+            ArrayBuilder<ElementBasis.Icing> icing = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8709,10 +8709,10 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseIcing.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
-                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): (subArea ??= []).Add(global::JmaXml.Meteorology.SubAreaIcing.Read(r)); break;
-                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): (icing ??= []).Add(global::JmaXml.ElementBasis.Icing.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
+                    case "SubArea" when r.InNamespace(XmlNamespaces.Meteorology): subArea.Add(r, global::JmaXml.Meteorology.SubAreaIcing.Read(r)); break;
+                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): icing.Add(r, global::JmaXml.ElementBasis.Icing.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8722,10 +8722,10 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                SubArea = subArea is null ? [] : [.. subArea],
-                Icing = icing is null ? [] : [.. icing],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                SubArea = subArea.ToImmutable(r),
+                Icing = icing.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8791,10 +8791,10 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseIcing? @base = null;
             var @baseSeen = false;
-            List<BaseIcing>? temporary = null;
-            List<BaseIcing>? becoming = null;
-            List<LocalIcing>? local = null;
-            List<ElementBasis.Icing>? icing = null;
+            ArrayBuilder<BaseIcing> temporary = default;
+            ArrayBuilder<BaseIcing> becoming = default;
+            ArrayBuilder<LocalIcing> local = default;
+            ArrayBuilder<ElementBasis.Icing> icing = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8807,10 +8807,10 @@ public static partial class Meteorology
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseIcing.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalIcing.Read(r)); break;
-                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): (icing ??= []).Add(global::JmaXml.ElementBasis.Icing.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseIcing.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalIcing.Read(r)); break;
+                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): icing.Add(r, global::JmaXml.ElementBasis.Icing.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8821,10 +8821,10 @@ public static partial class Meteorology
                 AreaName = areaName,
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
-                Icing = icing is null ? [] : [.. icing],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
+                Icing = icing.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8862,8 +8862,8 @@ public static partial class Meteorology
         {
             string? timeModifier = null;
             var timeModifierSeen = false;
-            List<ElementBasis.Icing>? icing = null;
-            List<LocalIcing>? local = null;
+            ArrayBuilder<ElementBasis.Icing> icing = default;
+            ArrayBuilder<LocalIcing> local = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8874,8 +8874,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
-                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): (icing ??= []).Add(global::JmaXml.ElementBasis.Icing.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalIcing.Read(r)); break;
+                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): icing.Add(r, global::JmaXml.ElementBasis.Icing.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalIcing.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8884,8 +8884,8 @@ public static partial class Meteorology
             return new BaseIcing
             {
                 TimeModifier = timeModifier,
-                Icing = icing is null ? [] : [.. icing],
-                Local = local is null ? [] : [.. local],
+                Icing = icing.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8925,7 +8925,7 @@ public static partial class Meteorology
             var areaNameSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<ElementBasis.Icing>? icing = null;
+            ArrayBuilder<ElementBasis.Icing> icing = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -8937,7 +8937,7 @@ public static partial class Meteorology
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): (icing ??= []).Add(global::JmaXml.ElementBasis.Icing.Read(r)); break;
+                    case "Icing" when r.InNamespace(XmlNamespaces.ElementBasis): icing.Add(r, global::JmaXml.ElementBasis.Icing.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -8947,7 +8947,7 @@ public static partial class Meteorology
             {
                 AreaName = areaName,
                 Sentence = sentence,
-                Icing = icing is null ? [] : [.. icing],
+                Icing = icing.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -8965,19 +8965,19 @@ public static partial class Meteorology
 
         internal static ReliabilityClassPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.ReliabilityClass>? reliabilityClass = null;
+            ArrayBuilder<ElementBasis.ReliabilityClass> reliabilityClass = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "ReliabilityClass" when r.InNamespace(XmlNamespaces.ElementBasis): (reliabilityClass ??= []).Add(global::JmaXml.ElementBasis.ReliabilityClass.Read(r)); break;
+                    case "ReliabilityClass" when r.InNamespace(XmlNamespaces.ElementBasis): reliabilityClass.Add(r, global::JmaXml.ElementBasis.ReliabilityClass.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new ReliabilityClassPart
             {
-                ReliabilityClass = reliabilityClass is null ? throw r.Missing("ReliabilityClass") : [.. reliabilityClass],
+                ReliabilityClass = reliabilityClass.IsEmpty ? throw r.Missing("ReliabilityClass") : reliabilityClass.ToImmutable(r),
             };
         }
     }
@@ -8993,19 +8993,19 @@ public static partial class Meteorology
 
         internal static ReliabilityValuePart Read(JmaXmlReader r)
         {
-            List<ElementBasis.ReliabilityValue>? reliabilityValue = null;
+            ArrayBuilder<ElementBasis.ReliabilityValue> reliabilityValue = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "ReliabilityValue" when r.InNamespace(XmlNamespaces.ElementBasis): (reliabilityValue ??= []).Add(global::JmaXml.ElementBasis.ReliabilityValue.Read(r)); break;
+                    case "ReliabilityValue" when r.InNamespace(XmlNamespaces.ElementBasis): reliabilityValue.Add(r, global::JmaXml.ElementBasis.ReliabilityValue.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new ReliabilityValuePart
             {
-                ReliabilityValue = reliabilityValue is null ? throw r.Missing("ReliabilityValue") : [.. reliabilityValue],
+                ReliabilityValue = reliabilityValue.IsEmpty ? throw r.Missing("ReliabilityValue") : reliabilityValue.ToImmutable(r),
             };
         }
     }
@@ -9018,19 +9018,19 @@ public static partial class Meteorology
 
         internal static PossibilityRankOfWarningPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.PossibilityRankOfWarning>? possibilityRankOfWarning = null;
+            ArrayBuilder<ElementBasis.PossibilityRankOfWarning> possibilityRankOfWarning = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "PossibilityRankOfWarning" when r.InNamespace(XmlNamespaces.ElementBasis): (possibilityRankOfWarning ??= []).Add(global::JmaXml.ElementBasis.PossibilityRankOfWarning.Read(r)); break;
+                    case "PossibilityRankOfWarning" when r.InNamespace(XmlNamespaces.ElementBasis): possibilityRankOfWarning.Add(r, global::JmaXml.ElementBasis.PossibilityRankOfWarning.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new PossibilityRankOfWarningPart
             {
-                PossibilityRankOfWarning = possibilityRankOfWarning is null ? throw r.Missing("PossibilityRankOfWarning") : [.. possibilityRankOfWarning],
+                PossibilityRankOfWarning = possibilityRankOfWarning.IsEmpty ? throw r.Missing("PossibilityRankOfWarning") : possibilityRankOfWarning.ToImmutable(r),
             };
         }
     }
@@ -9220,15 +9220,15 @@ public static partial class Meteorology
 
         internal static CenterPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.Coordinate>? coordinate = null;
-            List<ElementBasis.Circle>? probabilityCircle = null;
+            ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
+            ArrayBuilder<ElementBasis.Circle> probabilityCircle = default;
             string? location = null;
             var locationSeen = false;
-            List<ElementBasis.Direction>? direction = null;
-            List<ElementBasis.Speed>? speed = null;
+            ArrayBuilder<ElementBasis.Direction> direction = default;
+            ArrayBuilder<ElementBasis.Speed> speed = default;
             ElementBasis.Pressure? pressure = null;
             var pressureSeen = false;
-            List<ElementBasis.Radius>? radius = null;
+            ArrayBuilder<ElementBasis.Radius> radius = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -9238,13 +9238,13 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): (coordinate ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "ProbabilityCircle" when r.InNamespace(XmlNamespaces.Meteorology): (probabilityCircle ??= []).Add(global::JmaXml.ElementBasis.Circle.Read(r)); break;
+                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): coordinate.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "ProbabilityCircle" when r.InNamespace(XmlNamespaces.Meteorology): probabilityCircle.Add(r, global::JmaXml.ElementBasis.Circle.Read(r)); break;
                     case "Location" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref locationSeen, "Location"); location = r.ReadString(); break;
-                    case "Direction" when r.InNamespace(XmlNamespaces.ElementBasis): (direction ??= []).Add(global::JmaXml.ElementBasis.Direction.Read(r)); break;
-                    case "Speed" when r.InNamespace(XmlNamespaces.ElementBasis): (speed ??= []).Add(global::JmaXml.ElementBasis.Speed.Read(r)); break;
+                    case "Direction" when r.InNamespace(XmlNamespaces.ElementBasis): direction.Add(r, global::JmaXml.ElementBasis.Direction.Read(r)); break;
+                    case "Speed" when r.InNamespace(XmlNamespaces.ElementBasis): speed.Add(r, global::JmaXml.ElementBasis.Speed.Read(r)); break;
                     case "Pressure" when r.InNamespace(XmlNamespaces.ElementBasis): r.Once(ref pressureSeen, "Pressure"); pressure = global::JmaXml.ElementBasis.Pressure.Read(r); break;
-                    case "Radius" when r.InNamespace(XmlNamespaces.ElementBasis): (radius ??= []).Add(global::JmaXml.ElementBasis.Radius.Read(r)); break;
+                    case "Radius" when r.InNamespace(XmlNamespaces.ElementBasis): radius.Add(r, global::JmaXml.ElementBasis.Radius.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -9252,13 +9252,13 @@ public static partial class Meteorology
             }
             return new CenterPart
             {
-                Coordinate = coordinate is null ? [] : [.. coordinate],
-                ProbabilityCircle = probabilityCircle is null ? [] : [.. probabilityCircle],
+                Coordinate = coordinate.ToImmutable(r),
+                ProbabilityCircle = probabilityCircle.ToImmutable(r),
                 Location = location,
-                Direction = direction is null ? [] : [.. direction],
-                Speed = speed is null ? [] : [.. speed],
+                Direction = direction.ToImmutable(r),
+                Speed = speed.ToImmutable(r),
                 Pressure = pressure,
-                Radius = radius is null ? [] : [.. radius],
+                Radius = radius.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -9288,9 +9288,9 @@ public static partial class Meteorology
 
         internal static CoordinatePart Read(JmaXmlReader r)
         {
-            List<ElementBasis.Coordinate>? coordinate = null;
-            List<ElementBasis.Coordinate>? line = null;
-            List<ElementBasis.Coordinate>? polygon = null;
+            ArrayBuilder<ElementBasis.Coordinate> coordinate = default;
+            ArrayBuilder<ElementBasis.Coordinate> line = default;
+            ArrayBuilder<ElementBasis.Coordinate> polygon = default;
             DateTimeOffset? time = null;
             var timeSeen = false;
             string? remark = null;
@@ -9300,9 +9300,9 @@ public static partial class Meteorology
             {
                 switch (r.LocalName)
                 {
-                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): (coordinate ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "Line" when r.InNamespace(XmlNamespaces.ElementBasis): (line ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
-                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): (polygon ??= []).Add(global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Coordinate" when r.InNamespace(XmlNamespaces.ElementBasis): coordinate.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Line" when r.InNamespace(XmlNamespaces.ElementBasis): line.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
+                    case "Polygon" when r.InNamespace(XmlNamespaces.ElementBasis): polygon.Add(r, global::JmaXml.ElementBasis.Coordinate.Read(r)); break;
                     case "Time" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeSeen, "Time"); time = r.ReadDateTimeOffset(); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
@@ -9310,9 +9310,9 @@ public static partial class Meteorology
             }
             return new CoordinatePart
             {
-                Coordinate = coordinate is null ? [] : [.. coordinate],
-                Line = line is null ? [] : [.. line],
-                Polygon = polygon is null ? [] : [.. polygon],
+                Coordinate = coordinate.ToImmutable(r),
+                Line = line.ToImmutable(r),
+                Polygon = polygon.ToImmutable(r),
                 Time = time,
                 Remark = remark,
             };
@@ -9376,19 +9376,19 @@ public static partial class Meteorology
 
         internal static WaterLevelPart Read(JmaXmlReader r)
         {
-            List<ElementBasis.WaterLevel>? waterLevel = null;
+            ArrayBuilder<ElementBasis.WaterLevel> waterLevel = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "WaterLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (waterLevel ??= []).Add(global::JmaXml.ElementBasis.WaterLevel.Read(r)); break;
+                    case "WaterLevel" when r.InNamespace(XmlNamespaces.ElementBasis): waterLevel.Add(r, global::JmaXml.ElementBasis.WaterLevel.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new WaterLevelPart
             {
-                WaterLevel = waterLevel is null ? [] : [.. waterLevel],
+                WaterLevel = waterLevel.ToImmutable(r),
             };
         }
     }
@@ -9415,7 +9415,7 @@ public static partial class Meteorology
         {
             Area? area = null;
             var areaSeen = false;
-            List<FloodAssumptionPart>? floodAssumptionPart = null;
+            ArrayBuilder<FloodAssumptionPart> floodAssumptionPart = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -9424,7 +9424,7 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "Area" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaSeen, "Area"); area = global::JmaXml.Meteorology.Area.Read(r); break;
-                    case "FloodAssumptionPart" when r.InNamespace(XmlNamespaces.Meteorology): (floodAssumptionPart ??= []).Add(global::JmaXml.Meteorology.FloodAssumptionPart.Read(r)); break;
+                    case "FloodAssumptionPart" when r.InNamespace(XmlNamespaces.Meteorology): floodAssumptionPart.Add(r, global::JmaXml.Meteorology.FloodAssumptionPart.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -9432,7 +9432,7 @@ public static partial class Meteorology
             return new FloodAssumptionTable
             {
                 Area = area ?? throw r.Missing("Area"),
-                FloodAssumptionPart = floodAssumptionPart is null ? [] : [.. floodAssumptionPart],
+                FloodAssumptionPart = floodAssumptionPart.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -9459,7 +9459,7 @@ public static partial class Meteorology
             var floodAssumptionAreaSeen = false;
             ElementBasis.DateTime? attainmentTime = null;
             var attainmentTimeSeen = false;
-            List<ElementBasis.FloodDepth>? floodDepth = null;
+            ArrayBuilder<ElementBasis.FloodDepth> floodDepth = default;
             ElementBasis.DateTime? attainmentDeepestTime = null;
             var attainmentDeepestTimeSeen = false;
             using var scope = r.Enter();
@@ -9469,7 +9469,7 @@ public static partial class Meteorology
                 {
                     case "FloodAssumptionArea" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref floodAssumptionAreaSeen, "FloodAssumptionArea"); floodAssumptionArea = r.ReadString(); break;
                     case "AttainmentTime" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref attainmentTimeSeen, "AttainmentTime"); attainmentTime = global::JmaXml.ElementBasis.DateTime.Read(r); break;
-                    case "FloodDepth" when r.InNamespace(XmlNamespaces.ElementBasis): (floodDepth ??= []).Add(global::JmaXml.ElementBasis.FloodDepth.Read(r)); break;
+                    case "FloodDepth" when r.InNamespace(XmlNamespaces.ElementBasis): floodDepth.Add(r, global::JmaXml.ElementBasis.FloodDepth.Read(r)); break;
                     case "AttainmentDeepestTime" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref attainmentDeepestTimeSeen, "AttainmentDeepestTime"); attainmentDeepestTime = global::JmaXml.ElementBasis.DateTime.Read(r); break;
                     default: r.Skip(); break;
                 }
@@ -9478,7 +9478,7 @@ public static partial class Meteorology
             {
                 FloodAssumptionArea = floodAssumptionArea,
                 AttainmentTime = attainmentTime,
-                FloodDepth = floodDepth is null ? [] : [.. floodDepth],
+                FloodDepth = floodDepth.ToImmutable(r),
                 AttainmentDeepestTime = attainmentDeepestTime,
             };
         }
@@ -9492,19 +9492,19 @@ public static partial class Meteorology
 
         internal static DischargePart Read(JmaXmlReader r)
         {
-            List<ElementBasis.Discharge>? discharge = null;
+            ArrayBuilder<ElementBasis.Discharge> discharge = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Discharge" when r.InNamespace(XmlNamespaces.ElementBasis): (discharge ??= []).Add(global::JmaXml.ElementBasis.Discharge.Read(r)); break;
+                    case "Discharge" when r.InNamespace(XmlNamespaces.ElementBasis): discharge.Add(r, global::JmaXml.ElementBasis.Discharge.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new DischargePart
             {
-                Discharge = discharge is null ? [] : [.. discharge],
+                Discharge = discharge.ToImmutable(r),
             };
         }
     }
@@ -9534,8 +9534,8 @@ public static partial class Meteorology
         {
             Area? area = null;
             var areaSeen = false;
-            List<string>? chargeSection = null;
-            List<HydrometricStationCriteria>? criteria = null;
+            ArrayBuilder<string> chargeSection = default;
+            ArrayBuilder<HydrometricStationCriteria> criteria = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -9544,8 +9544,8 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "Area" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaSeen, "Area"); area = global::JmaXml.Meteorology.Area.Read(r); break;
-                    case "ChargeSection" when r.InNamespace(XmlNamespaces.Meteorology): (chargeSection ??= []).Add(r.ReadString()); break;
-                    case "Criteria" when r.InNamespace(XmlNamespaces.Meteorology): (criteria ??= []).Add(global::JmaXml.Meteorology.HydrometricStationCriteria.Read(r)); break;
+                    case "ChargeSection" when r.InNamespace(XmlNamespaces.Meteorology): chargeSection.Add(r, r.ReadString()); break;
+                    case "Criteria" when r.InNamespace(XmlNamespaces.Meteorology): criteria.Add(r, global::JmaXml.Meteorology.HydrometricStationCriteria.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -9553,8 +9553,8 @@ public static partial class Meteorology
             return new HydrometricStationPart
             {
                 Area = area ?? throw r.Missing("Area"),
-                ChargeSection = chargeSection is null ? [] : [.. chargeSection],
-                Criteria = criteria is null ? [] : [.. criteria],
+                ChargeSection = chargeSection.ToImmutable(r),
+                Criteria = criteria.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -9571,22 +9571,22 @@ public static partial class Meteorology
 
         internal static HydrometricStationCriteria Read(JmaXmlReader r)
         {
-            List<ElementBasis.WaterLevel>? waterLevel = null;
-            List<ElementBasis.Discharge>? discharge = null;
+            ArrayBuilder<ElementBasis.WaterLevel> waterLevel = default;
+            ArrayBuilder<ElementBasis.Discharge> discharge = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "WaterLevel" when r.InNamespace(XmlNamespaces.ElementBasis): (waterLevel ??= []).Add(global::JmaXml.ElementBasis.WaterLevel.Read(r)); break;
-                    case "Discharge" when r.InNamespace(XmlNamespaces.ElementBasis): (discharge ??= []).Add(global::JmaXml.ElementBasis.Discharge.Read(r)); break;
+                    case "WaterLevel" when r.InNamespace(XmlNamespaces.ElementBasis): waterLevel.Add(r, global::JmaXml.ElementBasis.WaterLevel.Read(r)); break;
+                    case "Discharge" when r.InNamespace(XmlNamespaces.ElementBasis): discharge.Add(r, global::JmaXml.ElementBasis.Discharge.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new HydrometricStationCriteria
             {
-                WaterLevel = waterLevel is null ? [] : [.. waterLevel],
-                Discharge = discharge is null ? [] : [.. discharge],
+                WaterLevel = waterLevel.ToImmutable(r),
+                Discharge = discharge.ToImmutable(r),
             };
         }
     }
@@ -9655,7 +9655,7 @@ public static partial class Meteorology
 
         internal static BaseSignificancy Read(JmaXmlReader r)
         {
-            List<Significancy>? significancy = null;
+            ArrayBuilder<Significancy> significancy = default;
             Sentence? sentence = null;
             var sentenceSeen = false;
             ForecastTerm? peakTime = null;
@@ -9664,29 +9664,29 @@ public static partial class Meteorology
             var attentionSeen = false;
             Addition? addition = null;
             var additionSeen = false;
-            List<LocalSignificancy>? local = null;
+            ArrayBuilder<LocalSignificancy> local = default;
             using var scope = r.Enter();
             while (r.NextChild())
             {
                 switch (r.LocalName)
                 {
-                    case "Significancy" when r.InNamespace(XmlNamespaces.Meteorology): (significancy ??= []).Add(global::JmaXml.Meteorology.Significancy.Read(r)); break;
+                    case "Significancy" when r.InNamespace(XmlNamespaces.Meteorology): significancy.Add(r, global::JmaXml.Meteorology.Significancy.Read(r)); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "PeakTime" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref peakTimeSeen, "PeakTime"); peakTime = global::JmaXml.Meteorology.ForecastTerm.Read(r); break;
                     case "Attention" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref attentionSeen, "Attention"); attention = global::JmaXml.Meteorology.Attention.Read(r); break;
                     case "Addition" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref additionSeen, "Addition"); addition = global::JmaXml.Meteorology.Addition.Read(r); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalSignificancy.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalSignificancy.Read(r)); break;
                     default: r.Skip(); break;
                 }
             }
             return new BaseSignificancy
             {
-                Significancy = significancy is null ? [] : [.. significancy],
+                Significancy = significancy.ToImmutable(r),
                 Sentence = sentence,
                 PeakTime = peakTime,
                 Attention = attention,
                 Addition = addition,
-                Local = local is null ? [] : [.. local],
+                Local = local.ToImmutable(r),
             };
         }
     }
@@ -9728,7 +9728,7 @@ public static partial class Meteorology
         {
             string? areaName = null;
             var areaNameSeen = false;
-            List<Significancy>? significancy = null;
+            ArrayBuilder<Significancy> significancy = default;
             Sentence? sentence = null;
             var sentenceSeen = false;
             ForecastTerm? peakTime = null;
@@ -9743,7 +9743,7 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "AreaName" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref areaNameSeen, "AreaName"); areaName = r.ReadString(); break;
-                    case "Significancy" when r.InNamespace(XmlNamespaces.Meteorology): (significancy ??= []).Add(global::JmaXml.Meteorology.Significancy.Read(r)); break;
+                    case "Significancy" when r.InNamespace(XmlNamespaces.Meteorology): significancy.Add(r, global::JmaXml.Meteorology.Significancy.Read(r)); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "PeakTime" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref peakTimeSeen, "PeakTime"); peakTime = global::JmaXml.Meteorology.ForecastTerm.Read(r); break;
                     case "Attention" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref attentionSeen, "Attention"); attention = global::JmaXml.Meteorology.Attention.Read(r); break;
@@ -9754,7 +9754,7 @@ public static partial class Meteorology
             return new LocalSignificancy
             {
                 AreaName = areaName ?? throw r.Missing("AreaName"),
-                Significancy = significancy is null ? [] : [.. significancy],
+                Significancy = significancy.ToImmutable(r),
                 Sentence = sentence,
                 PeakTime = peakTime,
                 Attention = attention,
@@ -9925,14 +9925,14 @@ public static partial class Meteorology
             var sentenceSeen = false;
             BaseEvent? @base = null;
             var @baseSeen = false;
-            List<BaseEvent>? temporary = null;
-            List<BaseEvent>? becoming = null;
-            List<LocalEvent>? local = null;
+            ArrayBuilder<BaseEvent> temporary = default;
+            ArrayBuilder<BaseEvent> becoming = default;
+            ArrayBuilder<LocalEvent> local = default;
             CoordinatePart? coordinate = null;
             var coordinateSeen = false;
             string? location = null;
             var locationSeen = false;
-            List<Event>? @event = null;
+            ArrayBuilder<Event> @event = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -9942,12 +9942,12 @@ public static partial class Meteorology
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Base" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref @baseSeen, "Base"); @base = global::JmaXml.Meteorology.BaseEvent.Read(r); break;
-                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): (temporary ??= []).Add(global::JmaXml.Meteorology.BaseEvent.Read(r)); break;
-                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): (becoming ??= []).Add(global::JmaXml.Meteorology.BaseEvent.Read(r)); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalEvent.Read(r)); break;
+                    case "Temporary" when r.InNamespace(XmlNamespaces.Meteorology): temporary.Add(r, global::JmaXml.Meteorology.BaseEvent.Read(r)); break;
+                    case "Becoming" when r.InNamespace(XmlNamespaces.Meteorology): becoming.Add(r, global::JmaXml.Meteorology.BaseEvent.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalEvent.Read(r)); break;
                     case "Coordinate" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref coordinateSeen, "Coordinate"); coordinate = global::JmaXml.Meteorology.CoordinatePart.Read(r); break;
                     case "Location" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref locationSeen, "Location"); location = r.ReadString(); break;
-                    case "Event" when r.InNamespace(XmlNamespaces.Meteorology): (@event ??= []).Add(global::JmaXml.Meteorology.Event.Read(r)); break;
+                    case "Event" when r.InNamespace(XmlNamespaces.Meteorology): @event.Add(r, global::JmaXml.Meteorology.Event.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -9956,12 +9956,12 @@ public static partial class Meteorology
             {
                 Sentence = sentence,
                 Base = @base,
-                Temporary = temporary is null ? [] : [.. temporary],
-                Becoming = becoming is null ? [] : [.. becoming],
-                Local = local is null ? [] : [.. local],
+                Temporary = temporary.ToImmutable(r),
+                Becoming = becoming.ToImmutable(r),
+                Local = local.ToImmutable(r),
                 Coordinate = coordinate,
                 Location = location,
-                Event = @event is null ? [] : [.. @event],
+                Event = @event.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -10009,12 +10009,12 @@ public static partial class Meteorology
             var timeModifierSeen = false;
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<LocalEvent>? local = null;
+            ArrayBuilder<LocalEvent> local = default;
             CoordinatePart? coordinate = null;
             var coordinateSeen = false;
             string? location = null;
             var locationSeen = false;
-            List<Event>? @event = null;
+            ArrayBuilder<Event> @event = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -10024,10 +10024,10 @@ public static partial class Meteorology
                 {
                     case "TimeModifier" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref timeModifierSeen, "TimeModifier"); timeModifier = r.ReadString(); break;
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): (local ??= []).Add(global::JmaXml.Meteorology.LocalEvent.Read(r)); break;
+                    case "Local" when r.InNamespace(XmlNamespaces.Meteorology): local.Add(r, global::JmaXml.Meteorology.LocalEvent.Read(r)); break;
                     case "Coordinate" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref coordinateSeen, "Coordinate"); coordinate = global::JmaXml.Meteorology.CoordinatePart.Read(r); break;
                     case "Location" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref locationSeen, "Location"); location = r.ReadString(); break;
-                    case "Event" when r.InNamespace(XmlNamespaces.Meteorology): (@event ??= []).Add(global::JmaXml.Meteorology.Event.Read(r)); break;
+                    case "Event" when r.InNamespace(XmlNamespaces.Meteorology): @event.Add(r, global::JmaXml.Meteorology.Event.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -10036,10 +10036,10 @@ public static partial class Meteorology
             {
                 TimeModifier = timeModifier,
                 Sentence = sentence,
-                Local = local is null ? [] : [.. local],
+                Local = local.ToImmutable(r),
                 Coordinate = coordinate,
                 Location = location,
-                Event = @event is null ? [] : [.. @event],
+                Event = @event.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -10085,7 +10085,7 @@ public static partial class Meteorology
             var coordinateSeen = false;
             string? location = null;
             var locationSeen = false;
-            List<Event>? @event = null;
+            ArrayBuilder<Event> @event = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -10097,7 +10097,7 @@ public static partial class Meteorology
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
                     case "Coordinate" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref coordinateSeen, "Coordinate"); coordinate = global::JmaXml.Meteorology.CoordinatePart.Read(r); break;
                     case "Location" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref locationSeen, "Location"); location = r.ReadString(); break;
-                    case "Event" when r.InNamespace(XmlNamespaces.Meteorology): (@event ??= []).Add(global::JmaXml.Meteorology.Event.Read(r)); break;
+                    case "Event" when r.InNamespace(XmlNamespaces.Meteorology): @event.Add(r, global::JmaXml.Meteorology.Event.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -10108,7 +10108,7 @@ public static partial class Meteorology
                 Sentence = sentence,
                 Coordinate = coordinate,
                 Location = location,
-                Event = @event is null ? [] : [.. @event],
+                Event = @event.ToImmutable(r),
                 Remark = remark,
             };
         }
@@ -10176,10 +10176,10 @@ public static partial class Meteorology
             var refID = r.AttributeByte("refID");
             Sentence? sentence = null;
             var sentenceSeen = false;
-            List<string>? eventName = null;
-            List<string>? eventClass = null;
-            List<EventTime>? time = null;
-            List<EventDuration>? duration = null;
+            ArrayBuilder<string> eventName = default;
+            ArrayBuilder<string> eventClass = default;
+            ArrayBuilder<EventTime> time = default;
+            ArrayBuilder<EventDuration> duration = default;
             string? remark = null;
             var remarkSeen = false;
             using var scope = r.Enter();
@@ -10188,10 +10188,10 @@ public static partial class Meteorology
                 switch (r.LocalName)
                 {
                     case "Sentence" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref sentenceSeen, "Sentence"); sentence = global::JmaXml.Meteorology.Sentence.Read(r); break;
-                    case "EventName" when r.InNamespace(XmlNamespaces.Meteorology): (eventName ??= []).Add(r.ReadString()); break;
-                    case "EventClass" when r.InNamespace(XmlNamespaces.Meteorology): (eventClass ??= []).Add(r.ReadString()); break;
-                    case "Time" when r.InNamespace(XmlNamespaces.Meteorology): (time ??= []).Add(global::JmaXml.Meteorology.EventTime.Read(r)); break;
-                    case "Duration" when r.InNamespace(XmlNamespaces.Meteorology): (duration ??= []).Add(global::JmaXml.Meteorology.EventDuration.Read(r)); break;
+                    case "EventName" when r.InNamespace(XmlNamespaces.Meteorology): eventName.Add(r, r.ReadString()); break;
+                    case "EventClass" when r.InNamespace(XmlNamespaces.Meteorology): eventClass.Add(r, r.ReadString()); break;
+                    case "Time" when r.InNamespace(XmlNamespaces.Meteorology): time.Add(r, global::JmaXml.Meteorology.EventTime.Read(r)); break;
+                    case "Duration" when r.InNamespace(XmlNamespaces.Meteorology): duration.Add(r, global::JmaXml.Meteorology.EventDuration.Read(r)); break;
                     case "Remark" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref remarkSeen, "Remark"); remark = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -10201,10 +10201,10 @@ public static partial class Meteorology
                 Type = type,
                 RefId = refID,
                 Sentence = sentence,
-                EventName = eventName is null ? [] : [.. eventName],
-                EventClass = eventClass is null ? [] : [.. eventClass],
-                Time = time is null ? [] : [.. time],
-                Duration = duration is null ? [] : [.. duration],
+                EventName = eventName.ToImmutable(r),
+                EventClass = eventClass.ToImmutable(r),
+                Time = time.ToImmutable(r),
+                Duration = duration.ToImmutable(r),
                 Remark = remark,
             };
         }
