@@ -42,6 +42,18 @@ public class JmaXmlReaderValueTests
     }
 
     [Theory]
+    [InlineData("<l/>")]
+    [InlineData("<l></l>")]
+    [InlineData("<l> \n </l>")]
+    public void ReadList_of_empty_content_is_an_initialized_empty_array(string element)
+    {
+        using var reader = Xml.Reader($"<a xmlns=\"urn:x\">{element}</a>");
+        var list = AtFirstChild(reader).ReadList();
+        Assert.False(list.IsDefault);
+        Assert.Empty(list);
+    }
+
+    [Theory]
     [InlineData("5.9", 5.9f)]
     [InlineData("NaN", float.NaN)]
     [InlineData("-1E2", -100f)]

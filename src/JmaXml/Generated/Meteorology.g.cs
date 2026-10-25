@@ -587,7 +587,7 @@ public static partial class Meteorology
         /// <remarks>
         /// <para>付加文コードを示す。複数表記の場合はxs:list型を用いること。</para>
         /// </remarks>
-        public ImmutableArray<string>? Code { get; init; }
+        public ImmutableArray<string> Code { get; init; } = [];
 
         internal static Comment Read(JmaXmlReader r)
         {
@@ -608,7 +608,7 @@ public static partial class Meteorology
             return new Comment
             {
                 Text = text.IsEmpty ? throw r.Missing(in scope, "Text") : text.ToImmutable(r),
-                Code = code,
+                Code = code ?? [],
             };
         }
     }
@@ -2421,13 +2421,13 @@ public static partial class Meteorology
         /// <remarks>
         /// <para>xs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? PrefectureList { get; init; }
+        public ImmutableArray<string> PrefectureList { get; init; } = [];
 
         /// <summary>都道府県コードのリスト</summary>
         /// <remarks>
         /// <para>5桁の市町村コードをxs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? PrefectureCodeList { get; init; }
+        public ImmutableArray<string> PrefectureCodeList { get; init; } = [];
 
         /// <summary>支庁</summary>
         public string? SubPrefecture { get; init; }
@@ -2442,13 +2442,13 @@ public static partial class Meteorology
         /// <remarks>
         /// <para>xs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? SubPrefectureList { get; init; }
+        public ImmutableArray<string> SubPrefectureList { get; init; } = [];
 
         /// <summary>支庁コードのリスト</summary>
         /// <remarks>
         /// <para>5桁の市町村コードをxs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? SubPrefectureCodeList { get; init; }
+        public ImmutableArray<string> SubPrefectureCodeList { get; init; } = [];
 
         /// <summary>市町村</summary>
         public PrefectureCity? City { get; init; }
@@ -2463,13 +2463,13 @@ public static partial class Meteorology
         /// <remarks>
         /// <para>xs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? CityList { get; init; }
+        public ImmutableArray<string> CityList { get; init; } = [];
 
         /// <summary>市町村コードのリスト</summary>
         /// <remarks>
         /// <para>5桁の市町村コード又は末尾に&apos;00&apos;をつけた7桁のコードをxs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? CityCodeList { get; init; }
+        public ImmutableArray<string> CityCodeList { get; init; } = [];
 
         /// <summary>市町村を細分する領域</summary>
         public string? SubCity { get; init; }
@@ -2484,19 +2484,19 @@ public static partial class Meteorology
         /// <remarks>
         /// <para>xs:list型で記述。ただし、指定河川洪水予報では既存の細分区によらず浸水想定地区を記述し、SubCityCodeListは使用しない。</para>
         /// </remarks>
-        public ImmutableArray<string>? SubCityList { get; init; }
+        public ImmutableArray<string> SubCityList { get; init; } = [];
 
         /// <summary>市町村を細分する領域のコードのリスト</summary>
         /// <remarks>
         /// <para>気象庁で拡張した7桁の市町村コードをxs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? SubCityCodeList { get; init; }
+        public ImmutableArray<string> SubCityCodeList { get; init; } = [];
 
         /// <summary>対象地域・地点コードのリスト</summary>
         /// <remarks>
         /// <para>対象地域・地点名が複数の対象地域・地点コードにより示される場合にxs:list型で記述</para>
         /// </remarks>
-        public ImmutableArray<string>? CodeList { get; init; }
+        public ImmutableArray<string> CodeList { get; init; } = [];
 
         /// <summary>対象地域（円）</summary>
         /// <remarks>
@@ -2619,21 +2619,21 @@ public static partial class Meteorology
                 Code = code,
                 Prefecture = prefecture,
                 PrefectureCode = prefectureCode,
-                PrefectureList = prefectureList,
-                PrefectureCodeList = prefectureCodeList,
+                PrefectureList = prefectureList ?? [],
+                PrefectureCodeList = prefectureCodeList ?? [],
                 SubPrefecture = subPrefecture,
                 SubPrefectureCode = subPrefectureCode,
-                SubPrefectureList = subPrefectureList,
-                SubPrefectureCodeList = subPrefectureCodeList,
+                SubPrefectureList = subPrefectureList ?? [],
+                SubPrefectureCodeList = subPrefectureCodeList ?? [],
                 City = city,
                 CityCode = cityCode,
-                CityList = cityList,
-                CityCodeList = cityCodeList,
+                CityList = cityList ?? [],
+                CityCodeList = cityCodeList ?? [],
                 SubCity = subCity,
                 SubCityCode = subCityCode,
-                SubCityList = subCityList,
-                SubCityCodeList = subCityCodeList,
-                CodeList = codeList,
+                SubCityList = subCityList ?? [],
+                SubCityCodeList = subCityCodeList ?? [],
+                CodeList = codeList ?? [],
                 Circle = circle.ToImmutable(r),
                 Coordinate = coordinate.ToImmutable(r),
                 Line = line.ToImmutable(r),

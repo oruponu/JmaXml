@@ -920,13 +920,13 @@ JmaXml.Meteorology.Area.City.get -> JmaXml.Meteorology.PrefectureCity?
 JmaXml.Meteorology.Area.City.init -> void
 JmaXml.Meteorology.Area.CityCode.get -> string?
 JmaXml.Meteorology.Area.CityCode.init -> void
-JmaXml.Meteorology.Area.CityCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.CityCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.CityCodeList.init -> void
-JmaXml.Meteorology.Area.CityList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.CityList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.CityList.init -> void
 JmaXml.Meteorology.Area.Code.get -> string?
 JmaXml.Meteorology.Area.Code.init -> void
-JmaXml.Meteorology.Area.CodeList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.CodeList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.CodeList.init -> void
 JmaXml.Meteorology.Area.CodeType.get -> string?
 JmaXml.Meteorology.Area.CodeType.init -> void
@@ -945,9 +945,9 @@ JmaXml.Meteorology.Area.Prefecture.get -> JmaXml.Meteorology.PrefectureCity?
 JmaXml.Meteorology.Area.Prefecture.init -> void
 JmaXml.Meteorology.Area.PrefectureCode.get -> string?
 JmaXml.Meteorology.Area.PrefectureCode.init -> void
-JmaXml.Meteorology.Area.PrefectureCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.PrefectureCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.PrefectureCodeList.init -> void
-JmaXml.Meteorology.Area.PrefectureList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.PrefectureList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.PrefectureList.init -> void
 JmaXml.Meteorology.Area.Status.get -> string?
 JmaXml.Meteorology.Area.Status.init -> void
@@ -955,17 +955,17 @@ JmaXml.Meteorology.Area.SubCity.get -> string?
 JmaXml.Meteorology.Area.SubCity.init -> void
 JmaXml.Meteorology.Area.SubCityCode.get -> string?
 JmaXml.Meteorology.Area.SubCityCode.init -> void
-JmaXml.Meteorology.Area.SubCityCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.SubCityCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.SubCityCodeList.init -> void
-JmaXml.Meteorology.Area.SubCityList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.SubCityList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.SubCityList.init -> void
 JmaXml.Meteorology.Area.SubPrefecture.get -> string?
 JmaXml.Meteorology.Area.SubPrefecture.init -> void
 JmaXml.Meteorology.Area.SubPrefectureCode.get -> string?
 JmaXml.Meteorology.Area.SubPrefectureCode.init -> void
-JmaXml.Meteorology.Area.SubPrefectureCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.SubPrefectureCodeList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.SubPrefectureCodeList.init -> void
-JmaXml.Meteorology.Area.SubPrefectureList.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Area.SubPrefectureList.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Area.SubPrefectureList.init -> void
 JmaXml.Meteorology.Areas
 JmaXml.Meteorology.Areas.<Clone>$() -> JmaXml.Meteorology.Areas!
@@ -1366,7 +1366,7 @@ JmaXml.Meteorology.ClimateValuesPart.Type.get -> string!
 JmaXml.Meteorology.ClimateValuesPart.Type.init -> void
 JmaXml.Meteorology.Comment
 JmaXml.Meteorology.Comment.<Clone>$() -> JmaXml.Meteorology.Comment!
-JmaXml.Meteorology.Comment.Code.get -> System.Collections.Immutable.ImmutableArray<string!>?
+JmaXml.Meteorology.Comment.Code.get -> System.Collections.Immutable.ImmutableArray<string!>
 JmaXml.Meteorology.Comment.Code.init -> void
 JmaXml.Meteorology.Comment.Comment() -> void
 JmaXml.Meteorology.Comment.Equals(JmaXml.Meteorology.Comment? other) -> bool

@@ -106,7 +106,7 @@ XML 名前空間ごとに静的クラスを設け、型をその入れ子の型�
 | XSD | C# |
 |---|---|
 | 要素 `1..1` | `required` の非 null プロパティ（nillable な要素は `required` の無い `T?`） |
-| 要素 `0..1` | `T?` |
+| 要素 `0..1` | `T?`（`xs:list` の要素を除く） |
 | 要素 `0..*`・`1..*` | `ImmutableArray<T>`（要素が無ければ空。`1..*` は、読み込みに成功すれば 1 件以上） |
 | 値と属性を持つ要素（`simpleContent`） | `Value` プロパティと属性のプロパティ |
 | 属性 `required` | 非 null |
@@ -120,7 +120,7 @@ XML 名前空間ごとに静的クラスを設け、型をその入れ子の型�
 | `xs:unsignedByte` | `byte` |
 | `xs:boolean` | `bool` |
 | `xs:duration` | `TimeSpan` |
-| `xs:list` | `ImmutableArray<string>` |
+| `xs:list` | `ImmutableArray<string>`（`0..1` の要素は、要素が無ければ空） |
 | `xs:any`（`addition1`） | プロパティを生成しません（内容は読み飛ばします） |
 
 ## 読み込みの規則

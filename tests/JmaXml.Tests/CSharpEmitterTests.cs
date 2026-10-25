@@ -63,6 +63,18 @@ public class CSharpEmitterTests
     }
 
     [Fact]
+    public void Optional_list_element_is_an_empty_array_when_absent()
+    {
+        var meteUri = Uri("jmx_mete");
+        var type = new TypeModel("type.Region", meteUri, null, [], [Element("Cities", meteUri, TypeRef.Simple(Primitive.StringList), 0, false)]);
+        var files = CSharpEmitter.Emit(SchemaOf("jmx_mete", type), EmptyDictionary);
+        var mete = files["Meteorology.g.cs"];
+        Assert.Contains("public ImmutableArray<string> Cities { get; init; } = [];", mete, StringComparison.Ordinal);
+        Assert.Contains("case \"Cities\" when r.InNamespace(XmlNamespaces.Meteorology): r.Once(ref citiesSeen, \"Cities\"); cities = r.ReadList(); break;", mete, StringComparison.Ordinal);
+        Assert.Contains("Cities = cities ?? [],", mete, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Repeated_complex_element_named_like_its_type_qualifies_the_read_call_with_global()
     {
         var seisUri = Uri("jmx_seis");

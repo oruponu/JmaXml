@@ -150,6 +150,7 @@ public static class CSharpEmitter
                 : $"public required ImmutableArray<{itemType}> {property} {{ get; init; }}";
         }
         if (element.MinOccurs == 1 && !IsNullableType(itemType)) return $"public required {itemType} {property} {{ get; init; }}";
+        if (element.Type.Primitive == Primitive.StringList) return $"public {itemType} {property} {{ get; init; }} = [];";
         return $"public {Nullable(itemType)} {property} {{ get; init; }}";
     }
 
@@ -247,7 +248,7 @@ public static class CSharpEmitter
                 }
                 else if (element.MinOccurs == 0)
                 {
-                    inits.Add($"{property} = {local},");
+                    inits.Add(element.Type.Primitive == Primitive.StringList ? $"{property} = {local} ?? []," : $"{property} = {local},");
                 }
                 else if (IsNullableType(itemType))
                 {

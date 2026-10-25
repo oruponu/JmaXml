@@ -27,6 +27,21 @@ public class SampleValueTests
     }
 
     [Fact]
+    public void Storm_surge_warning_VPWW57()
+    {
+        var report = Report.Parse(Fixtures.Sample("15_16_02_251222_VPWW57.xml"));
+        Assert.Equal("気象警報・注意報（Ｒ０６）（高潮）", report.Control.Title, StringComparer.Ordinal);
+        var body = Assert.IsType<Meteorology.Body>(report.Body);
+        var warningArea = body.Warning.SelectMany(w => w.Item).Select(i => i.Area).First(a => a?.Name == "舞鶴湾")!;
+        Assert.Equal(["舞鶴市"], warningArea.SubCityList, StringComparer.Ordinal);
+        Assert.False(warningArea.SubCityCodeList.IsDefault);
+        Assert.Empty(warningArea.SubCityCodeList);
+        var tidalArea = body.AdditionalInfo!.TidalWarningAddition[0].TidalAreaPart.Area;
+        Assert.Equal(["舞鶴市"], tidalArea.SubCityList, StringComparer.Ordinal);
+        Assert.Equal(["2620200"], tidalArea.SubCityCodeList, StringComparer.Ordinal);
+    }
+
+    [Fact]
     public void Tsunami_warning_VTSE41()
     {
         var report = Report.Parse(Fixtures.Sample("32-39_11_02_250206_VTSE41.xml"));
