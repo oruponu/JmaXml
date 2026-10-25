@@ -82,7 +82,22 @@ switch (report.Body)
 
 `Report.Parse` は XML 文字列（`string`）・`Stream`・`TextReader`・`XmlReader` を受け取ります。`string` には、ファイルのパスではなく電文の XML そのものを渡します。
 
-`Control.Parse`・`InformationBasis.Head.Parse`・`Seismology.Body.Parse`（`Meteorology`・`Volcanology` も同様）を使うと、電文の一部だけを `XmlReader` から読み込めます。
+`Control.Parse`・`InformationBasis.Head.Parse`・`Seismology.Body.Parse`（`Meteorology`・`Volcanology` も同様）を使うと、電文の一部だけを `XmlReader` から読み込めます。次の例では管理部とヘッダ部だけを読み込み、内容部は読みません。
+
+```csharp
+using System.Xml;
+using JmaXml;
+
+using var stream = File.OpenRead("32-35_01_03_240613_VXSE53.xml");
+using var reader = XmlReader.Create(stream);
+reader.MoveToContent();
+reader.Read();
+
+var control = Control.Parse(reader);
+var head = InformationBasis.Head.Parse(reader);
+```
+
+`Control.Parse` を呼んだ後、`XmlReader` は `Control` の終了タグの次のノードに位置します。続けて `InformationBasis.Head.Parse` を呼ぶと、空白やコメントを読み飛ばして次の要素が `Head` であることを確かめてから読み込みます。間に `reader.ReadToFollowing("Head")` を挟まないでください。`Control` の次のノードが `Head` の開始タグである場合（改行の無い電文など）、`ReadToFollowing` はその開始タグを読み飛ばして後ろの `Head` を探します。その後で `InformationBasis.Head.Parse` を呼ぶと `JmaXmlException` になります。
 
 ## XSD と C# の対応
 
