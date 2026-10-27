@@ -6,7 +6,7 @@
     <IsAotCompatible>true</IsAotCompatible>
     <IsTrimmable>true</IsTrimmable>
     <PackageId>JmaXml</PackageId>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <Authors>oruponu</Authors>
     <Description>気象庁防災情報XMLの電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリ。
 A .NET library that parses JMA (Japan Meteorological Agency) disaster information XML messages into strongly typed, immutable models generated from the official XML schemas and data dictionary.</Description>
