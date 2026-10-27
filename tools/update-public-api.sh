@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
+#
+# Collect undeclared public API symbols from RS0016 build warnings and
+# add them to src/JmaXml/PublicAPI.Unshipped.txt.
+
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 unshipped=src/JmaXml/PublicAPI.Unshipped.txt
 
-if ! log=$(DOTNET_CLI_UI_LANGUAGE=en dotnet build src/JmaXml --no-incremental -p:TreatWarningsAsErrors=false 2>&1); then
+if ! log=$(DOTNET_CLI_UI_LANGUAGE=en dotnet build src/JmaXml \
+    --no-incremental -p:TreatWarningsAsErrors=false 2>&1); then
   printf '%s\n' "$log" >&2
   echo "Build failed. $unshipped was not updated." >&2
   exit 1
 fi
 
+# Extract <symbol> from "Symbol '<symbol>' is not part of the declared
+# public API". Fail if any RS0016 message does not match this format.
 added=$(printf '%s\n' "$log" | awk -v q="'" '
   /warning RS0016:/ {
     prefix = "Symbol " q
@@ -25,11 +32,12 @@ added=$(printf '%s\n' "$log" | awk -v q="'" '
   }
   END { exit failed }' | LC_ALL=C sort -u)
 
+# Keep the "#nullable enable" header out of the sort and put it back on top.
 {
   printf '#nullable enable\n'
   {
     tail -n +2 "$unshipped"
-    if [ -n "$added" ]; then printf '%s\n' "$added"; fi
+    if [[ -n "$added" ]]; then printf '%s\n' "$added"; fi
   } | LC_ALL=C sort -u
 } > "$unshipped.tmp"
 mv "$unshipped.tmp" "$unshipped"
