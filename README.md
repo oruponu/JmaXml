@@ -3,7 +3,8 @@
 気象庁防災情報XMLの電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリ
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Status](https://img.shields.io/badge/status-WIP-yellow)
+[![NuGet](https://img.shields.io/nuget/v/JmaXml.svg)](https://www.nuget.org/packages/JmaXml)
+[![CI](https://github.com/oruponu/JmaXml/actions/workflows/ci.yml/badge.svg)](https://github.com/oruponu/JmaXml/actions/workflows/ci.yml)
 
 A .NET library that parses JMA (Japan Meteorological Agency) disaster information XML messages into strongly typed, immutable models generated from the official XML schemas and data dictionary. It covers every body type (meteorology, seismology and volcanology), uses a forward-only `XmlReader` without building a DOM, and is Native AOT- and trim-compatible. This is not an official JMA product. The documentation below is in Japanese.
 
