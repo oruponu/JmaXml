@@ -12,7 +12,7 @@ public static class SchemaInfo
     /// <summary>
     /// 辞書の日付を取得します。
     /// </summary>
-    public static string DictionaryDate { get; } = "2026-01-29";
+    public static string DictionaryDate { get; } = "2026-11-18";
 
     /// <summary>
     /// XSD ごとの版と改版日を取得します。
@@ -25,7 +25,7 @@ public static class SchemaInfo
         new("jmx_ib.xsd", "http://xml.kishou.go.jp/jmaxml1/informationBasis1/", "1.0c", "2010-08-06"),
         new("jmx_mete.xsd", "http://xml.kishou.go.jp/jmaxml1/body/meteorology1/", "1.5", "2024-10-31"),
         new("jmx_seis.xsd", "http://xml.kishou.go.jp/jmaxml1/body/seismology1/", "1.3", "2021-12-22"),
-        new("jmx_volc.xsd", "http://xml.kishou.go.jp/jmaxml1/body/volcanology1/", "1.3", "2022-09-29"),
+        new("jmx_volc.xsd", "http://xml.kishou.go.jp/jmaxml1/body/volcanology1/", "1.4", "2026-11-18"),
     ];
 }
 

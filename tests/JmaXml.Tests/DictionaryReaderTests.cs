@@ -7,7 +7,7 @@ public class DictionaryReaderTests
     private static readonly DictionaryModel Model = DictionaryReader.Read(Fixtures.DictionaryPath);
 
     [Fact]
-    public void Date_comes_from_the_file_name() => Assert.Equal("2026-01-29", Model.Date);
+    public void Date_comes_from_the_file_name() => Assert.Equal("2026-11-18", Model.Date);
 
     [Fact]
     public void All_six_sheets_are_read()

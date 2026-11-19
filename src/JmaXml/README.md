@@ -1,6 +1,6 @@
 # JmaXml
 
-気象庁防災情報XMLの電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリです。
+気象庁防災情報 XML の電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリです。
 
 A .NET library that parses JMA (Japan Meteorological Agency) disaster information XML messages into strongly typed, immutable models generated from the official XML schemas and data dictionary. This is not an official JMA product.
 

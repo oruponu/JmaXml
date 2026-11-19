@@ -2916,6 +2916,7 @@ public static partial class ElementBasis
         /// <list type="bullet">
         /// <item><description>噴煙の流向: 分類が&quot;噴煙の流向&quot;であることを示す。</description></item>
         /// <item><description>降灰の方向: 分類が&quot;降灰の方向&quot;であることを示す。</description></item>
+        /// <item><description>火山灰の方向: 分類が&quot;火山灰の方向&quot;であることを示す。</description></item>
         /// <item><description>小さな噴石の落下方向: 分類が&quot;小さな噴石の落下方向&quot;であることを示す。</description></item>
         /// </list>
         /// </remarks>
