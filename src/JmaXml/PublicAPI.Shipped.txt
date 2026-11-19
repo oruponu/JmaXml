@@ -3789,9 +3789,25 @@ JmaXml.Volcanology.AshInfos.AshInfos() -> void
 JmaXml.Volcanology.AshInfos.Equals(JmaXml.Volcanology.AshInfos? other) -> bool
 JmaXml.Volcanology.AshInfos.Type.get -> string!
 JmaXml.Volcanology.AshInfos.Type.init -> void
+JmaXml.Volcanology.AshSource
+JmaXml.Volcanology.AshSource.<Clone>$() -> JmaXml.Volcanology.AshSource!
+JmaXml.Volcanology.AshSource.Area.get -> JmaXml.Volcanology.Area!
+JmaXml.Volcanology.AshSource.Area.init -> void
+JmaXml.Volcanology.AshSource.AshSource() -> void
+JmaXml.Volcanology.AshSource.Equals(JmaXml.Volcanology.AshSource? other) -> bool
+JmaXml.Volcanology.AshSource.WidespreadAshfall.get -> string?
+JmaXml.Volcanology.AshSource.WidespreadAshfall.init -> void
+JmaXml.Volcanology.AshSources
+JmaXml.Volcanology.AshSources.<Clone>$() -> JmaXml.Volcanology.AshSources!
+JmaXml.Volcanology.AshSources.AshSource.get -> System.Collections.Immutable.ImmutableArray<JmaXml.Volcanology.AshSource!>
+JmaXml.Volcanology.AshSources.AshSource.init -> void
+JmaXml.Volcanology.AshSources.AshSources() -> void
+JmaXml.Volcanology.AshSources.Equals(JmaXml.Volcanology.AshSources? other) -> bool
 JmaXml.Volcanology.Body
 JmaXml.Volcanology.Body.AshInfos.get -> JmaXml.Volcanology.AshInfos?
 JmaXml.Volcanology.Body.AshInfos.init -> void
+JmaXml.Volcanology.Body.AshSources.get -> JmaXml.Volcanology.AshSources?
+JmaXml.Volcanology.Body.AshSources.init -> void
 JmaXml.Volcanology.Body.Body() -> void
 JmaXml.Volcanology.Body.Equals(JmaXml.Volcanology.Body? other) -> bool
 JmaXml.Volcanology.Body.Notice.get -> string?
@@ -3828,8 +3844,12 @@ JmaXml.Volcanology.EventTime.EventDateTimeUtc.init -> void
 JmaXml.Volcanology.EventTime.EventTime() -> void
 JmaXml.Volcanology.Item
 JmaXml.Volcanology.Item.<Clone>$() -> JmaXml.Volcanology.Item!
-JmaXml.Volcanology.Item.Areas.get -> JmaXml.Volcanology.Areas!
+JmaXml.Volcanology.Item.Area.get -> JmaXml.Volcanology.Area?
+JmaXml.Volcanology.Item.Area.init -> void
+JmaXml.Volcanology.Item.Areas.get -> JmaXml.Volcanology.Areas?
 JmaXml.Volcanology.Item.Areas.init -> void
+JmaXml.Volcanology.Item.AshDepthCategory.get -> string?
+JmaXml.Volcanology.Item.AshDepthCategory.init -> void
 JmaXml.Volcanology.Item.Equals(JmaXml.Volcanology.Item? other) -> bool
 JmaXml.Volcanology.Item.EventTime.get -> JmaXml.Volcanology.EventTime?
 JmaXml.Volcanology.Item.EventTime.init -> void
@@ -4744,6 +4764,12 @@ override JmaXml.Volcanology.AshInfo.ToString() -> string!
 override JmaXml.Volcanology.AshInfos.Equals(object? obj) -> bool
 override JmaXml.Volcanology.AshInfos.GetHashCode() -> int
 override JmaXml.Volcanology.AshInfos.ToString() -> string!
+override JmaXml.Volcanology.AshSource.Equals(object? obj) -> bool
+override JmaXml.Volcanology.AshSource.GetHashCode() -> int
+override JmaXml.Volcanology.AshSource.ToString() -> string!
+override JmaXml.Volcanology.AshSources.Equals(object? obj) -> bool
+override JmaXml.Volcanology.AshSources.GetHashCode() -> int
+override JmaXml.Volcanology.AshSources.ToString() -> string!
 override JmaXml.Volcanology.Body.<Clone>$() -> JmaXml.Volcanology.Body!
 override JmaXml.Volcanology.Body.Equals(object? obj) -> bool
 override JmaXml.Volcanology.Body.GetHashCode() -> int
@@ -5323,6 +5349,10 @@ static JmaXml.Volcanology.AshInfo.operator !=(JmaXml.Volcanology.AshInfo? left, 
 static JmaXml.Volcanology.AshInfo.operator ==(JmaXml.Volcanology.AshInfo? left, JmaXml.Volcanology.AshInfo? right) -> bool
 static JmaXml.Volcanology.AshInfos.operator !=(JmaXml.Volcanology.AshInfos? left, JmaXml.Volcanology.AshInfos? right) -> bool
 static JmaXml.Volcanology.AshInfos.operator ==(JmaXml.Volcanology.AshInfos? left, JmaXml.Volcanology.AshInfos? right) -> bool
+static JmaXml.Volcanology.AshSource.operator !=(JmaXml.Volcanology.AshSource? left, JmaXml.Volcanology.AshSource? right) -> bool
+static JmaXml.Volcanology.AshSource.operator ==(JmaXml.Volcanology.AshSource? left, JmaXml.Volcanology.AshSource? right) -> bool
+static JmaXml.Volcanology.AshSources.operator !=(JmaXml.Volcanology.AshSources? left, JmaXml.Volcanology.AshSources? right) -> bool
+static JmaXml.Volcanology.AshSources.operator ==(JmaXml.Volcanology.AshSources? left, JmaXml.Volcanology.AshSources? right) -> bool
 static JmaXml.Volcanology.Body.Parse(System.Xml.XmlReader! reader) -> JmaXml.Volcanology.Body!
 static JmaXml.Volcanology.Body.operator !=(JmaXml.Volcanology.Body? left, JmaXml.Volcanology.Body? right) -> bool
 static JmaXml.Volcanology.Body.operator ==(JmaXml.Volcanology.Body? left, JmaXml.Volcanology.Body? right) -> bool
