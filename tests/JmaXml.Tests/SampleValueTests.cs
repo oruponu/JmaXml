@@ -146,4 +146,28 @@ public class SampleValueTests
         Assert.Equal("火山名", item.Areas!.CodeType, StringComparer.Ordinal);
         Assert.Equal("口永良部島", item.Areas.Area[0].Name, StringComparer.Ordinal);
     }
+
+    [Fact]
+    public void Volcanic_ash_warning_VFVO70()
+    {
+        var report = Report.Parse(Fixtures.Sample("93_01_02_261118_VFVO70.xml"));
+        Assert.Equal("火山灰警報・注意報", report.Head.InfoKind, StringComparer.Ordinal);
+        var body = Assert.IsType<Volcanology.Body>(report.Body);
+        Assert.Equal(2, body.VolcanoInfo.Length);
+        var info = body.VolcanoInfo[0];
+        Assert.Equal("火山灰警報・注意報（都道府県）", info.Type, StringComparer.Ordinal);
+        var item = info.Item[0];
+        Assert.Equal("火山灰注意報", item.Kind.Name, StringComparer.Ordinal);
+        Assert.Equal("01", item.Kind.Code, StringComparer.Ordinal);
+        Assert.Equal("発表", item.Kind.Condition, StringComparer.Ordinal);
+        Assert.Equal("火山灰警報・注意報発表なし", item.LastKind!.Name, StringComparer.Ordinal);
+        Assert.Null(item.Areas);
+        Assert.Equal("宮崎県", item.Area!.Name, StringComparer.Ordinal);
+        Assert.Equal("45", item.Area.Code, StringComparer.Ordinal);
+        Assert.Equal("累積火山灰量０．１ｍｍ以上", item.AshDepthCategory, StringComparer.Ordinal);
+        var source = Assert.Single(body.AshSources!.AshSource);
+        Assert.Equal("広域に火山灰が降り積もるおそれがある大規模な噴火が発生しました。", source.WidespreadAshfall, StringComparer.Ordinal);
+        Assert.Equal("桜島", source.Area.Name, StringComparer.Ordinal);
+        Assert.Equal("506", source.Area.Code, StringComparer.Ordinal);
+    }
 }

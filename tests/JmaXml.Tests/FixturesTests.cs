@@ -5,7 +5,7 @@ public class FixturesTests
     [Fact]
     public void Official_samples_are_copied_to_output()
     {
-        Assert.Equal(549, Directory.GetFiles(Fixtures.Samples, "*.xml").Length);
+        Assert.Equal(552, Directory.GetFiles(Fixtures.Samples, "*.xml").Length);
     }
 
     [Fact]
