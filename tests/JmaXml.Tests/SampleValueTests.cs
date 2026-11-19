@@ -143,7 +143,7 @@ public class SampleValueTests
         Assert.Equal("15", item.Kind.Code, StringComparer.Ordinal);
         Assert.Equal("継続", item.Kind.Condition, StringComparer.Ordinal);
         Assert.Equal("", item.LastKind!.Condition, StringComparer.Ordinal);
-        Assert.Equal("火山名", item.Areas.CodeType, StringComparer.Ordinal);
+        Assert.Equal("火山名", item.Areas!.CodeType, StringComparer.Ordinal);
         Assert.Equal("口永良部島", item.Areas.Area[0].Name, StringComparer.Ordinal);
     }
 }

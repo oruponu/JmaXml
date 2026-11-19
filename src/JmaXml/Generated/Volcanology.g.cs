@@ -22,15 +22,15 @@ public static partial class Volcanology
         /// <summary>防災気象情報</summary>
         public ImmutableArray<VolcanoInfo> VolcanoInfo { get; init; } = [];
 
-        /// <summary>降灰に関する情報</summary>
+        /// <summary>火山灰に関する情報</summary>
         /// <remarks>
-        /// <para>降灰に関する情報の詳細予報事項を示す。</para>
+        /// <para>降灰に関する情報・火山灰に関する情報の詳細予報事項を示す。</para>
         /// </remarks>
         public AshInfos? AshInfos { get; init; }
 
         /// <summary>本文</summary>
         /// <remarks>
-        /// <para>噴火警報・予報、解説情報、海上警報・予報の本文を示す。</para>
+        /// <para>噴火警報・予報、火山灰警報・注意報、解説情報、海上警報・予報の本文を示す。</para>
         /// </remarks>
         public VolcanoInfoContent? VolcanoInfoContent { get; init; }
 
@@ -39,6 +39,12 @@ public static partial class Volcanology
         /// <para>噴火に関する火山観測報の本文を示す。</para>
         /// </remarks>
         public VolcanoObservation? VolcanoObservation { get; init; }
+
+        /// <summary>火山灰の発生源</summary>
+        /// <remarks>
+        /// <para>火山灰の発生源の全体を示す。</para>
+        /// </remarks>
+        public AshSources? AshSources { get; init; }
 
         /// <summary>テキスト要素</summary>
         /// <remarks>
@@ -76,6 +82,8 @@ public static partial class Volcanology
             var volcanoInfoContentSeen = false;
             VolcanoObservation? volcanoObservation = null;
             var volcanoObservationSeen = false;
+            AshSources? ashSources = null;
+            var ashSourcesSeen = false;
             string? text = null;
             var textSeen = false;
             var scope = r.Enter();
@@ -88,6 +96,7 @@ public static partial class Volcanology
                     case "AshInfos" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref ashInfosSeen, "AshInfos"); ashInfos = global::JmaXml.Volcanology.AshInfos.Read(r); break;
                     case "VolcanoInfoContent" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref volcanoInfoContentSeen, "VolcanoInfoContent"); volcanoInfoContent = global::JmaXml.Volcanology.VolcanoInfoContent.Read(r); break;
                     case "VolcanoObservation" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref volcanoObservationSeen, "VolcanoObservation"); volcanoObservation = global::JmaXml.Volcanology.VolcanoObservation.Read(r); break;
+                    case "AshSources" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref ashSourcesSeen, "AshSources"); ashSources = global::JmaXml.Volcanology.AshSources.Read(r); break;
                     case "Text" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref textSeen, "Text"); text = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
@@ -100,6 +109,7 @@ public static partial class Volcanology
                 AshInfos = ashInfos,
                 VolcanoInfoContent = volcanoInfoContent,
                 VolcanoObservation = volcanoObservation,
+                AshSources = ashSources,
                 Text = text,
             };
         }
@@ -123,6 +133,10 @@ public static partial class Volcanology
         /// <item><description>火山現象に関する海上警報・海上予報（対象海上予報区）</description></item>
         /// <item><description>噴火に関する火山観測報</description></item>
         /// <item><description>推定噴煙流向報</description></item>
+        /// <item><description>火山灰警報・注意報（都道府県）</description></item>
+        /// <item><description>火山灰警報・注意報（対象市町村等）</description></item>
+        /// <item><description>火山灰予報（対象火山）</description></item>
+        /// <item><description>火山灰予報（対象市町村等）</description></item>
         /// </list>
         /// </remarks>
         public required string Type { get; init; }
@@ -174,7 +188,19 @@ public static partial class Volcanology
         /// <remarks>
         /// <para>対象となる地域・地点群を示す。</para>
         /// </remarks>
-        public required Areas Areas { get; init; }
+        public Areas? Areas { get; init; }
+
+        /// <summary>対象地域・地点</summary>
+        /// <remarks>
+        /// <para>個々の対象地域・地点を示す。</para>
+        /// </remarks>
+        public Area? Area { get; init; }
+
+        /// <summary>火山灰の深さ</summary>
+        /// <remarks>
+        /// <para>火山灰の深さに関する状況を示す。</para>
+        /// </remarks>
+        public string? AshDepthCategory { get; init; }
 
         internal static Item Read(JmaXmlReader r)
         {
@@ -186,6 +212,10 @@ public static partial class Volcanology
             var lastKindSeen = false;
             Areas? areas = null;
             var areasSeen = false;
+            Area? area = null;
+            var areaSeen = false;
+            string? ashDepthCategory = null;
+            var ashDepthCategorySeen = false;
             var scope = r.Enter();
             while (r.NextChild(ref scope))
             {
@@ -195,6 +225,8 @@ public static partial class Volcanology
                     case "Kind" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref kindSeen, "Kind"); kind = global::JmaXml.Volcanology.Kind.Read(r); break;
                     case "LastKind" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref lastKindSeen, "LastKind"); lastKind = global::JmaXml.Volcanology.Kind.Read(r); break;
                     case "Areas" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref areasSeen, "Areas"); areas = global::JmaXml.Volcanology.Areas.Read(r); break;
+                    case "Area" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref areaSeen, "Area"); area = global::JmaXml.Volcanology.Area.Read(r); break;
+                    case "AshDepthCategory" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref ashDepthCategorySeen, "AshDepthCategory"); ashDepthCategory = r.ReadString(); break;
                     default: r.Skip(); break;
                 }
             }
@@ -204,7 +236,9 @@ public static partial class Volcanology
                 EventTime = eventTime,
                 Kind = kind ?? throw r.Missing(in scope, "Kind"),
                 LastKind = lastKind,
-                Areas = areas ?? throw r.Missing(in scope, "Areas"),
+                Areas = areas,
+                Area = area,
+                AshDepthCategory = ashDepthCategory,
             };
         }
     }
@@ -327,6 +361,7 @@ public static partial class Volcanology
         /// <item><description>&quot;気象・地震・火山情報／市町村等&quot;コード: codeの種別が市町村等であることを示す。</description></item>
         /// <item><description>&quot;地方海上予報区&quot;コード: codeの種別が地方海上予報区であることを示す。</description></item>
         /// <item><description>&quot;火山名&quot;コード: codeの種別が火山名であることを示す。</description></item>
+        /// <item><description>火山情報／都道府県等: codeの種別が都道府県であることを示す。</description></item>
         /// </list>
         /// </remarks>
         public required string CodeType { get; init; }
@@ -375,6 +410,7 @@ public static partial class Volcanology
         /// <item><description>code.AreaInformationCity: &quot;気象・地震・火山情報／市町村&quot;コード</description></item>
         /// <item><description>code.AreaMarineJ: &quot;地方海上予報区&quot;コード</description></item>
         /// <item><description>code.PointVolcano: &quot;火山名&quot;コード</description></item>
+        /// <item><description>code.AreaInformationPrefectureVolcano: &quot;火山情報／都道府県等&quot;コード</description></item>
         /// </list>
         /// </remarks>
         public required string Code { get; init; }
@@ -441,21 +477,24 @@ public static partial class Volcanology
         }
     }
 
-    /// <summary>降灰に関する情報</summary>
+    /// <summary>火山灰に関する情報</summary>
     public sealed record AshInfos
     {
-        /// <summary>降灰予報の種別</summary>
+        /// <summary>火山灰に関する予報の種別</summary>
         /// <remarks>
-        /// <para>この要素が示す降灰予報の種別を示す。個々の種別間は独立している。</para>
+        /// <para>この要素が示す火山灰に関する予報の種別を示す。個々の種別間は独立している。</para>
         /// <list type="bullet">
         /// <item><description>降灰予報（定時）</description></item>
         /// <item><description>降灰予報（速報）</description></item>
         /// <item><description>降灰予報（詳細）</description></item>
+        /// <item><description>火山灰予報（定時）</description></item>
+        /// <item><description>火山灰予報（速報）</description></item>
+        /// <item><description>火山灰予報（詳細）</description></item>
         /// </list>
         /// </remarks>
         public required string Type { get; init; }
 
-        /// <summary>個々の時間における降灰予報</summary>
+        /// <summary>個々の時間における火山灰に関する予報</summary>
         /// <remarks>
         /// <para>防災気象情報を示す。</para>
         /// </remarks>
@@ -483,10 +522,10 @@ public static partial class Volcanology
         }
     }
 
-    /// <summary>個々の時間における降灰予報</summary>
+    /// <summary>個々の時間における火山灰に関する予報</summary>
     public sealed record AshInfo
     {
-        /// <summary>降灰予報の時刻</summary>
+        /// <summary>火山灰に関する予報の時刻</summary>
         /// <remarks>
         /// <list type="bullet">
         /// <item><description>予報　１時間後</description></item>
@@ -615,7 +654,9 @@ public static partial class Volcanology
         /// <remarks>
         /// <list type="bullet">
         /// <item><description>降灰量: 分類が&quot;降灰量&quot;であることを示す。</description></item>
+        /// <item><description>火山灰量: 分類が&quot;火山灰量&quot;であることを示す。</description></item>
         /// <item><description>降灰の厚さ: 分類が&quot;降灰の厚さ&quot;であることを示す。</description></item>
+        /// <item><description>火山灰の深さ: 分類が&quot;火山灰の深さ&quot;であることを示す。</description></item>
         /// <item><description>小さな噴石の大きさ: 分類が&quot;小さな噴石の大きさ&quot;であることを示す。</description></item>
         /// </list>
         /// </remarks>
@@ -655,6 +696,7 @@ public static partial class Volcanology
         /// <remarks>
         /// <list type="bullet">
         /// <item><description>降灰の到達距離: 分類が&quot;降灰の到達距離&quot;であることを示す。</description></item>
+        /// <item><description>火山灰の到達距離: 分類が&quot;火山灰の到達距離&quot;であることを示す。</description></item>
         /// <item><description>小さな噴石の到達距離: 分類が&quot;小さな噴石の到達距離&quot;であることを示す。</description></item>
         /// </list>
         /// </remarks>
@@ -979,6 +1021,75 @@ public static partial class Volcanology
                 WindHeightAboveSeaLevel = windHeightAboveSeaLevel ?? throw r.Missing(in scope, "WindHeightAboveSeaLevel"),
                 WindDegree = windDegree ?? throw r.Missing(in scope, "WindDegree"),
                 WindSpeed = windSpeed ?? throw r.Missing(in scope, "WindSpeed"),
+            };
+        }
+    }
+
+    /// <summary>火山灰の発生源</summary>
+    public sealed record AshSources
+    {
+        /// <summary>個々の火山灰の発生源</summary>
+        /// <remarks>
+        /// <para>火山灰の個々の発生源を示す。</para>
+        /// </remarks>
+        public required ImmutableArray<AshSource> AshSource { get; init; }
+
+        internal static AshSources Read(JmaXmlReader r)
+        {
+            ArrayBuilder<AshSource> ashSource = default;
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
+            {
+                switch (r.LocalName)
+                {
+                    case "AshSource" when r.InNamespace(XmlNamespaces.Volcanology): ashSource.Add(r, global::JmaXml.Volcanology.AshSource.Read(r)); break;
+                    default: r.Skip(); break;
+                }
+            }
+            r.Exit(in scope);
+            return new AshSources
+            {
+                AshSource = ashSource.IsEmpty ? throw r.Missing(in scope, "AshSource") : ashSource.ToImmutable(r),
+            };
+        }
+    }
+
+    /// <summary>個々の火山灰の発生源</summary>
+    public sealed record AshSource
+    {
+        /// <summary>噴火規模についての付加文</summary>
+        /// <remarks>
+        /// <para>噴火規模に関する事項を示す。</para>
+        /// </remarks>
+        public string? WidespreadAshfall { get; init; }
+
+        /// <summary>対象地域・地点</summary>
+        /// <remarks>
+        /// <para>個々の対象地域・地点を示す。</para>
+        /// </remarks>
+        public required Area Area { get; init; }
+
+        internal static AshSource Read(JmaXmlReader r)
+        {
+            string? widespreadAshfall = null;
+            var widespreadAshfallSeen = false;
+            Area? area = null;
+            var areaSeen = false;
+            var scope = r.Enter();
+            while (r.NextChild(ref scope))
+            {
+                switch (r.LocalName)
+                {
+                    case "WidespreadAshfall" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref widespreadAshfallSeen, "WidespreadAshfall"); widespreadAshfall = r.ReadString(); break;
+                    case "Area" when r.InNamespace(XmlNamespaces.Volcanology): r.Once(ref areaSeen, "Area"); area = global::JmaXml.Volcanology.Area.Read(r); break;
+                    default: r.Skip(); break;
+                }
+            }
+            r.Exit(in scope);
+            return new AshSource
+            {
+                WidespreadAshfall = widespreadAshfall,
+                Area = area ?? throw r.Missing(in scope, "Area"),
             };
         }
     }

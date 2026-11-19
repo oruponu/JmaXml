@@ -120,7 +120,7 @@ public class SyntheticTests
         var body = Assert.IsType<Volcanology.Body>(Parse("volcano-observation-plume.xml").Body);
         var item = body.VolcanoInfo[0].Item[0];
         Assert.Equal("", item.EventTime!.EventDateTimeComment, StringComparer.Ordinal);
-        Assert.Equal("", item.Areas.Area[0].CraterName, StringComparer.Ordinal);
+        Assert.Equal("", item.Areas!.Area[0].CraterName, StringComparer.Ordinal);
         Assert.Null(item.Areas.Area[0].AreaFromMark);
         var observation = body.VolcanoObservation!;
         Assert.Null(observation.ColorPlume!.PlumeHeightAboveCrater.Value);

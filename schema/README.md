@@ -4,8 +4,8 @@
 
 | ファイル | 取得元 | 日付 |
 |---|---|---|
-| `xsd/*.xsd` | XMLスキーマファイル（xsd形式）一式 `jmaxml_20241031_Schema(xsd).zip` | 2024-10-31 |
-| `jmaxml_20260129_dictionary.xlsx` | 辞書一式 | 2026-01-29 |
+| `xsd/*.xsd` | XMLスキーマファイル（xsd形式）一式 `jmaxml_20261118_Schema(xsd).zip` | 2026-11-18 |
+| `jmaxml_20261118_dictionary.xlsx` | 辞書一式 | 2026-11-18 |
 | `../tests/JmaXml.Tests/fixtures/samples/*.xml` | サンプルデータ（xml及びtxt）セット `jmaxml_20260917_Samples.zip` の xml | 2026-09-17 |
 
 上記の資料は、本リポジトリの [MITライセンス](../LICENSE) の対象外です。

@@ -138,6 +138,8 @@ public static partial class InformationBasis
         /// <item><description>気象警報・注意報時系列: （令和6年10月31日に追加　気象警報・注意報で使用開始）</description></item>
         /// <item><description>水位周知河川に関する情報: （令和6年10月31日に追加　気象警報・注意報で使用開始）</description></item>
         /// <item><description>気象解説情報: （令和6年10月31日に追加　気象解説情報で使用開始）</description></item>
+        /// <item><description>火山灰警報・注意報: （令和8年11月18日に追加）</description></item>
+        /// <item><description>火山灰予報: （令和8年11月18日に追加）</description></item>
         /// </list>
         /// </remarks>
         public required string InfoKind { get; init; }
@@ -333,6 +335,10 @@ public static partial class InformationBasis
         /// <item><description>気象特別警報報知（警報注意報種別毎）</description></item>
         /// <item><description>推定噴煙流向報</description></item>
         /// <item><description>情報タグ: （令和6年10月31日に追加　気象解説情報で使用開始）</description></item>
+        /// <item><description>火山灰警報・注意報（都道府県）: （令和8年11月18日に追加）</description></item>
+        /// <item><description>火山灰警報・注意報（対象市町村等）: （令和8年11月18日に追加）</description></item>
+        /// <item><description>火山灰予報（対象火山）: （令和8年11月18日に追加）</description></item>
+        /// <item><description>火山灰予報（対象市町村等）: （令和8年11月18日に追加）</description></item>
         /// </list>
         /// </remarks>
         public required string Type { get; init; }
@@ -536,6 +542,7 @@ public static partial class InformationBasis
         /// <item><description>code.PointVolcano: &quot;火山名&quot;コード</description></item>
         /// <item><description>code.PointTsunami: &quot;潮位観測点&quot;コード</description></item>
         /// <item><description>code.AreaCoastForecast: &quot;高潮予報区間&quot;コード</description></item>
+        /// <item><description>code.AreaInformationPrefectureVolcano: &quot;火山情報／都道府県等&quot;コード</description></item>
         /// </list>
         /// </remarks>
         public string? Code { get; init; }
