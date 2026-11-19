@@ -4,6 +4,8 @@
 
 ## [未リリース]
 
+## [2.0.0] - 2026-11-20
+
 生成元の辞書と XML スキーマを 2026-11-18 版に更新しました。新設される火山灰警報・注意報の電文を読み込めるようになりました。降灰予報から名称が変わる火山灰予報の電文は、1.0.0 でも読み込めます。同梱した公式サンプル電文 552 件がすべて読み込めることを確認しています。
 
 ### 追加
@@ -25,5 +27,6 @@
 - 気象・地震・火山の内容部と、管理部・ヘッダ部を型で表し、`Report.Parse` で電文を読み込みます。
 - 生成元の辞書と XML スキーマの版を `SchemaInfo` で取得できます。
 
-[未リリース]: https://github.com/oruponu/JmaXml/compare/v1.0.0...HEAD
+[未リリース]: https://github.com/oruponu/JmaXml/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/oruponu/JmaXml/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/oruponu/JmaXml/releases/tag/v1.0.0
