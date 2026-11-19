@@ -1,6 +1,6 @@
 # JmaXml
 
-気象庁防災情報XMLの電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリ
+気象庁防災情報 XML の電文を、公式の XML スキーマと辞書から生成した型に読み込む .NET ライブラリ
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![NuGet](https://img.shields.io/nuget/v/JmaXml.svg)](https://www.nuget.org/packages/JmaXml)
